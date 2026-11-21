@@ -19,10 +19,11 @@ type Section = {
   badge?: { name: string; color?: string; glyph?: string; logo?: string }; head?: Line[]; card?: Card; sub?: Line[]; bullets?: string[];
   keyword?: string; cover?: string;
 };
-const S = SCRIPT as unknown as { brand: string; sections: Section[] };
+// brandLogo / watermarkLogo: paths under public/ (build.py copies brand/ -> public/brand/), e.g. "brand/logos/logo.png"
+const S = SCRIPT as unknown as { brand: string; brandLogo?: string; watermarkLogo?: string; sections: Section[] };
 const SIZE: Record<string, React.CSSProperties> = {
   small: { fontSize: 44, fontWeight: 500 }, reg: { fontSize: 50, fontWeight: 500 }, big: { fontSize: 72, fontWeight: 800, letterSpacing: -1 },
-  huge: { fontSize: 150, fontWeight: 800, letterSpacing: -3, lineHeight: 1 }, italic: { fontSize: 62, fontWeight: 700, fontStyle: "italic" },
+  huge: { fontSize: 124, fontWeight: 800, letterSpacing: -3, lineHeight: 1 }, italic: { fontSize: 62, fontWeight: 700, fontStyle: "italic" },
   bar: { fontSize: 56, fontWeight: 700, color: "#fff" },
 };
 
@@ -92,7 +93,9 @@ const Grid: React.FC<{ op?: number }> = ({ op = 0.5 }) => (
   <AbsoluteFill style={{ opacity: op, backgroundImage: "radial-gradient(#cfcfcf 2px, transparent 2px)", backgroundSize: "54px 54px" }} />
 );
 const Watermark: React.FC = () => (
-  <div style={{ position: "absolute", left: 0, right: 0, top: H * 0.855, textAlign: "center", fontFamily: FONT, fontWeight: 700, fontSize: 40, color: C.mark }}>{S.brand}</div>
+  <div style={{ position: "absolute", left: 0, right: 0, top: H * 0.855, display: "flex", justifyContent: "center", alignItems: "center", gap: 14, fontFamily: FONT, fontWeight: 700, fontSize: 40, color: C.mark }}>
+    {S.watermarkLogo ? <Img src={staticFile(S.watermarkLogo)} style={{ height: 44, opacity: 0.45 }} /> : null}{S.brand}
+  </div>
 );
 
 // ------------------------------------------------------------------ card (screen recording / screenshot / code-drawn terminal)
@@ -119,7 +122,7 @@ const Terminal: React.FC<{ lines: string[]; title?: string; t0: number }> = ({ l
   const now = useNow(); const el = Math.max(0, now - t0 - 0.3);
   let budget = el * 55; // characters per second typed
   return (
-    <div style={{ width: "100%", height: "100%", background: "#1b1b1d", fontFamily: "'Cascadia Code','Consolas',monospace", color: "#e7e5e2", fontSize: 30, padding: 0 }}>
+    <div style={{ width: "100%", height: "100%", background: "#1b1b1d", fontFamily: "'Cascadia Code','Consolas',monospace", color: "#e7e5e2", fontSize: 38, padding: 0 }}>
       <div style={{ height: 54, background: "#2a2a2d", display: "flex", alignItems: "center", padding: "0 22px", gap: 12 }}>
         {["#ff5f57", "#febc2e", "#28c840"].map((c) => <div key={c} style={{ width: 18, height: 18, borderRadius: 9, background: c }} />)}
         <div style={{ marginLeft: 18, color: "#9b9893", fontSize: 24 }}>{title ?? "terminal"}</div>
@@ -143,10 +146,10 @@ const Badge: React.FC<{ b: NonNullable<Section["badge"]>; at: number; times: num
   return (
     <div style={{ display: "flex", justifyContent: "center", transform: `translateX(${(1 - k) * 700}px)` }}>
       <div style={{ display: "flex", alignItems: "center", gap: 22, background: "#fff", borderRadius: 18, padding: "16px 30px 16px 16px", boxShadow: "0 18px 40px rgba(0,0,0,0.18)", border: "2px solid #e3e3e3" }}>
-        <div style={{ width: 74, height: 74, borderRadius: 14, background: b.color ?? "#111", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800, fontSize: 42, fontFamily: FONT }}>
+        <div style={{ width: 96, height: 96, borderRadius: 18, background: b.color ?? "#111", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800, fontSize: 56, fontFamily: FONT }}>
           {b.logo ? <Img src={staticFile(b.logo)} style={{ width: 54, height: 54 }} /> : b.glyph ?? b.name[0]}
         </div>
-        <div style={{ fontFamily: FONT, fontWeight: 800, fontSize: 50, color: C.ink, letterSpacing: 0.5 }}>
+        <div style={{ fontFamily: FONT, fontWeight: 800, fontSize: 62, color: C.ink, letterSpacing: 0.5 }}>
           {words(b.name).map((w, i) => <Word key={i} w={w} at={Math.min(times[start + i] ?? at, at + 0.05)} style={{ fontWeight: 800 }} />)}
         </div>
       </div>
@@ -201,8 +204,8 @@ const Hook: React.FC<{ s: Section; times: number[]; t0: number }> = ({ s, times,
           <Asterisk r={70} color={C.accent} petals={12} rot={now * 30} />
         </div>
       ))}
-      {s.card ? <div style={{ position: "absolute", top: H * 0.33, left: 0, right: 0 }}><CardView card={s.card} t0={t0} w={800} h={420} tilt={4} /></div> : null}
-      <div style={{ position: "absolute", top: H * 0.17, left: 60, right: 60 }}>{L.map((x, i) => <TextLine key={i} line={x.line} times={times} start={st[i]} />)}</div>
+      {s.card ? <div style={{ position: "absolute", top: H * 0.47, left: 0, right: 0 }}><CardView card={s.card} t0={t0} w={800} h={420} tilt={4} /></div> : null}
+      <div style={{ position: "absolute", top: H * 0.13, left: 60, right: 60 }}>{L.map((x, i) => <TextLine key={i} line={x.line} times={times} start={st[i]} />)}</div>
     </AbsoluteFill>
   );
 };
@@ -233,7 +236,9 @@ const Follow: React.FC<{ s: Section; times: number[]; t0: number }> = ({ s, time
       <Grid op={0.45} />
       <div style={{ position: "absolute", top: H * 0.06, left: 40, right: 40 }}>{L.slice(0, half).map((x, i) => <TextLine key={i} line={x.line} times={times} start={st[i]} />)}</div>
       <div style={{ position: "absolute", top: H * 0.3, left: 0, right: 0, display: "flex", justifyContent: "center" }}>
-        <div style={{ width: 380, height: 380, borderRadius: 190, background: "#111", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 200, transform: `scale(${k})`, boxShadow: "0 40px 80px rgba(0,0,0,0.25)" }}>{S.brand.replace(/^@/, "")[0]?.toUpperCase()}</div>
+        <div style={{ width: 380, height: 380, borderRadius: 190, background: "#111", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 200, transform: `scale(${k})`, boxShadow: "0 40px 80px rgba(0,0,0,0.25)", overflow: "hidden" }}>
+          {S.brandLogo ? <Img src={staticFile(S.brandLogo)} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : S.brand.replace(/^@/, "")[0]?.toUpperCase()}
+        </div>
       </div>
       <div style={{ position: "absolute", top: H * 0.58, left: 40, right: 40 }}>{L.slice(half).map((x, i) => <TextLine key={i} line={x.line} times={times} start={st[i + half]} />)}</div>
     </AbsoluteFill>

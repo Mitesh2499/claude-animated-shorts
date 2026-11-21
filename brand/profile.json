@@ -1,0 +1,11 @@
+{
+  "handle": "",
+  "name": "",
+  "watermark": "",
+  "brandLogo": "brand/logos/logo.png",
+  "watermarkLogo": "",
+  "accent": "#cc6e5a",
+  "voice": "en-US-AndrewNeural",
+  "cta": { "type": "follow", "keyword": "", "resource": "", "cover": "" },
+  "_notes": "Fill handle/name/watermark before the first public video. cta.type: follow | comment-keyword | none. Use comment-keyword ONLY if the resource really exists."
+}

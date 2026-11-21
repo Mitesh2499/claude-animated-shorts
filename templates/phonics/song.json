@@ -1,0 +1,17 @@
+{
+  "title": "ABC Phonics Song (A-H)",
+  "bpm": 76,
+  "introBeats": 2,
+  "tailBeats": 2,
+  "voice": "en-US-AnaNeural",
+  "items": [
+    { "letter": "A", "word": "Apple",    "toy": "apple" },
+    { "letter": "B", "word": "Banana",   "toy": "banana" },
+    { "letter": "C", "word": "Cat",      "toy": "cat" },
+    { "letter": "D", "word": "Dog",      "toy": "dog" },
+    { "letter": "E", "word": "Elephant", "toy": "elephant" },
+    { "letter": "F", "word": "Fish",     "toy": "fish" },
+    { "letter": "G", "word": "Guitar",   "toy": "guitar" },
+    { "letter": "H", "word": "Hat",      "toy": "hat" }
+  ]
+}

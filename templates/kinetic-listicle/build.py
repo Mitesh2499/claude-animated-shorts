@@ -10,6 +10,11 @@ S = json.load(open(os.path.join(ROOT, 'script.json'), encoding='utf-8'))
 VOICE, RATE, PITCH = S.get('voice', 'en-US-AndrewNeural'), S.get('rate', '+8%'), S.get('pitch', '+0Hz')
 GAP = S.get('gap', 0.12)
 SR = 48000
+import shutil
+BRAND = S.get('brandDir', r"C:\Projects\claude-animated-shortsrand")   # shared brand kit (logos, profile.json)
+if os.path.isdir(BRAND): shutil.copytree(BRAND, os.path.join(ROOT, 'public', 'brand'), dirs_exist_ok=True)
+missing = [p for p in [S.get('brandLogo'), S.get('watermarkLogo')] + [sec.get('badge', {}).get('logo') for sec in S['sections']] + [sec.get('cover') for sec in S['sections']] if p and not os.path.exists(os.path.join(ROOT, 'public', p))]
+if missing: raise SystemExit('Missing assets (upload them or fetch logos first): ' + ', '.join(missing))
 os.makedirs(os.path.join(ROOT, 'public', 'audio'), exist_ok=True); os.makedirs(os.path.join(ROOT, 'audio', 'voice'), exist_ok=True)
 
 def lines(sec):  # MUST match sectionLines() in Listicle.tsx

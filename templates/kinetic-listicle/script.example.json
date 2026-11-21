@@ -1,26 +1,266 @@
 {
-  "brand": "@yourhandle",
-  "voice": "en-US-AndrewNeural", "rate": "+10%", "pitch": "+0Hz", "accent": "#cc6e5a",
-  "sections": [
-    { "kind": "hook",
-      "card": { "kind": "terminal", "title": "claude", "lines": ["> /help", "  /init     /compact     /clear", "  /model    /review      ..."] },
-      "blocks": [ [ { "t": "If you use" } ], [ { "t": "Claude Code,", "s": "big" } ], [ { "t": "these are the" } ], [ { "t": "3 commands", "s": "big" } ], [ { "t": "you should run today", "s": "bar" } ] ] },
-    { "kind": "item", "ordinal": "First is", "badge": { "name": "/INIT", "say": "slash init", "color": "#cc6e5a", "glyph": "/" },
-      "head": [ [ { "t": "This writes a" } ], [ { "t": "CLAUDE.md file", "s": "big", "say": "Claude dot M D file" } ] ],
-      "card": { "kind": "terminal", "title": "my-app", "lines": ["> /init", "Reading the codebase...", "✓ Wrote CLAUDE.md", "  build, test and style notes"] },
-      "sub": [ [ { "t": "so every new session" } ], [ { "t": "knows your project", "s": "big" } ] ],
-      "bullets": [ "build commands", "code style", "no repeating yourself" ] },
-    { "kind": "item", "ordinal": "Second is", "badge": { "name": "/COMPACT", "say": "slash compact", "color": "#1d1d1d", "glyph": "/" },
-      "head": [ [ { "t": "This summarises the" } ], [ { "t": "whole conversation", "s": "big" } ] ],
-      "card": { "kind": "terminal", "title": "my-app", "lines": ["> /compact", "Compacting conversation...", "✓ History summarised", "  context freed for the next task"] },
-      "sub": [ [ { "t": "and frees up" } ], [ { "t": "context", "s": "big" } ] ],
-      "bullets": [ "long sessions stay sharp", "keeps the key decisions" ] },
-    { "kind": "item", "ordinal": "Third is", "badge": { "name": "/CLEAR", "say": "slash clear", "color": "#3b6fd4", "glyph": "/" },
-      "head": [ [ { "t": "This starts" } ], [ { "t": "a clean slate", "s": "big" } ] ],
-      "card": { "kind": "terminal", "title": "my-app", "lines": ["> /clear", "✓ Conversation cleared", "> fix the login bug"] },
-      "sub": [ [ { "t": "when you switch" } ], [ { "t": "to a new task", "s": "big" } ] ],
-      "bullets": [ "no old context", "better answers" ] },
-    { "kind": "recap", "blocks": [ [ { "t": "You just learned" } ], [ { "t": "3 commands", "s": "huge" } ], [ { "t": "that most" } ], [ { "t": "Claude Code users", "s": "italic" } ], [ { "t": "never type", "s": "bar" } ] ] },
-    { "kind": "follow", "blocks": [ [ { "t": "Follow" } ], [ { "t": "for more", "s": "big" } ], [ { "t": "Claude Code tips", "s": "italic" } ], [ { "t": "every week", "s": "bar" } ] ] }
-  ]
+ "brand": "@yourhandle",
+ "brandLogo": "",
+ "watermarkLogo": "",
+ "_brand_notes": "Fill from brand/profile.json during intake. brandLogo e.g. brand/logos/logo.png; badge.logo e.g. brand/tool-logos/<slug>.svg (python -I brand/fetch_logo.py <slug> --white).",
+ "voice": "en-US-AndrewNeural",
+ "rate": "+10%",
+ "pitch": "+0Hz",
+ "accent": "#cc6e5a",
+ "sections": [
+  {
+   "kind": "hook",
+   "card": {
+    "kind": "terminal",
+    "title": "claude",
+    "lines": [
+     "> /help",
+     "  /init     /compact     /clear",
+     "  /model    /review      ..."
+    ]
+   },
+   "blocks": [
+    [
+     {
+      "t": "If you use"
+     }
+    ],
+    [
+     {
+      "t": "Claude Code,",
+      "s": "big"
+     }
+    ],
+    [
+     {
+      "t": "these are the"
+     }
+    ],
+    [
+     {
+      "t": "3 commands",
+      "s": "big"
+     }
+    ],
+    [
+     {
+      "t": "you should run today",
+      "s": "bar"
+     }
+    ]
+   ]
+  },
+  {
+   "kind": "item",
+   "ordinal": "First is",
+   "badge": {
+    "name": "/INIT",
+    "say": "slash init",
+    "color": "#cc6e5a",
+    "glyph": "/"
+   },
+   "head": [
+    [
+     {
+      "t": "This writes a"
+     }
+    ],
+    [
+     {
+      "t": "CLAUDE.md file",
+      "s": "big",
+      "say": "Claude dot M D file"
+     }
+    ]
+   ],
+   "card": {
+    "kind": "terminal",
+    "title": "my-app",
+    "lines": [
+     "> /init",
+     "Reading the codebase...",
+     "✓ Wrote CLAUDE.md",
+     "  build, test and style notes"
+    ]
+   },
+   "sub": [
+    [
+     {
+      "t": "so every new session"
+     }
+    ],
+    [
+     {
+      "t": "knows your project",
+      "s": "big"
+     }
+    ]
+   ],
+   "bullets": [
+    "build commands",
+    "code style",
+    "no repeating yourself"
+   ]
+  },
+  {
+   "kind": "item",
+   "ordinal": "Second is",
+   "badge": {
+    "name": "/COMPACT",
+    "say": "slash compact",
+    "color": "#1d1d1d",
+    "glyph": "/"
+   },
+   "head": [
+    [
+     {
+      "t": "This summarises the"
+     }
+    ],
+    [
+     {
+      "t": "whole conversation",
+      "s": "big"
+     }
+    ]
+   ],
+   "card": {
+    "kind": "terminal",
+    "title": "my-app",
+    "lines": [
+     "> /compact",
+     "Compacting conversation...",
+     "✓ History summarised",
+     "  context freed for the next task"
+    ]
+   },
+   "sub": [
+    [
+     {
+      "t": "and frees up"
+     }
+    ],
+    [
+     {
+      "t": "context",
+      "s": "big"
+     }
+    ]
+   ],
+   "bullets": [
+    "long sessions stay sharp",
+    "keeps the key decisions"
+   ]
+  },
+  {
+   "kind": "item",
+   "ordinal": "Third is",
+   "badge": {
+    "name": "/CLEAR",
+    "say": "slash clear",
+    "color": "#3b6fd4",
+    "glyph": "/"
+   },
+   "head": [
+    [
+     {
+      "t": "This starts"
+     }
+    ],
+    [
+     {
+      "t": "a clean slate",
+      "s": "big"
+     }
+    ]
+   ],
+   "card": {
+    "kind": "terminal",
+    "title": "my-app",
+    "lines": [
+     "> /clear",
+     "✓ Conversation cleared",
+     "> fix the login bug"
+    ]
+   },
+   "sub": [
+    [
+     {
+      "t": "when you switch"
+     }
+    ],
+    [
+     {
+      "t": "to a new task",
+      "s": "big"
+     }
+    ]
+   ],
+   "bullets": [
+    "no old context",
+    "better answers"
+   ]
+  },
+  {
+   "kind": "recap",
+   "blocks": [
+    [
+     {
+      "t": "You just learned"
+     }
+    ],
+    [
+     {
+      "t": "3 commands",
+      "s": "huge"
+     }
+    ],
+    [
+     {
+      "t": "that most"
+     }
+    ],
+    [
+     {
+      "t": "Claude Code users",
+      "s": "italic"
+     }
+    ],
+    [
+     {
+      "t": "never type",
+      "s": "bar"
+     }
+    ]
+   ]
+  },
+  {
+   "kind": "follow",
+   "blocks": [
+    [
+     {
+      "t": "Follow"
+     }
+    ],
+    [
+     {
+      "t": "for more",
+      "s": "big"
+     }
+    ],
+    [
+     {
+      "t": "Claude Code tips",
+      "s": "italic"
+     }
+    ],
+    [
+     {
+      "t": "every week",
+      "s": "bar"
+     }
+    ]
+   ]
+  }
+ ]
 }
