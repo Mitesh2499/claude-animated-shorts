@@ -9,15 +9,19 @@ export const W = 1080, H = 1920, FPS = 30;
 export const TOTAL = Math.ceil(TL.total * FPS);
 
 // ------------------------------------------------------------------ design tokens (measured from the reference)
-const C = { bg: "#f1f1f1", ink: "#1d1d1d", grey: "#525252", ghost: "#bdbab8", accent: (SCRIPT as any).accent ?? "#cc6e5a", mark: "#c6c6c6" };
+const TH = ((SCRIPT as any).theme ?? {}) as Record<string, string>;
+const C = { bg: TH.bg ?? "#f1f1f1", ink: TH.ink ?? "#1d1d1d", grey: "#525252", ghost: "#bdbab8", accent: (SCRIPT as any).accent ?? "#cc6e5a", mark: TH.mark ?? "#c6c6c6", bar: TH.bar ?? "#111111" };
+/** span colour names -> hex (theme can override): blue/cyan/amber/violet/accent */
+const COL: Record<string, string> = { blue: TH.blue ?? "#2563EB", cyan: TH.cyan ?? "#06B6D4", amber: TH.amber ?? "#F59E0B", violet: TH.violet ?? "#8B5CF6", accent: (SCRIPT as any).accent ?? "#cc6e5a" };
 const FONT = "'Inter','Segoe UI','Helvetica Neue',Arial,sans-serif";
-type Span = { t: string; s?: "small" | "reg" | "big" | "huge" | "italic" | "bar"; say?: string };
+/** say: what the voice says instead of t ("" = shown silently right after the previous spoken word); c: colour name */
+type Span = { t: string; s?: "small" | "reg" | "big" | "huge" | "italic" | "bar"; say?: string; c?: string };
 type Line = Span[];
-type Card = { kind: "image" | "video" | "terminal"; src?: string; lines?: string[]; title?: string };
+type Card = { kind: "image" | "video" | "terminal" | "context"; src?: string; lines?: string[]; title?: string };
 type Section = {
   kind: "hook" | "item" | "recap" | "cta" | "follow"; blocks?: Line[]; ordinal?: string;
-  badge?: { name: string; color?: string; glyph?: string; logo?: string }; head?: Line[]; card?: Card; sub?: Line[]; bullets?: string[];
-  keyword?: string; cover?: string;
+  badge?: { name: string; say?: string; color?: string; glyph?: string; logo?: string }; head?: Line[]; card?: Card; sub?: Line[]; bullets?: (string | Span)[];
+  ordinalSay?: string; tag?: string; chips?: string[]; keyword?: string; cover?: string;
 };
 // brandLogo / watermarkLogo: paths under public/ (build.py copies brand/ -> public/brand/), e.g. "brand/logos/logo.png"
 const S = SCRIPT as unknown as { brand: string; brandLogo?: string; watermarkLogo?: string; sections: Section[] };
@@ -32,11 +36,12 @@ const words = (t: string) => t.split(/\s+/).filter(Boolean);
 export const sectionLines = (s: Section): { group: string; line: Line }[] => {
   const out: { group: string; line: Line }[] = [];
   if (s.kind === "item") {
-    if (s.ordinal) out.push({ group: "ordinal", line: [{ t: s.ordinal, s: "huge" }] });
+    if (s.ordinal) out.push({ group: "ordinal", line: [{ t: s.ordinal, s: "huge", say: s.ordinalSay }] });
     if (s.badge) out.push({ group: "badge", line: [{ t: s.badge.name }] });
     (s.head ?? []).forEach((l) => out.push({ group: "head", line: l }));
     (s.sub ?? []).forEach((l) => out.push({ group: "sub", line: l }));
-    (s.bullets ?? []).forEach((b) => out.push({ group: "bullet", line: [{ t: b, s: "small" }] }));
+    (s.bullets ?? []).forEach((b) => out.push({ group: "bullet", line: [typeof b === "string" ? { t: b, s: "small" } : { s: "small", ...b }] }));
+    if (s.tag) out.push({ group: "tag", line: [{ t: s.tag, s: "bar", say: "" }] });
   } else (s.blocks ?? []).forEach((l) => out.push({ group: "block", line: l }));
   return out;
 };
@@ -68,11 +73,11 @@ const TextLine: React.FC<{ line: Line; times: number[]; start: number; align?: "
     <div style={{ textAlign: align, lineHeight: 1.12, margin: "4px 0" }}>
       {line.map((sp, i) => {
         const ws = words(sp.t); const st = SIZE[sp.s ?? "small"];
-        const el = ws.map((w, j) => <Word key={j} w={w} at={times[k + j] ?? 1e9} style={{ ...st, color: sp.s === "bar" ? "#fff" : st.color }} />);
+        const el = ws.map((w, j) => <Word key={j} w={w} at={times[k + j] ?? 1e9} style={{ ...st, color: sp.s === "bar" ? "#fff" : sp.c ? COL[sp.c] ?? sp.c : st.color }} />);
         k += ws.length;
         if (sp.s === "bar") {
           const on = now >= (times[k - ws.length] ?? 1e9) - 0.02;
-          return <span key={i} style={{ display: "inline-block", background: on ? "#111" : "transparent", padding: "4px 18px 8px", margin: "10px 0" }}>{el}</span>;
+          return <span key={i} style={{ display: "inline-block", background: on ? (sp.c ? COL[sp.c] ?? sp.c : C.bar) : "transparent", padding: "4px 18px 8px", margin: "10px 0", borderRadius: 6 }}>{el}</span>;
         }
         return <span key={i}>{el}</span>;
       })}
@@ -81,7 +86,7 @@ const TextLine: React.FC<{ line: Line; times: number[]; start: number; align?: "
 };
 const Sparkle: React.FC<{ size?: number }> = ({ size = 40 }) => (
   <svg width={size} height={size} viewBox="-10 -10 20 20" style={{ flex: "none", marginRight: 26, marginTop: 6 }}>
-    <path d="M0,-10 C1,-2 2,-1 10,0 C2,1 1,2 0,10 C-1,2 -2,1 -10,0 C-2,-1 -1,-2 0,-10Z" fill={C.ink} />
+    <path d="M0,-10 C1,-2 2,-1 10,0 C2,1 1,2 0,10 C-1,2 -2,1 -10,0 C-2,-1 -1,-2 0,-10Z" fill={TH.sparkle ?? C.ink} />
   </svg>
 );
 const Asterisk: React.FC<{ r: number; color: string; petals?: number; rot?: number }> = ({ r, color, petals = 10, rot = 0 }) => (
@@ -106,6 +111,7 @@ const CardView: React.FC<{ card: Card; t0: number; w?: number; h?: number; tilt?
   const drift = lf / fps;
   const inner = card.kind === "image" && card.src ? <Img src={staticFile(card.src)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
     : card.kind === "video" && card.src ? <OffthreadVideo src={staticFile(card.src)} muted style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+    : card.kind === "context" ? <ContextGrid t0={t0} title={card.title} />
     : <Terminal lines={card.lines ?? []} title={card.title} t0={t0} />;
   return (
     <div style={{ perspective: 1800, display: "flex", justifyContent: "center" }}>
@@ -131,7 +137,8 @@ const Terminal: React.FC<{ lines: string[]; title?: string; t0: number }> = ({ l
         {lines.map((l, i) => {
           const show = l.slice(0, Math.max(0, Math.floor(budget))); budget -= l.length + 6;
           const isCmd = l.startsWith(">") || l.startsWith("$");
-          return <div key={i} style={{ color: isCmd ? "#f0b48c" : l.startsWith("✓") ? "#7fd48a" : "#d8d5d0", whiteSpace: "pre" }}>{show}{show.length < l.length && show.length > 0 ? <span style={{ background: "#e7e5e2" }}>&nbsp;</span> : null}</div>;
+          const add = l.startsWith("+ "), del = l.startsWith("- "), sel = l.trimStart().startsWith("❯");
+          return <div key={i} style={{ color: isCmd ? "#f0b48c" : l.startsWith("✓") ? "#7fd48a" : add ? "#a6f0b4" : del ? "#ffb0b0" : sel ? "#7fb4ff" : "#d8d5d0", background: add ? "rgba(46,160,67,0.28)" : del ? "rgba(248,81,73,0.25)" : sel ? "rgba(37,99,235,0.25)" : undefined, whiteSpace: "pre", margin: "0 -30px", padding: "0 30px" }}>{show}{show.length < l.length && show.length > 0 ? <span style={{ background: "#e7e5e2" }}>&nbsp;</span> : null}</div>;
         })}
       </div>
     </div>
@@ -186,6 +193,7 @@ const Item: React.FC<{ s: Section; times: number[]; t0: number }> = ({ s, times,
           const on = now >= times[st[i]] - 0.02;
           return <div key={i} style={{ display: "flex", alignItems: "flex-start", marginLeft: 40, opacity: on ? 1 : 0, marginBottom: 14 }}><Sparkle /><div style={{ flex: 1 }}><TextLine line={L[i].line} times={times} start={st[i]} align="left" /></div></div>;
         })}
+        {idx("tag").map((i) => <div key={i} style={{ marginTop: 22 }}><TextLine line={L[i].line} times={times} start={st[i]} /></div>)}
       </div>
     </AbsoluteFill>
   );
@@ -199,7 +207,7 @@ const Hook: React.FC<{ s: Section; times: number[]; t0: number }> = ({ s, times,
       {[[-80, -60, 260, 0], [760, -90, 230, 0.1], [-120, 1500, 280, 0.2], [800, 1460, 300, 0.15]].map(([x, y, r, d], i) => (
         <div key={i} style={{ position: "absolute", left: x, top: y, transform: `scale(${pop(d)}) rotate(${now * 20 * (i % 2 ? 1 : -1)}deg)` }}><Asterisk r={r} color={C.accent} petals={9} /></div>
       ))}
-      {[[640, 150], [90, 1180]].map(([x, y], i) => (
+      {[[830, 650], [20, 1460]].map(([x, y], i) => (
         <div key={i} style={{ position: "absolute", left: x, top: y + Math.sin(now * 2 + i) * 12, width: 230, height: 230, borderRadius: 115, background: "#f7f7f7", boxShadow: "0 24px 50px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", transform: `scale(${pop(0.25 + i * 0.1)})` }}>
           <Asterisk r={70} color={C.accent} petals={12} rot={now * 30} />
         </div>
@@ -209,9 +217,39 @@ const Hook: React.FC<{ s: Section; times: number[]; t0: number }> = ({ s, times,
     </AbsoluteFill>
   );
 };
-const Center: React.FC<{ s: Section; times: number[]; t0: number; top?: number }> = ({ s, times, top = 0.36 }) => {
-  const L = sectionLines(s), st = lineStarts(s);
-  return <AbsoluteFill style={{ fontFamily: FONT }}><div style={{ position: "absolute", top: H * top, left: 60, right: 60 }}>{L.map((x, i) => <TextLine key={i} line={x.line} times={times} start={st[i]} />)}</div></AbsoluteFill>;
+const Center: React.FC<{ s: Section; times: number[]; t0: number; top?: number }> = ({ s, times, t0, top = 0.3 }) => {
+  const L = sectionLines(s), st = lineStarts(s); const f = useCurrentFrame();
+  return <AbsoluteFill style={{ fontFamily: FONT }}>
+    {s.chips ? <div style={{ position: "absolute", top: H * 0.07, left: 50, right: 50, display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 18 }}>
+      {s.chips.map((c, i) => { const k = spring({ frame: Math.max(0, f - (t0 + 0.1 + i * 0.12) * FPS), fps: FPS, config: { damping: 12, stiffness: 170 } });
+        return <div key={i} style={{ transform: `scale(${k})`, background: "#fff", borderRadius: 16, padding: "14px 26px", boxShadow: "0 12px 28px rgba(0,0,0,0.14)", border: "2px solid #e3e3e3", fontFamily: "'Cascadia Code','Consolas',monospace", fontWeight: 700, fontSize: 46, color: COL.blue }}>{c}</div>; })}
+    </div> : null}
+    <div style={{ position: "absolute", top: H * top, left: 60, right: 60 }}>{L.map((x, i) => <TextLine key={i} line={x.line} times={times} start={st[i]} />)}</div>
+  </AbsoluteFill>;
+};
+/** /context-style usage grid: coloured squares fill in by category, legend beside (code-drawn proof card). */
+const ContextGrid: React.FC<{ t0: number; title?: string }> = ({ t0, title }) => {
+  const now = useNow(); const el = Math.max(0, now - t0 - 0.2);
+  const cats = [["System prompt", "#8a8f98", 8], ["System tools", "#8B5CF6", 14], ["MCP tools", "#06B6D4", 18], ["Memory files", "#F59E0B", 6], ["Messages", "#2563EB", 26], ["Free space", "#3a3d44", 28]] as [string, string, number][];
+  const cells: string[] = []; cats.forEach(([, c, n]) => { for (let i = 0; i < n; i++) cells.push(c); });
+  const shown = Math.floor(el * 70);
+  return (
+    <div style={{ width: "100%", height: "100%", background: "#1b1b1d", fontFamily: "'Cascadia Code','Consolas',monospace", color: "#d8d5d0" }}>
+      <div style={{ height: 54, background: "#2a2a2d", display: "flex", alignItems: "center", padding: "0 22px", gap: 12 }}>
+        {["#ff5f57", "#febc2e", "#28c840"].map((c) => <div key={c} style={{ width: 18, height: 18, borderRadius: 9, background: c }} />)}
+        <div style={{ marginLeft: 18, color: "#9b9893", fontSize: 24 }}>{title ?? "claude"}</div>
+      </div>
+      <div style={{ display: "flex", padding: "24px 30px", gap: 34 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(10, 32px)", gap: 7 }}>
+          {cells.map((c, i) => <div key={i} style={{ width: 32, height: 32, borderRadius: 6, background: i < shown ? c : "#26272b" }} />)}
+        </div>
+        <div style={{ fontSize: 25, lineHeight: 1.75 }}>
+          <div style={{ color: "#f0b48c", marginBottom: 6 }}>&gt; /context</div>
+          {cats.map(([n, c, k], i) => <div key={n} style={{ opacity: el > 0.3 + i * 0.25 ? 1 : 0 }}><span style={{ color: c }}>■</span> {n} <span style={{ color: "#8a8f98" }}>{k}%</span></div>)}
+        </div>
+      </div>
+    </div>
+  );
 };
 const Cta: React.FC<{ s: Section; times: number[]; t0: number }> = ({ s, times, t0 }) => {
   const f = useCurrentFrame(); const now = f / FPS; const L = sectionLines(s), st = lineStarts(s);

@@ -1,0 +1,423 @@
+{
+ "brand": "@MiteshJourney",
+ "brandLogo": "brand/logos/logo.png",
+ "watermarkLogo": "",
+ "voice": "en-US-AndrewNeural",
+ "rate": "+8%",
+ "pitch": "+0Hz",
+ "accent": "#2563EB",
+ "theme": {
+  "bar": "#0B1220",
+  "sparkle": "#2563EB",
+  "blue": "#2563EB",
+  "cyan": "#06B6D4",
+  "amber": "#F59E0B",
+  "violet": "#8B5CF6"
+ },
+ "_source": "Reel 01 script by the user, facts checked against Anthropic's Claude Code docs (2026-11-21). Voice-over is verbatim; on-screen taglines are silent bars.",
+ "sections": [
+  {
+   "kind": "hook",
+   "card": {
+    "kind": "terminal",
+    "title": "claude",
+    "lines": [
+     "> /",
+     "  /init       /context",
+     "  /compact    /rewind",
+     "  /diff       ..."
+    ]
+   },
+   "blocks": [
+    [
+     {
+      "t": "If you use"
+     }
+    ],
+    [
+     {
+      "t": "Claude Code,",
+      "s": "big",
+      "c": "blue"
+     }
+    ],
+    [
+     {
+      "t": "these"
+     }
+    ],
+    [
+     {
+      "t": "5 slash commands",
+      "s": "big",
+      "say": "five slash commands"
+     }
+    ],
+    [
+     {
+      "t": "can make your development workflow"
+     }
+    ],
+    [
+     {
+      "t": "much easier.",
+      "s": "bar"
+     }
+    ]
+   ]
+  },
+  {
+   "kind": "item",
+   "ordinal": "01",
+   "badge": {
+    "name": "/init",
+    "say": "slash init.",
+    "color": "#2563EB",
+    "glyph": "/"
+   },
+   "head": [
+    [
+     {
+      "t": "It analyzes your project"
+     }
+    ],
+    [
+     {
+      "t": "and creates a"
+     }
+    ],
+    [
+     {
+      "t": "CLAUDE.md file",
+      "s": "big",
+      "c": "blue",
+      "say": "Claude dot M D file"
+     }
+    ]
+   ],
+   "card": {
+    "kind": "terminal",
+    "title": "my-app",
+    "lines": [
+     "> /init",
+     "Analyzing your codebase...",
+     "✓ Created CLAUDE.md",
+     "  ## Build    npm run build",
+     "  ## Test     npm test",
+     "  ## Style    TypeScript, ESLint"
+    ]
+   },
+   "sub": [
+    [
+     {
+      "t": "with the"
+     }
+    ]
+   ],
+   "bullets": [
+    {
+     "t": "build commands",
+     "say": "build commands,"
+    },
+    {
+     "t": "tests"
+    },
+    {
+     "t": "conventions",
+     "say": "and conventions it discovers."
+    }
+   ],
+   "tag": "PROJECT CONTEXT, AUTOMATICALLY.",
+   "ordinalSay": "First,"
+  },
+  {
+   "kind": "item",
+   "ordinal": "02",
+   "badge": {
+    "name": "/context",
+    "say": "slash context.",
+    "color": "#06B6D4",
+    "glyph": "/"
+   },
+   "head": [
+    [
+     {
+      "t": "See exactly what's consuming"
+     }
+    ],
+    [
+     {
+      "t": "your context window",
+      "s": "big",
+      "c": "blue"
+     }
+    ]
+   ],
+   "card": {
+    "kind": "context",
+    "title": "claude"
+   },
+   "sub": [
+    [
+     {
+      "t": "and where your"
+     }
+    ],
+    [
+     {
+      "t": "tokens are going.",
+      "s": "big"
+     }
+    ]
+   ],
+   "tag": "KNOW WHAT'S FILLING YOUR CONTEXT.",
+   "ordinalSay": "Second,"
+  },
+  {
+   "kind": "item",
+   "ordinal": "03",
+   "badge": {
+    "name": "/compact",
+    "say": "slash compact.",
+    "color": "#8B5CF6",
+    "glyph": "/"
+   },
+   "head": [
+    [
+     {
+      "t": "Summarize a"
+     }
+    ],
+    [
+     {
+      "t": "long conversation",
+      "s": "big",
+      "c": "blue"
+     }
+    ]
+   ],
+   "card": {
+    "kind": "terminal",
+    "title": "my-app",
+    "lines": [
+     "> /compact focus on the auth bug",
+     "Compacting conversation...",
+     "✓ Summary kept:",
+     "  auth bug, failing tests,",
+     "  decisions so far",
+     "✓ Context freed - same session"
+    ]
+   },
+   "sub": [
+    [
+     {
+      "t": "and free up context"
+     }
+    ]
+   ],
+   "bullets": [
+    {
+     "t": "without starting a new session."
+    }
+   ],
+   "tag": "SUMMARIZE. FREE SPACE. CONTINUE.",
+   "ordinalSay": "Third,"
+  },
+  {
+   "kind": "item",
+   "ordinal": "04",
+   "badge": {
+    "name": "/rewind",
+    "say": "slash rewind.",
+    "color": "#F59E0B",
+    "glyph": "/"
+   },
+   "head": [
+    [
+     {
+      "t": "Made a"
+     }
+    ],
+    [
+     {
+      "t": "wrong change?",
+      "s": "big",
+      "c": "amber"
+     }
+    ]
+   ],
+   "card": {
+    "kind": "terminal",
+    "title": "my-app",
+    "lines": [
+     "> /rewind",
+     "Rewind to a checkpoint:",
+     "  ❯ Restore code and conversation",
+     "    Restore conversation",
+     "    Restore code",
+     "    Summarize from here"
+    ]
+   },
+   "sub": [
+    [
+     {
+      "t": "Restore your"
+     }
+    ]
+   ],
+   "bullets": [
+    {
+     "t": "code,",
+     "say": "code,"
+    },
+    {
+     "t": "conversation,",
+     "say": "conversation,"
+    },
+    {
+     "t": "or both",
+     "say": "or both from an earlier checkpoint."
+    }
+   ],
+   "tag": "UNDO AND RECOVER.",
+   "ordinalSay": "Fourth,"
+  },
+  {
+   "kind": "item",
+   "ordinal": "05",
+   "badge": {
+    "name": "/diff",
+    "say": "slash diff.",
+    "color": "#0B1220",
+    "glyph": "/"
+   },
+   "head": [
+    [
+     {
+      "t": "Review Claude's"
+     }
+    ],
+    [
+     {
+      "t": "code changes",
+      "s": "big",
+      "c": "blue"
+     }
+    ]
+   ],
+   "card": {
+    "kind": "terminal",
+    "title": "src/auth.ts",
+    "lines": [
+     "> /diff",
+     "  function login(user) {",
+     "- if (user.token) return true;",
+     "+ if (!user.token) return false;",
+     "+ return verify(user.token);",
+     "  }"
+    ]
+   },
+   "sub": [
+    [
+     {
+      "t": "and inspect exactly what was"
+     }
+    ],
+    [
+     {
+      "t": "added or removed",
+      "s": "big"
+     }
+    ]
+   ],
+   "bullets": [
+    {
+     "t": "before shipping."
+    }
+   ],
+   "tag": "REVIEW BEFORE YOU SHIP.",
+   "ordinalSay": "Fifth,"
+  },
+  {
+   "kind": "recap",
+   "chips": [
+    "/init",
+    "/context",
+    "/compact",
+    "/rewind",
+    "/diff"
+   ],
+   "blocks": [
+    [
+     {
+      "t": "Most developers use"
+     }
+    ],
+    [
+     {
+      "t": "Claude Code",
+      "s": "big",
+      "c": "blue"
+     }
+    ],
+    [
+     {
+      "t": "to write code."
+     }
+    ],
+    [
+     {
+      "t": "Smart developers"
+     }
+    ],
+    [
+     {
+      "t": "learn to control"
+     }
+    ],
+    [
+     {
+      "t": "their workflow.",
+      "s": "bar"
+     }
+    ]
+   ]
+  },
+  {
+   "kind": "follow",
+   "blocks": [
+    [
+     {
+      "t": "Follow"
+     }
+    ],
+    [
+     {
+      "t": "@MiteshJourney",
+      "s": "big",
+      "c": "blue",
+      "say": "Mitesh Journey"
+     }
+    ],
+    [
+     {
+      "t": "for more"
+     }
+    ],
+    [
+     {
+      "t": "practical AI tips.",
+      "s": "italic"
+     }
+    ],
+    [
+     {
+      "t": "LEARN. BUILD. AUTOMATE.",
+      "s": "bar",
+      "say": ""
+     }
+    ]
+   ]
+  }
+ ]
+}

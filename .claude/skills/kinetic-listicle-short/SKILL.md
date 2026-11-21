@@ -39,6 +39,15 @@ Do not start `build.py` until handle + logo decision + CTA are known. Save every
 ### script.json brand fields
 `brand` (watermark text), `brandLogo` (follow card, e.g. `brand/logos/logo.png`), `watermarkLogo` (small, beside the handle), per item `badge.logo` (e.g. `brand/tool-logos/perplexity.svg`), CTA `cover` (`brand/covers/<file>.png`), cards `card.src` (`brand/cards/1.mp4`).
 
+### script.json features (added for Reel 01, 2026-11-21)
+- `theme` {bg, ink, bar, sparkle, blue, cyan, amber, violet} - brand palette (take it from `brand/profile.json` notes); span `c: "blue"|"cyan"|"amber"|"violet"|<hex>` colours a key word (or a bar's background).
+- `ordinalSay`: show "01" while the voice says "First,"; badge `say: "slash init."`.
+- Span `say: ""` = shown silently right after the last spoken word; item `tag` = a silent tagline bar after the bullets (the user's on-screen taglines like "UNDO AND RECOVER."). build.py keeps the section on screen >= 1 s after it.
+- Bullets may be objects `{t, say}` so a short bullet can carry the full spoken phrase ("conventions" said "and conventions it discovers.").
+- Recap `chips: ["/init", ...]` pops a row of pills above the recap text.
+- Card kinds: `terminal` (lines starting `+ `/`- ` get green/red diff rows, `❯` = selected menu row in blue), `context` (code-drawn /context usage grid), `image`, `video`.
+- Proven: `stories/reel01-claude-commands/Reel01_5_Claude_Code_Commands.mp4` (53.4 s, project `c:\Projects\reel01-claude-commands`).
+
 ## Design tokens (measured; in Listicle.tsx `C` + `SIZE`)
 - Background #f1f1f1, ink #1d1d1d, secondary #525252, unrevealed/fresh words #bdbab8, accent #cc6e5a (hook bursts/badge tile), watermark #c6c6c6 bold at 85.5 % height.
 - Inter (Google Fonts, loaded with delayRender) 500/700/800 + 700 italic. Sizes at 1080 wide: small 44, reg 50, big 72/800, huge 124/800, italic 62/700, bar 56/700 white on #111.
@@ -62,3 +71,4 @@ Do not start `build.py` until handle + logo decision + CTA are known. Save every
 - Never call hooks inside `.map` branches (TextLine computes `now` once at the top).
 - Text width: a `huge` span longer than ~12 characters wraps; split it ("3" huge + "commands" big) or use big.
 - Remotion bundles copy `public/` to TEMP: render with TEMP/TMP set to `C:/Users/mithi/AppData/Local/Temp/remotion-tmp` (the scripts do it).
+- Windows paths inside Python source: use forward slashes (`C:/Projects/...`). A patch once turned `\b` in `...shorts\brand` into a backspace and the brand copy silently failed.

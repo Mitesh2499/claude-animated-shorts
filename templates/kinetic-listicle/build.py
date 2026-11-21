@@ -11,7 +11,7 @@ VOICE, RATE, PITCH = S.get('voice', 'en-US-AndrewNeural'), S.get('rate', '+8%'),
 GAP = S.get('gap', 0.12)
 SR = 48000
 import shutil
-BRAND = S.get('brandDir', r"C:\Projects\claude-animated-shortsrand")   # shared brand kit (logos, profile.json)
+BRAND = S.get('brandDir', "C:/Projects/claude-animated-shorts/brand")   # shared brand kit (logos, profile.json)
 if os.path.isdir(BRAND): shutil.copytree(BRAND, os.path.join(ROOT, 'public', 'brand'), dirs_exist_ok=True)
 missing = [p for p in [S.get('brandLogo'), S.get('watermarkLogo')] + [sec.get('badge', {}).get('logo') for sec in S['sections']] + [sec.get('cover') for sec in S['sections']] if p and not os.path.exists(os.path.join(ROOT, 'public', p))]
 if missing: raise SystemExit('Missing assets (upload them or fetch logos first): ' + ', '.join(missing))
@@ -20,11 +20,12 @@ os.makedirs(os.path.join(ROOT, 'public', 'audio'), exist_ok=True); os.makedirs(o
 def lines(sec):  # MUST match sectionLines() in Listicle.tsx
     out = []
     if sec['kind'] == 'item':
-        if sec.get('ordinal'): out.append(('ordinal', [{'t': sec['ordinal']}]))
+        if sec.get('ordinal'): out.append(('ordinal', [{'t': sec['ordinal'], 'say': sec.get('ordinalSay')}]))
         if sec.get('badge'): out.append(('badge', [{'t': sec['badge']['name'], 'say': sec['badge'].get('say')}]))
         for l in sec.get('head', []): out.append(('head', l))
         for l in sec.get('sub', []): out.append(('sub', l))
         for b in sec.get('bullets', []): out.append(('bullet', [{'t': b} if isinstance(b, str) else b]))
+        if sec.get('tag'): out.append(('tag', [{'t': sec['tag'], 'say': ''}]))
     else:
         for l in sec.get('blocks', []): out.append(('block', l))
     return out
@@ -54,8 +55,8 @@ async def main():
     voice = np.zeros(int(SR * 600))
     for i, sec in enumerate(S['sections']):
         sp = spans(sec)
-        say = [(s.get('say') or s['t']) for s in sp]
-        text = ' '.join(say).replace(' ,', ',')
+        say = [(s['say'] if s.get('say') is not None else s['t']) for s in sp]   # say == '' -> shown silently
+        text = ' '.join(x for x in say if x).replace(' ,', ',')
         mp3 = os.path.join(ROOT, 'audio', 'voice', f's{i:02d}.mp3'); wav = mp3[:-4] + '.wav'
         marks = await tts(text, mp3)
         subprocess.run([FF, '-v', 'error', '-y', '-i', mp3, '-ar', str(SR), '-ac', '1', wav], check=True)
@@ -66,6 +67,9 @@ async def main():
         mi, times = 0, []
         for s, sy in zip(sp, say):
             disp, sw = s['t'].split(), sy.split()
+            if not sw:   # silent span: appear just after the last spoken word, one word every 0.09 s
+                last = (times[-1] - t) if times else 0.0
+                times += [round(t + last + 0.35 + 0.09 * k, 3) for k in range(len(disp))]; continue
             starts = []
             for w in sw:
                 j = mi
@@ -78,6 +82,7 @@ async def main():
                 a, b = starts[0], starts[-1] + 0.25
                 ts = [a + (b - a) * k / max(1, len(disp)) for k in range(len(disp))]
             times += [round(t + v, 3) for v in ts]
+        if times: dur = max(dur, times[-1] - t + 1.0)   # silent tag lines need ~1 s on screen after they appear
         voice[int(t * SR): int(t * SR) + len(x)] += x
         out_secs.append({'kind': sec['kind'], 't0': round(t, 3), 't1': round(t + dur + GAP, 3), 'words': times})
         print(f"section {i} {sec['kind']:7s} {dur:5.2f}s words {len(times)}")
