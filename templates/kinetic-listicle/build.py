@@ -1,0 +1,126 @@
+# Kinetic listicle build: script.json -> voice per section (edge-tts with WORD boundaries) -> src/timeline.json + public/audio/mix.wav
+# usage (from the project root):  python -I build.py [--ffmpeg path/to/ffmpeg.exe]
+import asyncio, json, os, re, subprocess, sys
+import numpy as np, soundfile as sf, edge_tts
+from scipy.signal import butter, sosfilt
+
+ROOT = os.path.dirname(os.path.abspath(__file__))
+FF = sys.argv[sys.argv.index('--ffmpeg') + 1] if '--ffmpeg' in sys.argv else r"C:\Projects\bitter-fruit\node_modules\@remotion\compositor-win32-x64-msvc\ffmpeg.exe"
+S = json.load(open(os.path.join(ROOT, 'script.json'), encoding='utf-8'))
+VOICE, RATE, PITCH = S.get('voice', 'en-US-AndrewNeural'), S.get('rate', '+8%'), S.get('pitch', '+0Hz')
+GAP = S.get('gap', 0.12)
+SR = 48000
+os.makedirs(os.path.join(ROOT, 'public', 'audio'), exist_ok=True); os.makedirs(os.path.join(ROOT, 'audio', 'voice'), exist_ok=True)
+
+def lines(sec):  # MUST match sectionLines() in Listicle.tsx
+    out = []
+    if sec['kind'] == 'item':
+        if sec.get('ordinal'): out.append(('ordinal', [{'t': sec['ordinal']}]))
+        if sec.get('badge'): out.append(('badge', [{'t': sec['badge']['name'], 'say': sec['badge'].get('say')}]))
+        for l in sec.get('head', []): out.append(('head', l))
+        for l in sec.get('sub', []): out.append(('sub', l))
+        for b in sec.get('bullets', []): out.append(('bullet', [{'t': b} if isinstance(b, str) else b]))
+    else:
+        for l in sec.get('blocks', []): out.append(('block', l))
+    return out
+
+def spans(sec):
+    return [sp for _, l in lines(sec) for sp in l]
+
+norm = lambda w: re.sub(r"[^\w%&]+", "", w.lower())
+
+async def tts(text, path):
+    for attempt in range(6):
+        try:
+            c = edge_tts.Communicate(text, VOICE, rate=RATE, pitch=PITCH, boundary="WordBoundary")
+            marks = []
+            with open(path, 'wb') as f:
+                async for ch in c.stream():
+                    if ch['type'] == 'audio': f.write(ch['data'])
+                    elif ch['type'] == 'WordBoundary': marks.append((ch['offset'] / 1e7, (ch['offset'] + ch['duration']) / 1e7, ch['text']))
+            if marks: return marks
+        except Exception as e:
+            print('retry', attempt, type(e).__name__)
+        await asyncio.sleep(1.5)
+    raise SystemExit('edge-tts failed: ' + text[:60])
+
+async def main():
+    out_secs, t = [], 0.0
+    voice = np.zeros(int(SR * 600))
+    for i, sec in enumerate(S['sections']):
+        sp = spans(sec)
+        say = [(s.get('say') or s['t']) for s in sp]
+        text = ' '.join(say).replace(' ,', ',')
+        mp3 = os.path.join(ROOT, 'audio', 'voice', f's{i:02d}.mp3'); wav = mp3[:-4] + '.wav'
+        marks = await tts(text, mp3)
+        subprocess.run([FF, '-v', 'error', '-y', '-i', mp3, '-ar', str(SR), '-ac', '1', wav], check=True)
+        x, _ = sf.read(wav)
+        dur = min(len(x) / SR, marks[-1][1] + 0.35)
+        x = x[: int(dur * SR)]
+        # align every displayed word to a spoken word: walk the say-words and the boundary marks in order
+        mi, times = 0, []
+        for s, sy in zip(sp, say):
+            disp, sw = s['t'].split(), sy.split()
+            starts = []
+            for w in sw:
+                j = mi
+                while j < len(marks) and j < mi + 4 and norm(marks[j][2]) and not norm(w).startswith(norm(marks[j][2])[:3]) and not norm(marks[j][2]).startswith(norm(w)[:3]):
+                    j += 1
+                if j >= len(marks) or j >= mi + 4: j = min(mi, len(marks) - 1)
+                starts.append(marks[j][0]); mi = min(j + 1, len(marks) - 1) if j + 1 < len(marks) else j
+            if len(disp) == len(starts): ts = starts
+            else:  # display differs from what is said (e.g. "/init" said "slash init"): spread over the spoken span
+                a, b = starts[0], starts[-1] + 0.25
+                ts = [a + (b - a) * k / max(1, len(disp)) for k in range(len(disp))]
+            times += [round(t + v, 3) for v in ts]
+        voice[int(t * SR): int(t * SR) + len(x)] += x
+        out_secs.append({'kind': sec['kind'], 't0': round(t, 3), 't1': round(t + dur + GAP, 3), 'words': times})
+        print(f"section {i} {sec['kind']:7s} {dur:5.2f}s words {len(times)}")
+        t += dur + GAP
+    total = t + 0.6
+    out_secs[-1]['t1'] = round(total, 3)
+    json.dump({'total': round(total, 3), 'sections': out_secs}, open(os.path.join(ROOT, 'src', 'timeline.json'), 'w'), indent=1)
+    voice = voice[: int(total * SR)]
+    mix(voice, out_secs, total)
+
+def mix(voice, secs, total):
+    N = len(voice); rng = np.random.default_rng(3)
+    sfx = np.zeros(N); mus = np.zeros(N)
+    def put(buf, x, t0, g=1.0):
+        i = int(t0 * SR); x = x[: max(0, N - i)]; buf[i:i + len(x)] += x * g
+    def bp(x, lo, hi): return sosfilt(butter(2, [lo, hi], 'bandpass', fs=SR, output='sos'), x)
+    def whoosh(d=0.35):
+        n = int(d * SR); tt = np.linspace(0, 1, n); x = rng.standard_normal(n)
+        return bp(x, 400, 6000) * np.sin(np.pi * tt) ** 2 * 0.25
+    def tick(f=2400, d=0.06):
+        tt = np.arange(int(d * SR)) / SR; return np.sin(2 * np.pi * f * tt) * np.exp(-tt * 60) * 0.25
+    def pop():
+        tt = np.arange(int(0.12 * SR)) / SR; return np.sin(2 * np.pi * (300 + 900 * np.exp(-tt * 40)) * tt) * np.exp(-tt * 30) * 0.4
+    for i, (sec, tl) in enumerate(zip(S['sections'], secs)):
+        put(sfx, whoosh(), max(0, tl['t0'] - 0.12))
+        L = lines(sec); k = 0
+        for g, l in L:
+            n = sum(len(sp['t'].split()) for sp in l)
+            if g == 'badge': put(sfx, pop(), tl['words'][k] - 0.08)
+            if g == 'bullet': put(sfx, tick(), tl['words'][k] - 0.02, 0.8)
+            k += n
+    # light pluck bed, 96 bpm, i - VI - III - VII in A minor
+    beat = 60 / 96; chords = [[220, 261.6, 329.6], [174.6, 220, 261.6], [261.6, 329.6, 392], [196, 246.9, 293.7]]
+    t = 0.0; bar = 0
+    while t < total:
+        for b in range(4):
+            for j, f in enumerate(chords[bar % 4]):
+                tt = np.arange(int(0.9 * SR)) / SR
+                put(mus, (np.sin(2 * np.pi * f * tt) + 0.3 * np.sin(4 * np.pi * f * tt)) * np.exp(-tt * 5) * 0.05, t + b * beat + j * 0.02)
+            tt = np.arange(int(0.25 * SR)) / SR
+            if b % 2 == 0: put(mus, np.sin(2 * np.pi * (55 + 40 * np.exp(-tt * 30)) * tt) * np.exp(-tt * 12) * 0.25, t + b * beat)
+        t += 4 * beat; bar += 1
+    env = sosfilt(butter(1, 5, 'lowpass', fs=SR, output='sos'), np.abs(voice)); env = np.clip(env / (env.max() + 1e-9) * 3, 0, 1)
+    mus *= (1 - 0.45 * env); fade = np.ones(N); fade[-int(1.2 * SR):] = np.linspace(1, 0, int(1.2 * SR)); mus *= fade
+    m = voice * 0.95 + mus * 1.4 + sfx * 0.7          # standard mix: music under voice, SFX light
+    m = np.tanh(m * 1.6) / np.tanh(1.6); m *= 0.95 / (np.abs(m).max() + 1e-9)
+    st = np.stack([m, m], 1).astype('float32')
+    sf.write(os.path.join(ROOT, 'public', 'audio', 'mix.wav'), st, SR)
+    print('mix', round(total, 2), 's  rms dB', round(20 * np.log10(np.sqrt((m ** 2).mean())), 1))
+
+asyncio.run(main())

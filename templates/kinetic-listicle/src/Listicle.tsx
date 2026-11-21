@@ -1,0 +1,268 @@
+// Kinetic-typography listicle short (1080x1920 @ 30 fps). Data: ../script.json (what to say/show) + ./timeline.json (built by build.py:
+// section times + the spoken time of every displayed word). Every word appears when it is spoken.
+import React, { useEffect, useState } from "react";
+import { AbsoluteFill, Audio, Img, OffthreadVideo, continueRender, delayRender, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
+import SCRIPT from "../script.json";
+import TL from "./timeline.json";
+
+export const W = 1080, H = 1920, FPS = 30;
+export const TOTAL = Math.ceil(TL.total * FPS);
+
+// ------------------------------------------------------------------ design tokens (measured from the reference)
+const C = { bg: "#f1f1f1", ink: "#1d1d1d", grey: "#525252", ghost: "#bdbab8", accent: (SCRIPT as any).accent ?? "#cc6e5a", mark: "#c6c6c6" };
+const FONT = "'Inter','Segoe UI','Helvetica Neue',Arial,sans-serif";
+type Span = { t: string; s?: "small" | "reg" | "big" | "huge" | "italic" | "bar"; say?: string };
+type Line = Span[];
+type Card = { kind: "image" | "video" | "terminal"; src?: string; lines?: string[]; title?: string };
+type Section = {
+  kind: "hook" | "item" | "recap" | "cta" | "follow"; blocks?: Line[]; ordinal?: string;
+  badge?: { name: string; color?: string; glyph?: string; logo?: string }; head?: Line[]; card?: Card; sub?: Line[]; bullets?: string[];
+  keyword?: string; cover?: string;
+};
+const S = SCRIPT as unknown as { brand: string; sections: Section[] };
+const SIZE: Record<string, React.CSSProperties> = {
+  small: { fontSize: 44, fontWeight: 500 }, reg: { fontSize: 50, fontWeight: 500 }, big: { fontSize: 72, fontWeight: 800, letterSpacing: -1 },
+  huge: { fontSize: 150, fontWeight: 800, letterSpacing: -3, lineHeight: 1 }, italic: { fontSize: 62, fontWeight: 700, fontStyle: "italic" },
+  bar: { fontSize: 56, fontWeight: 700, color: "#fff" },
+};
+
+// ------------------------------------------------------------------ token bookkeeping: must match build.py `tokens()` order
+const words = (t: string) => t.split(/\s+/).filter(Boolean);
+export const sectionLines = (s: Section): { group: string; line: Line }[] => {
+  const out: { group: string; line: Line }[] = [];
+  if (s.kind === "item") {
+    if (s.ordinal) out.push({ group: "ordinal", line: [{ t: s.ordinal, s: "huge" }] });
+    if (s.badge) out.push({ group: "badge", line: [{ t: s.badge.name }] });
+    (s.head ?? []).forEach((l) => out.push({ group: "head", line: l }));
+    (s.sub ?? []).forEach((l) => out.push({ group: "sub", line: l }));
+    (s.bullets ?? []).forEach((b) => out.push({ group: "bullet", line: [{ t: b, s: "small" }] }));
+  } else (s.blocks ?? []).forEach((l) => out.push({ group: "block", line: l }));
+  return out;
+};
+/** start index of every line's first token inside the section's token list */
+const lineStarts = (s: Section) => { let k = 0; return sectionLines(s).map(({ line }) => { const st = k; k += line.reduce((n, sp) => n + words(sp.t).length, 0); return st; }); };
+
+// ------------------------------------------------------------------ primitives
+const useNow = () => useCurrentFrame() / FPS;
+const Word: React.FC<{ w: string; at: number; style?: React.CSSProperties }> = ({ w, at, style }) => {
+  const now = useNow();
+  const k = Math.max(0, Math.min(1, (now - at) / 0.24));
+  const shown = now >= at - 0.02;
+  return (
+    <span style={{
+      display: "inline-block", marginRight: "0.26em", opacity: shown ? 0.35 + 0.65 * k : 0,
+      color: k < 1 ? mix(C.ghost, (style?.color as string) ?? C.ink, k) : (style?.color as string) ?? C.ink,
+      transform: `translateY(${(1 - k) * 10}px)`, filter: k < 1 ? `blur(${(1 - k) * 3}px)` : undefined, ...style,
+    }}>{w}</span>
+  );
+};
+const mix = (a: string, b: string, k: number) => {
+  const p = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+  const A = p(a), B = p(b); return `rgb(${A.map((v, i) => Math.round(v + (B[i] - v) * k)).join(",")})`;
+};
+const TextLine: React.FC<{ line: Line; times: number[]; start: number; align?: "center" | "left" }> = ({ line, times, start, align = "center" }) => {
+  const now = useNow();
+  let k = start;
+  return (
+    <div style={{ textAlign: align, lineHeight: 1.12, margin: "4px 0" }}>
+      {line.map((sp, i) => {
+        const ws = words(sp.t); const st = SIZE[sp.s ?? "small"];
+        const el = ws.map((w, j) => <Word key={j} w={w} at={times[k + j] ?? 1e9} style={{ ...st, color: sp.s === "bar" ? "#fff" : st.color }} />);
+        k += ws.length;
+        if (sp.s === "bar") {
+          const on = now >= (times[k - ws.length] ?? 1e9) - 0.02;
+          return <span key={i} style={{ display: "inline-block", background: on ? "#111" : "transparent", padding: "4px 18px 8px", margin: "10px 0" }}>{el}</span>;
+        }
+        return <span key={i}>{el}</span>;
+      })}
+    </div>
+  );
+};
+const Sparkle: React.FC<{ size?: number }> = ({ size = 40 }) => (
+  <svg width={size} height={size} viewBox="-10 -10 20 20" style={{ flex: "none", marginRight: 26, marginTop: 6 }}>
+    <path d="M0,-10 C1,-2 2,-1 10,0 C2,1 1,2 0,10 C-1,2 -2,1 -10,0 C-2,-1 -1,-2 0,-10Z" fill={C.ink} />
+  </svg>
+);
+const Asterisk: React.FC<{ r: number; color: string; petals?: number; rot?: number }> = ({ r, color, petals = 10, rot = 0 }) => (
+  <svg width={r * 2} height={r * 2} viewBox={`${-r} ${-r} ${r * 2} ${r * 2}`} style={{ overflow: "visible" }}>
+    <g transform={`rotate(${rot})`}>{Array.from({ length: petals }).map((_, i) => <rect key={i} x={-r * 0.09} y={-r} width={r * 0.18} height={r} rx={r * 0.09} fill={color} transform={`rotate(${(i * 360) / petals})`} />)}</g>
+  </svg>
+);
+const Grid: React.FC<{ op?: number }> = ({ op = 0.5 }) => (
+  <AbsoluteFill style={{ opacity: op, backgroundImage: "radial-gradient(#cfcfcf 2px, transparent 2px)", backgroundSize: "54px 54px" }} />
+);
+const Watermark: React.FC = () => (
+  <div style={{ position: "absolute", left: 0, right: 0, top: H * 0.855, textAlign: "center", fontFamily: FONT, fontWeight: 700, fontSize: 40, color: C.mark }}>{S.brand}</div>
+);
+
+// ------------------------------------------------------------------ card (screen recording / screenshot / code-drawn terminal)
+const CardView: React.FC<{ card: Card; t0: number; w?: number; h?: number; tilt?: number }> = ({ card, t0, w = 860, h = 560, tilt = 6 }) => {
+  const f = useCurrentFrame(); const { fps } = useVideoConfig();
+  const lf = Math.max(0, f - t0 * fps);
+  const k = spring({ frame: lf, fps, config: { damping: 16, stiffness: 120 } });
+  const drift = lf / fps;
+  const inner = card.kind === "image" && card.src ? <Img src={staticFile(card.src)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+    : card.kind === "video" && card.src ? <OffthreadVideo src={staticFile(card.src)} muted style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+    : <Terminal lines={card.lines ?? []} title={card.title} t0={t0} />;
+  return (
+    <div style={{ perspective: 1800, display: "flex", justifyContent: "center" }}>
+      <div style={{
+        width: w, height: h, borderRadius: 22, overflow: "hidden", background: "#fff",
+        boxShadow: "0 30px 60px rgba(0,0,0,0.22), 0 8px 18px rgba(0,0,0,0.12)", border: "2px solid #ffffff",
+        transform: `translateY(${(1 - k) * 120}px) scale(${0.92 + 0.08 * k + drift * 0.006}) rotateX(${tilt * (1 - k * 0.4)}deg) rotateY(${-tilt * 0.6 + Math.sin(drift * 0.8) * 1.2}deg)`,
+        opacity: k,
+      }}>{inner}</div>
+    </div>
+  );
+};
+const Terminal: React.FC<{ lines: string[]; title?: string; t0: number }> = ({ lines, title, t0 }) => {
+  const now = useNow(); const el = Math.max(0, now - t0 - 0.3);
+  let budget = el * 55; // characters per second typed
+  return (
+    <div style={{ width: "100%", height: "100%", background: "#1b1b1d", fontFamily: "'Cascadia Code','Consolas',monospace", color: "#e7e5e2", fontSize: 30, padding: 0 }}>
+      <div style={{ height: 54, background: "#2a2a2d", display: "flex", alignItems: "center", padding: "0 22px", gap: 12 }}>
+        {["#ff5f57", "#febc2e", "#28c840"].map((c) => <div key={c} style={{ width: 18, height: 18, borderRadius: 9, background: c }} />)}
+        <div style={{ marginLeft: 18, color: "#9b9893", fontSize: 24 }}>{title ?? "terminal"}</div>
+      </div>
+      <div style={{ padding: "26px 30px", lineHeight: 1.45 }}>
+        {lines.map((l, i) => {
+          const show = l.slice(0, Math.max(0, Math.floor(budget))); budget -= l.length + 6;
+          const isCmd = l.startsWith(">") || l.startsWith("$");
+          return <div key={i} style={{ color: isCmd ? "#f0b48c" : l.startsWith("✓") ? "#7fd48a" : "#d8d5d0", whiteSpace: "pre" }}>{show}{show.length < l.length && show.length > 0 ? <span style={{ background: "#e7e5e2" }}>&nbsp;</span> : null}</div>;
+        })}
+      </div>
+    </div>
+  );
+};
+
+// ------------------------------------------------------------------ badge pill
+const Badge: React.FC<{ b: NonNullable<Section["badge"]>; at: number; times: number[]; start: number }> = ({ b, at, times, start }) => {
+  const f = useCurrentFrame(); const { fps } = useVideoConfig();
+  const k = spring({ frame: Math.max(0, f - at * fps), fps, config: { damping: 14, stiffness: 140 } });
+  if (f < at * fps - 1) return null;
+  return (
+    <div style={{ display: "flex", justifyContent: "center", transform: `translateX(${(1 - k) * 700}px)` }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 22, background: "#fff", borderRadius: 18, padding: "16px 30px 16px 16px", boxShadow: "0 18px 40px rgba(0,0,0,0.18)", border: "2px solid #e3e3e3" }}>
+        <div style={{ width: 74, height: 74, borderRadius: 14, background: b.color ?? "#111", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800, fontSize: 42, fontFamily: FONT }}>
+          {b.logo ? <Img src={staticFile(b.logo)} style={{ width: 54, height: 54 }} /> : b.glyph ?? b.name[0]}
+        </div>
+        <div style={{ fontFamily: FONT, fontWeight: 800, fontSize: 50, color: C.ink, letterSpacing: 0.5 }}>
+          {words(b.name).map((w, i) => <Word key={i} w={w} at={Math.min(times[start + i] ?? at, at + 0.05)} style={{ fontWeight: 800 }} />)}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ------------------------------------------------------------------ sections
+const Item: React.FC<{ s: Section; times: number[]; t0: number }> = ({ s, times, t0 }) => {
+  const now = useNow(); const L = sectionLines(s), st = lineStarts(s);
+  const idx = (g: string) => L.map((x, i) => (x.group === g ? i : -1)).filter((i) => i >= 0);
+  const headI = idx("head"), subI = idx("sub"), bulI = idx("bullet");
+  const bodyAt = headI.length ? times[st[headI[0]]] - 0.05 : t0 + 1.6;
+  if (now < bodyAt) {
+    const oi = idx("ordinal")[0], bi = idx("badge")[0];
+    return (
+      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", fontFamily: FONT }}>
+        <div style={{ marginTop: -120 }}>
+          {oi != null ? <TextLine line={L[oi].line} times={times} start={st[oi]} /> : null}
+          <div style={{ height: 30 }} />
+          {bi != null && s.badge ? <Badge b={s.badge} at={times[st[bi]] - 0.1} times={times} start={st[bi]} /> : null}
+        </div>
+      </AbsoluteFill>
+    );
+  }
+  return (
+    <AbsoluteFill style={{ fontFamily: FONT }}>
+      <div style={{ position: "absolute", top: H * 0.045, left: 60, right: 60 }}>{headI.map((i) => <TextLine key={i} line={L[i].line} times={times} start={st[i]} />)}</div>
+      <div style={{ position: "absolute", top: H * 0.2, left: 0, right: 0 }}>{s.card ? <CardView card={s.card} t0={bodyAt} /> : null}</div>
+      <div style={{ position: "absolute", top: H * 0.52, left: 60, right: 60 }}>
+        {subI.map((i) => <TextLine key={i} line={L[i].line} times={times} start={st[i]} />)}
+        <div style={{ height: 26 }} />
+        {bulI.map((i) => {
+          const on = now >= times[st[i]] - 0.02;
+          return <div key={i} style={{ display: "flex", alignItems: "flex-start", marginLeft: 40, opacity: on ? 1 : 0, marginBottom: 14 }}><Sparkle /><div style={{ flex: 1 }}><TextLine line={L[i].line} times={times} start={st[i]} align="left" /></div></div>;
+        })}
+      </div>
+    </AbsoluteFill>
+  );
+};
+const Hook: React.FC<{ s: Section; times: number[]; t0: number }> = ({ s, times, t0 }) => {
+  const f = useCurrentFrame(); const now = f / FPS; const L = sectionLines(s), st = lineStarts(s);
+  const pop = (d: number) => spring({ frame: Math.max(0, f - (t0 + d) * FPS), fps: FPS, config: { damping: 12, stiffness: 160 } });
+  return (
+    <AbsoluteFill style={{ fontFamily: FONT }}>
+      <Grid />
+      {[[-80, -60, 260, 0], [760, -90, 230, 0.1], [-120, 1500, 280, 0.2], [800, 1460, 300, 0.15]].map(([x, y, r, d], i) => (
+        <div key={i} style={{ position: "absolute", left: x, top: y, transform: `scale(${pop(d)}) rotate(${now * 20 * (i % 2 ? 1 : -1)}deg)` }}><Asterisk r={r} color={C.accent} petals={9} /></div>
+      ))}
+      {[[640, 150], [90, 1180]].map(([x, y], i) => (
+        <div key={i} style={{ position: "absolute", left: x, top: y + Math.sin(now * 2 + i) * 12, width: 230, height: 230, borderRadius: 115, background: "#f7f7f7", boxShadow: "0 24px 50px rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", transform: `scale(${pop(0.25 + i * 0.1)})` }}>
+          <Asterisk r={70} color={C.accent} petals={12} rot={now * 30} />
+        </div>
+      ))}
+      {s.card ? <div style={{ position: "absolute", top: H * 0.33, left: 0, right: 0 }}><CardView card={s.card} t0={t0} w={800} h={420} tilt={4} /></div> : null}
+      <div style={{ position: "absolute", top: H * 0.17, left: 60, right: 60 }}>{L.map((x, i) => <TextLine key={i} line={x.line} times={times} start={st[i]} />)}</div>
+    </AbsoluteFill>
+  );
+};
+const Center: React.FC<{ s: Section; times: number[]; t0: number; top?: number }> = ({ s, times, top = 0.36 }) => {
+  const L = sectionLines(s), st = lineStarts(s);
+  return <AbsoluteFill style={{ fontFamily: FONT }}><div style={{ position: "absolute", top: H * top, left: 60, right: 60 }}>{L.map((x, i) => <TextLine key={i} line={x.line} times={times} start={st[i]} />)}</div></AbsoluteFill>;
+};
+const Cta: React.FC<{ s: Section; times: number[]; t0: number }> = ({ s, times, t0 }) => {
+  const f = useCurrentFrame(); const now = f / FPS; const L = sectionLines(s), st = lineStarts(s);
+  const k = spring({ frame: Math.max(0, f - t0 * FPS), fps: FPS, config: { damping: 14 } });
+  return (
+    <AbsoluteFill style={{ fontFamily: FONT }}>
+      <Grid op={0.4} />
+      <div style={{ position: "absolute", top: H * 0.07, left: 40, right: 40 }}>{L.slice(0, 2).map((x, i) => <TextLine key={i} line={x.line} times={times} start={st[i]} />)}</div>
+      {s.cover ? <div style={{ position: "absolute", top: H * 0.27, left: 0, right: 0, display: "flex", justifyContent: "center", perspective: 1600 }}>
+        <Img src={staticFile(s.cover)} style={{ width: 560, borderRadius: 10, boxShadow: "30px 40px 70px rgba(0,0,0,0.3)", transform: `rotateY(${-22 + Math.sin(now) * 6}deg) rotateZ(-8deg) scale(${0.8 + 0.2 * k})` }} />
+      </div> : null}
+      <div style={{ position: "absolute", top: H * (s.cover ? 0.62 : 0.4), left: 40, right: 40 }}>{L.slice(2).map((x, i) => <TextLine key={i} line={x.line} times={times} start={st[i + 2]} />)}</div>
+    </AbsoluteFill>
+  );
+};
+const Follow: React.FC<{ s: Section; times: number[]; t0: number }> = ({ s, times, t0 }) => {
+  const f = useCurrentFrame(); const L = sectionLines(s), st = lineStarts(s);
+  const k = spring({ frame: Math.max(0, f - (t0 + 0.2) * FPS), fps: FPS, config: { damping: 11, stiffness: 150 } });
+  const half = Math.ceil(L.length / 2);
+  return (
+    <AbsoluteFill style={{ fontFamily: FONT }}>
+      <Grid op={0.45} />
+      <div style={{ position: "absolute", top: H * 0.06, left: 40, right: 40 }}>{L.slice(0, half).map((x, i) => <TextLine key={i} line={x.line} times={times} start={st[i]} />)}</div>
+      <div style={{ position: "absolute", top: H * 0.3, left: 0, right: 0, display: "flex", justifyContent: "center" }}>
+        <div style={{ width: 380, height: 380, borderRadius: 190, background: "#111", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 200, transform: `scale(${k})`, boxShadow: "0 40px 80px rgba(0,0,0,0.25)" }}>{S.brand.replace(/^@/, "")[0]?.toUpperCase()}</div>
+      </div>
+      <div style={{ position: "absolute", top: H * 0.58, left: 40, right: 40 }}>{L.slice(half).map((x, i) => <TextLine key={i} line={x.line} times={times} start={st[i + half]} />)}</div>
+    </AbsoluteFill>
+  );
+};
+
+// ------------------------------------------------------------------ root
+const useInter = () => {
+  const [h] = useState(() => delayRender("font"));
+  useEffect(() => {
+    const l = document.createElement("link"); l.rel = "stylesheet";
+    l.href = "https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,700;0,800;1,700&display=block";
+    document.head.appendChild(l);
+    const done = () => continueRender(h);
+    l.onload = () => Promise.all(["500", "700", "800"].map((w) => (document as any).fonts.load(`${w} 40px Inter`))).then(done, done);
+    l.onerror = done; setTimeout(done, 8000);
+  }, [h]);
+};
+export const Listicle: React.FC = () => {
+  useInter();
+  const now = useNow();
+  const i = TL.sections.findIndex((x) => now >= x.t0 && now < x.t1);
+  const s = S.sections[i]; const tl = TL.sections[i];
+  return (
+    <AbsoluteFill style={{ background: C.bg }}>
+      {s && tl ? (s.kind === "item" ? <Item s={s} times={tl.words} t0={tl.t0} /> : s.kind === "hook" ? <Hook s={s} times={tl.words} t0={tl.t0} />
+        : s.kind === "cta" ? <Cta s={s} times={tl.words} t0={tl.t0} /> : s.kind === "follow" ? <Follow s={s} times={tl.words} t0={tl.t0} /> : <Center s={s} times={tl.words} t0={tl.t0} />) : null}
+      <Watermark />
+      <Audio src={staticFile("audio/mix.wav")} />
+    </AbsoluteFill>
+  );
+};
