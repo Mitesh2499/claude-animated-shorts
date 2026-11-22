@@ -1,6 +1,6 @@
 ---
 name: kinetic-listicle-short
-description: Make a 30-60 s vertical kinetic-typography LISTICLE short ("N tools/tips/commands every X needs right now") in the clean light-grey tech-creator style - every spoken word appears on screen as it is spoken (karaoke reveal), bold key phrases, black highlight bars, a name badge pill per item, a floating screen-recording/terminal card, sparkle bullets, a recap that flatters the viewer and a comment-keyword / follow CTA. Voice generated with edge-tts WORD timestamps, rendered in Remotion. Learned from "5 MCP servers every Claude Code user needs right now" in Raw/. Use when the user asks for a tech tips / tools / AI / productivity listicle reel, "like the MCP video", a text-animation explainer, or says "use the listicle skill". Not for story/character videos (use illustrated-parallax-short or cartoon-3d-short).
+description: Make a 30-60 s vertical kinetic-typography LISTICLE or animated EXPLAINER short (theSVG icons, code-drawn animated scenes such as the RAG pipeline) ("N tools/tips/commands every X needs right now") in the clean light-grey tech-creator style - every spoken word appears on screen as it is spoken (karaoke reveal), bold key phrases, black highlight bars, a name badge pill per item, a floating screen-recording/terminal card, sparkle bullets, a recap that flatters the viewer and a comment-keyword / follow CTA. Voice generated with edge-tts WORD timestamps, rendered in Remotion. Learned from "5 MCP servers every Claude Code user needs right now" in Raw/. Use when the user asks for a tech tips / tools / AI / productivity listicle reel, "like the MCP video", a text-animation explainer, or says "use the listicle skill". Not for story/character videos (use illustrated-parallax-short or cartoon-3d-short).
 ---
 
 # Kinetic listicle short (typography + screen cards, Remotion)
@@ -29,9 +29,18 @@ Read `brand/profile.json` and list `brand/logos/`, `brand/tool-logos/`, `brand/c
 Also confirm when relevant: language/voice (male/female, accent), length (3 items ~35 s / 5 items ~60 s), accent colour.
 Do not start `build.py` until handle + logo decision + CTA are known. Save every answer to `brand/profile.json` so the next video does not ask again (only re-confirm in one line).
 
+### Icons: theSVG first (https://thesvg.org, MIT)
+- **Primary source for ALL icons is theSVG**, via `python -I brand/fetch_icon.py`:
+  - `search <words>` lists matching UI icons (1,100+) and brand logos (7,900+, incl. AWS/Azure/GCP/Kubernetes, with licence per icon).
+  - `ui <slug> [look]` -> `brand/icons/<slug>.<look>.svg`. Looks: outline, duotone (default), fill, glass, glass-outline, offset, depth. Use ONE look per video so size/weight stay consistent.
+  - `brand <slug> [variant]` -> `brand/tool-logos/<slug>.svg` (official colours; variants default/color/mono/light/dark/wordmark).
+- UI icons draw with `currentColor`: `build.py` inlines every `brand/icons/*.svg` into `src/icons.json`, and `<Icon name="bot" color="#2563EB" size={64} />` (src/icon.tsx) recolours them to the brand palette. Use them in scenes, cards and badges instead of hand-drawn glyphs.
+- Useful proven slugs: UI `bot circle-user database search file-search file-text brain-circuit scissors sparkles badge-check circle-x external-link layers link cpu quote message-square send arrow-right pdf-file`; brand `pdf` (the red PDF file icon), `openai`, `anthropic`, `claude`, `github`, `python`, `postgresql`, `pinecone`.
+- Show a company's logo (e.g. OpenAI) only when that company's product is actually being demonstrated; otherwise use the generic `bot` icon.
+
 ### Logos: fetch public ones, ask for private ones
-- For every product/tool named in a badge, try a public logo first: `python -I brand/fetch_logo.py <slug> [#hex|--white]` (simple-icons, CC0, saved to `brand/tool-logos/<slug>.svg`). Use `--white` for the coloured badge tile, a grey/dark colour for the watermark (white disappears on #f1f1f1).
-- Not on simple-icons -> the product's official press/brand kit page (download only official assets, keep the file name `<slug>.png`).
+- For every product/tool named in a badge, try theSVG first (`fetch_icon.py brand <slug>`), then simple-icons: `python -I brand/fetch_logo.py <slug> [#hex|--white]` (CC0, saved to `brand/tool-logos/<slug>.svg`). Use `--white` for the coloured badge tile, a grey/dark colour for the watermark (white disappears on #f1f1f1).
+- Not on theSVG/simple-icons -> the product's official press/brand kit page (download only official assets, keep the file name `<slug>.png`).
 - Still not found, or it is a personal/company/internal brand -> STOP and ask the user to drop it into `brand/tool-logos/` (or `brand/logos/` for their own). Until then use the letter/glyph tile (`badge.glyph`).
 - Third-party logos are only used to identify the product being discussed (nominative use). Never alter them beyond recolouring for contrast, never imply endorsement.
 - `build.py` copies `brand/` to `public/brand/` and refuses to run if a referenced logo/cover is missing (prints the list).
@@ -47,6 +56,23 @@ Do not start `build.py` until handle + logo decision + CTA are known. Save every
 - Recap `chips: ["/init", ...]` pops a row of pills above the recap text.
 - Card kinds: `terminal` (lines starting `+ `/`- ` get green/red diff rows, `❯` = selected menu row in blue), `context` (code-drawn /context usage grid), `image`, `video`.
 - Proven: `stories/reel01-claude-commands/Reel01_5_Claude_Code_Commands.mp4` (53.4 s, project `c:\Projects\reel01-claude-commands`).
+
+### Scene sections: animated explainers (added for Reel 03, 2026-11-22)
+For concept/process explainers (not "N tools" lists) use `{"kind": "scene", "scene": "<name>", "blocks": [...], "sfx": [...], "minDur": s}`:
+- Word-synced header (the spoken lines, top 3-24 %) + a code-drawn animation on a 1080x1140 canvas (from y 470) from `src/scenes.tsx`.
+- Scenes receive `t` (s since section start), `d` (length) and `cue("word")` = when that word is spoken, so every visual beat lands on its word (counter hits 500 on "500", the bot fails on "fails", 5 dots light on "closest").
+- Library v1 (AI/RAG): `pdfSwarm` (500 PDF icons flood + counter + confused bot), `chatFail` (chat UI, failed answer, training-data checklist), `ingest` (PDF pile -> Extract text -> scissors -> chunk cards, "1 · INGESTION · RUNS ONCE"), `embed` (chunks -> embedding model -> vectors -> particles cluster by meaning), `vectorDb` (cylinder fills, chunk counter, topic tags), `retrieve` ("2 · QUERY TIME", question -> query vector -> radar search over a dot grid -> top-5 cards with scores), `generate` (5 chunks -> prompt -> LLM -> streamed grounded answer, "model weights unchanged", "500 PDFs never sent"), `chatAnswer` (polished chat, citation chip, cursor click, cited PDF page with highlight).
+- New scenes: add a component to `scenes.tsx` + register it in `SCENES`. Rules: something moves or appears every 0.3-0.5 s; label stages so it reads muted; brand palette only; icons via `<Icon>`; shapes code-drawn when more reliable than images.
+- `sfx`: `{"word": "500", "type": "pop"}` or `{"t": 0.4, "type": "tick", "n": 10, "every": 0.16, "gain": 0.3}`; types `pop | tick | whoosh | chime | error`. `minDur` keeps a scene on screen long enough for its animation.
+- Proven: `stories/reel03-rag-500-pdfs/Reel03_500_PDFs_to_Chatbot_RAG.mp4` (45.1 s, project `c:\Projects\reel03-rag-500-pdfs`, script.json + ASSETS.md beside it).
+
+### Final QA routine (run on the muxed MP4, not on stills)
+1. Contact sheets every 0.5 s of the final file (`out/qa/sheet*.jpg`) - read every tile: overflow, clipped text, overlaps, empty frames.
+2. Black frames = 0, longest frozen run < ~1.5 s, share of 0.4 s windows with visible change >= 90 %.
+3. Audio: per-section RMS within +-1.5 dB (target about -15 dB), voice 8-12 dB above the bed, peak <= 0.95.
+4. Sync: on-screen word times come from the TTS engine's own WordBoundary offsets for the same audio, so they are locked by construction; spot-check 2-3 words per section in stills against the timeline.
+5. Facts: re-read the narration against the `_source` note; label illustrative data (company, numbers, scores) as examples in ASSETS.md.
+Be explicit with the user that this is frame + signal analysis, not literal viewing/listening.
 
 ## Design tokens (measured; in Listicle.tsx `C` + `SIZE`)
 - Background #f1f1f1, ink #1d1d1d, secondary #525252, unrevealed/fresh words #bdbab8, accent #cc6e5a (hook bursts/badge tile), watermark #c6c6c6 bold at 85.5 % height.

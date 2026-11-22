@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { AbsoluteFill, Audio, Img, OffthreadVideo, continueRender, delayRender, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import SCRIPT from "../script.json";
 import TL from "./timeline.json";
+import { SCENES, SW, SH } from "./scenes";
 
 export const W = 1080, H = 1920, FPS = 30;
 export const TOTAL = Math.ceil(TL.total * FPS);
@@ -19,7 +20,7 @@ type Span = { t: string; s?: "small" | "reg" | "big" | "huge" | "italic" | "bar"
 type Line = Span[];
 type Card = { kind: "image" | "video" | "terminal" | "context"; src?: string; lines?: string[]; title?: string };
 type Section = {
-  kind: "hook" | "item" | "recap" | "cta" | "follow"; blocks?: Line[]; ordinal?: string;
+  kind: "hook" | "item" | "recap" | "cta" | "follow" | "scene"; blocks?: Line[]; ordinal?: string; scene?: string; minDur?: number;
   badge?: { name: string; say?: string; color?: string; glyph?: string; logo?: string }; head?: Line[]; card?: Card; sub?: Line[]; bullets?: (string | Span)[];
   ordinalSay?: string; tag?: string; chips?: string[]; keyword?: string; cover?: string;
 };
@@ -251,6 +252,20 @@ const ContextGrid: React.FC<{ t0: number; title?: string }> = ({ t0, title }) =>
     </div>
   );
 };
+/** Word-synced header on top + a code-drawn animated scene (scenes.tsx) that can cue on spoken words. */
+const norm = (w: string) => w.toLowerCase().replace(/[^a-z0-9%$]+/g, "");
+const SceneSection: React.FC<{ s: Section; times: number[]; t0: number; t1: number }> = ({ s, times, t0, t1 }) => {
+  const now = useNow(); const L = sectionLines(s), st = lineStarts(s);
+  const toks = L.flatMap(({ line }) => line.flatMap((sp) => words(sp.t)));
+  const cue = (w: string, nth = 1) => { let n = 0; const q = norm(w); for (let i = 0; i < toks.length; i++) if (norm(toks[i]).includes(q) && ++n === nth) return (times[i] ?? t0) - t0; return 0.5; };
+  const Scene = SCENES[s.scene ?? ""];
+  return (
+    <AbsoluteFill style={{ fontFamily: FONT }}>
+      <div style={{ position: "absolute", top: H * 0.03, left: 50, right: 50 }}>{L.map((x, i) => <TextLine key={i} line={x.line} times={times} start={st[i]} />)}</div>
+      <div style={{ position: "absolute", top: 470, left: 0, width: SW, height: SH }}>{Scene ? <Scene t={now - t0} d={t1 - t0} cue={cue} /> : null}</div>
+    </AbsoluteFill>
+  );
+};
 const Cta: React.FC<{ s: Section; times: number[]; t0: number }> = ({ s, times, t0 }) => {
   const f = useCurrentFrame(); const now = f / FPS; const L = sectionLines(s), st = lineStarts(s);
   const k = spring({ frame: Math.max(0, f - t0 * FPS), fps: FPS, config: { damping: 14 } });
@@ -303,6 +318,7 @@ export const Listicle: React.FC = () => {
   return (
     <AbsoluteFill style={{ background: C.bg }}>
       {s && tl ? (s.kind === "item" ? <Item s={s} times={tl.words} t0={tl.t0} /> : s.kind === "hook" ? <Hook s={s} times={tl.words} t0={tl.t0} />
+        : s.kind === "scene" ? <SceneSection s={s} times={tl.words} t0={tl.t0} t1={tl.t1} />
         : s.kind === "cta" ? <Cta s={s} times={tl.words} t0={tl.t0} /> : s.kind === "follow" ? <Follow s={s} times={tl.words} t0={tl.t0} /> : <Center s={s} times={tl.words} t0={tl.t0} />) : null}
       <Watermark />
       <Audio src={staticFile("audio/mix.wav")} />

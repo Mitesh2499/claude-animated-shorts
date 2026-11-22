@@ -15,6 +15,15 @@ BRAND = S.get('brandDir', "C:/Projects/claude-animated-shorts/brand")   # shared
 if os.path.isdir(BRAND): shutil.copytree(BRAND, os.path.join(ROOT, 'public', 'brand'), dirs_exist_ok=True)
 missing = [p for p in [S.get('brandLogo'), S.get('watermarkLogo')] + [sec.get('badge', {}).get('logo') for sec in S['sections']] + [sec.get('cover') for sec in S['sections']] if p and not os.path.exists(os.path.join(ROOT, 'public', p))]
 if missing: raise SystemExit('Missing assets (upload them or fetch logos first): ' + ', '.join(missing))
+# theSVG UI icons (brand/icons/*.svg) -> src/icons.json for <Icon name="bot" color=...> (inlined, recoloured via currentColor)
+icons = {}
+for fn in sorted(os.listdir(os.path.join(BRAND, 'icons'))) if os.path.isdir(os.path.join(BRAND, 'icons')) else []:
+    if fn.endswith('.svg'):
+        raw = open(os.path.join(BRAND, 'icons', fn), encoding='utf-8').read()
+        m = re.search(r'<svg[^>]*viewBox="([^"]+)"[^>]*>(.*)</svg>', raw, re.S)
+        if m: icons[fn[:-4]] = {'vb': m.group(1), 'body': m.group(2)}
+json.dump(icons, open(os.path.join(ROOT, 'src', 'icons.json'), 'w', encoding='utf-8'))
+print('icons', len(icons))
 os.makedirs(os.path.join(ROOT, 'public', 'audio'), exist_ok=True); os.makedirs(os.path.join(ROOT, 'audio', 'voice'), exist_ok=True)
 
 def lines(sec):  # MUST match sectionLines() in Listicle.tsx
@@ -82,7 +91,8 @@ async def main():
                 a, b = starts[0], starts[-1] + 0.25
                 ts = [a + (b - a) * k / max(1, len(disp)) for k in range(len(disp))]
             times += [round(t + v, 3) for v in ts]
-        if times: dur = max(dur, times[-1] - t + 1.0)   # silent tag lines need ~1 s on screen after they appear
+        if times: dur = max(dur, times[-1] - t + 1.0)
+        dur = max(dur, sec.get('minDur', 0))   # silent tag lines need ~1 s on screen after they appear
         voice[int(t * SR): int(t * SR) + len(x)] += x
         out_secs.append({'kind': sec['kind'], 't0': round(t, 3), 't1': round(t + dur + GAP, 3), 'words': times})
         print(f"section {i} {sec['kind']:7s} {dur:5.2f}s words {len(times)}")
@@ -114,6 +124,19 @@ def mix(voice, secs, total):
             if g == 'badge': put(sfx, pop(), tl['words'][k] - 0.08)
             if g == 'bullet': put(sfx, tick(), tl['words'][k] - 0.02, 0.8)
             k += n
+        # per-section sound events: {"word": "500", "type": "pop", "offset": 0} or {"t": 1.2, "type": "tick", "n": 8, "every": 0.08}
+        toks = [w for _, l in L for sp in l for w in sp['t'].split()]
+        for ev in sec.get('sfx', []):
+            if 'word' in ev:
+                idx = next((j for j, w in enumerate(toks) if norm(ev['word']) in norm(w)), None)
+                if idx is None: continue
+                at = tl['words'][idx] + ev.get('offset', 0)
+            else: at = tl['t0'] + ev['t']
+            for r in range(ev.get('n', 1)):
+                kind = ev['type']; x = {'pop': pop, 'tick': tick, 'whoosh': whoosh}.get(kind)
+                if kind == 'chime': tt = np.arange(int(0.9 * SR)) / SR; x = lambda: sum(np.sin(2 * np.pi * f * tt) * np.exp(-tt * 4) * 0.12 for f in (1046.5, 1318.5, 1568))
+                if kind == 'error': tt = np.arange(int(0.3 * SR)) / SR; x = lambda: np.sign(np.sin(2 * np.pi * 140 * tt)) * np.exp(-tt * 9) * 0.12
+                if x: put(sfx, x(), at + r * ev.get('every', 0.08), ev.get('gain', 0.8))
     # light pluck bed, 96 bpm, i - VI - III - VII in A minor
     beat = 60 / 96; chords = [[220, 261.6, 329.6], [174.6, 220, 261.6], [261.6, 329.6, 392], [196, 246.9, 293.7]]
     t = 0.0; bar = 0
