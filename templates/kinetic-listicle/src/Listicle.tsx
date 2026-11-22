@@ -212,8 +212,8 @@ const Hook: React.FC<{ s: Section; times: number[]; t0: number }> = ({ s, times,
           <Asterisk r={70} color={C.accent} petals={12} rot={now * 30} />
         </div>
       ))}
-      {s.card ? <div style={{ position: "absolute", top: H * 0.47, left: 0, right: 0 }}><CardView card={s.card} t0={t0} w={800} h={420} tilt={4} /></div> : null}
-      <div style={{ position: "absolute", top: H * 0.13, left: 60, right: 60 }}>{L.map((x, i) => <TextLine key={i} line={x.line} times={times} start={st[i]} />)}</div>
+      {s.card ? <div style={{ position: "absolute", top: H * 0.5, left: 0, right: 0 }}><CardView card={s.card} t0={t0} w={800} h={420} tilt={4} /></div> : null}
+      <div style={{ position: "absolute", top: H * 0.165, left: 90, right: 90 }}>{L.map((x, i) => <TextLine key={i} line={x.line} times={times} start={st[i]} />)}</div>
     </AbsoluteFill>
   );
 };

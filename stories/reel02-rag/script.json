@@ -1,0 +1,62 @@
+{
+ "brand": "@MiteshJourney",
+ "brandLogo": "brand/logos/logo.png",
+ "watermarkLogo": "",
+ "voice": "en-US-AndrewNeural", "rate": "+8%", "pitch": "+0Hz",
+ "accent": "#2563EB",
+ "theme": { "bar": "#0B1220", "sparkle": "#2563EB", "blue": "#2563EB", "cyan": "#06B6D4", "amber": "#F59E0B", "violet": "#8B5CF6" },
+ "_source": "Reel 02: why an LLM doesn't know private data + RAG. Facts: LLMs learn from training data up to a cutoff; private docs are not in it unless supplied; RAG = index (chunk + embed + vector store) -> retrieve by semantic similarity -> add to the prompt -> grounded answer with sources; no retraining, docs can be updated.",
+ "sections": [
+  { "kind": "hook",
+    "card": { "kind": "terminal", "title": "company-chatbot", "lines": ["> What's our refund window?", "I don't have access to your", "company's documents."] },
+    "blocks": [
+      [ { "t": "My AI chatbot knows" } ],
+      [ { "t": "everything...", "s": "big", "c": "blue" } ],
+      [ { "t": "except" } ],
+      [ { "t": "my company's documents.", "s": "bar" } ],
+      [ { "t": "How do I fix that?", "s": "italic" } ] ] },
+
+  { "kind": "item", "ordinal": "Why?",
+    "head": [ [ { "t": "A language model only knows" } ], [ { "t": "what it was trained on.", "s": "big", "c": "blue" } ] ],
+    "card": { "kind": "terminal", "title": "company-chatbot", "lines": ["> What's our refund window?", "- Usually 30 days.", "+ Your policy: 14 days.", "", "  (it guessed)"] },
+    "sub": [ [ { "t": "Mostly public data," } ], [ { "t": "up to a cutoff date.", "s": "big" } ] ],
+    "bullets": [ { "t": "never saw your private files", "say": "It never saw your private files," }, { "t": "so it guesses or says \"I don't know\"", "say": "so it guesses, or says it doesn't know." } ],
+    "tag": "NOT IN TRAINING = NOT KNOWN." },
+
+  { "kind": "item", "ordinal": "The fix", "ordinalSay": "The fix?", "badge": { "name": "RAG", "say": "RAG.", "color": "#2563EB", "glyph": "R" },
+    "head": [ [ { "t": "Retrieval-Augmented Generation", "s": "big", "c": "blue", "say": "Retrieval augmented generation." } ] ],
+    "card": { "kind": "terminal", "title": "rag-pipeline", "lines": ["  question", "  ↓ search your documents", "  ↓ top matching chunks", "  ↓ added to the prompt", "✓ grounded answer + sources"] },
+    "sub": [ [ { "t": "Don't retrain the model." } ], [ { "t": "Hand it the right pages" } ], [ { "t": "at question time.", "s": "big" } ] ],
+    "tag": "DON'T RETRAIN. RETRIEVE." },
+
+  { "kind": "item", "ordinal": "01", "ordinalSay": "Step one:", "badge": { "name": "INDEX", "say": "index.", "color": "#06B6D4", "glyph": "1" },
+    "head": [ [ { "t": "Split your documents" } ], [ { "t": "into small chunks,", "s": "big", "c": "cyan" } ] ],
+    "card": { "kind": "terminal", "title": "indexer", "lines": ["> index ./docs", "  handbook.pdf    -> 248 chunks", "  policies.docx   ->  96 chunks", "✓ 344 embeddings saved", "  to the vector database"] },
+    "sub": [ [ { "t": "turn each one into an embedding," } ], [ { "t": "and store it in a" } ], [ { "t": "vector database.", "s": "big" } ] ],
+    "tag": "YOUR DOCS, SEARCHABLE BY MEANING." },
+
+  { "kind": "item", "ordinal": "02", "ordinalSay": "Step two:", "badge": { "name": "RETRIEVE", "say": "retrieve.", "color": "#8B5CF6", "glyph": "2" },
+    "head": [ [ { "t": "When someone asks a question," } ], [ { "t": "search by meaning", "s": "big", "c": "violet" } ] ],
+    "card": { "kind": "terminal", "title": "retriever", "lines": ["> What's our refund window?", "searching 344 chunks...", "✓ 0.91  policies.docx  4.2", "✓ 0.87  handbook.pdf   p.12", "✓ 0.82  faq.md"] },
+    "sub": [ [ { "t": "and pull the" } ], [ { "t": "most relevant chunks.", "s": "big" } ] ],
+    "tag": "MEANING, NOT KEYWORDS." },
+
+  { "kind": "item", "ordinal": "03", "ordinalSay": "Step three:", "badge": { "name": "GENERATE", "say": "generate.", "color": "#F59E0B", "glyph": "3" },
+    "head": [ [ { "t": "Add those chunks" } ], [ { "t": "to the prompt,", "s": "big", "c": "amber" } ] ],
+    "card": { "kind": "terminal", "title": "company-chatbot", "lines": ["> What's our refund window?", "+ 14 days from delivery,", "+ unused items only.", "  Source: policies.docx 4.2"] },
+    "sub": [ [ { "t": "and the model answers" } ], [ { "t": "from your documents,", "s": "big" } ] ],
+    "bullets": [ { "t": "with sources", "say": "with sources." } ],
+    "tag": "GROUNDED ANSWERS. REAL SOURCES." },
+
+  { "kind": "recap", "chips": ["Index", "Retrieve", "Generate"],
+    "blocks": [
+      [ { "t": "No retraining.", "s": "big" } ], [ { "t": "Update a document," } ], [ { "t": "and the answer updates too." } ],
+      [ { "t": "That's RAG.", "s": "bar", "c": "blue" } ] ] },
+
+  { "kind": "follow",
+    "blocks": [
+      [ { "t": "Follow" } ], [ { "t": "@MiteshJourney", "s": "big", "c": "blue", "say": "Mitesh Journey" } ],
+      [ { "t": "for more" } ], [ { "t": "practical AI tips.", "s": "italic" } ],
+      [ { "t": "LEARN. BUILD. AUTOMATE.", "s": "bar", "say": "" } ] ] }
+ ]
+}
