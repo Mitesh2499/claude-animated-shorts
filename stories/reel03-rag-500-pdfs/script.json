@@ -2,49 +2,443 @@
  "brand": "@MiteshJourney",
  "brandLogo": "brand/logos/logo.png",
  "watermarkLogo": "",
- "voice": "en-US-AndrewNeural", "rate": "+8%", "pitch": "+0Hz",
+ "voice": "en-US-AndrewNeural",
+ "rate": "+8%",
+ "pitch": "+0Hz",
  "accent": "#2563EB",
- "theme": { "bar": "#0B1220", "sparkle": "#2563EB", "blue": "#2563EB", "cyan": "#06B6D4", "amber": "#F59E0B", "violet": "#8B5CF6" },
- "_source": "Reel 03: 500 company PDFs -> RAG. Ingestion (once): PDF -> text extraction -> chunking -> embeddings -> vector DB. Query (every question): question -> query embedding -> top-k similarity retrieval -> retrieved chunks in the prompt -> LLM -> grounded answer with citations. No retraining; only top-k chunks reach the model. Icons: theSVG UI icons + theSVG 'pdf' brand icon (MIT). Sample company, policy and numbers are illustrative.",
+ "theme": {
+  "bar": "#0B1220",
+  "sparkle": "#2563EB",
+  "blue": "#2563EB",
+  "cyan": "#06B6D4",
+  "amber": "#F59E0B",
+  "violet": "#8B5CF6"
+ },
+ "_source": "Reel 03 v2 (new crash hook; voice says \"rag\" as a word, UI shows RAG): 500 company PDFs -> RAG. Ingestion (once): PDF -> text extraction -> chunking -> embeddings -> vector DB. Query (every question): question -> query embedding -> top-k similarity retrieval -> retrieved chunks in the prompt -> LLM -> grounded answer with citations. No retraining; only top-k chunks reach the model. Icons: theSVG UI icons + theSVG 'pdf' brand icon (MIT). Sample company, policy and numbers are illustrative.",
  "sections": [
-  { "kind": "scene", "scene": "pdfSwarm",
-    "sfx": [ { "t": 0.1, "type": "tick", "n": 16, "every": 0.08, "gain": 0.35 }, { "word": "500", "type": "pop" }, { "word": "chatbot", "type": "pop", "offset": -0.1 } ],
-    "blocks": [ [ { "t": "I have" } ], [ { "t": "500 company PDFs.", "s": "big", "c": "blue", "say": "five hundred company PDFs." } ],
-      [ { "t": "How do I make my chatbot" } ], [ { "t": "answer from them?", "s": "bar" } ] ] },
-
-  { "kind": "scene", "scene": "chatFail",
-    "sfx": [ { "t": 0.15, "type": "pop" }, { "word": "fails", "type": "error", "offset": -0.1 }, { "word": "trained", "type": "tick", "n": 4, "every": 0.22 } ],
-    "blocks": [ [ { "t": "Ask it today," } ], [ { "t": "and it fails.", "s": "big", "c": "amber" } ], [ { "t": "It was never trained on your files." } ] ] },
-
-  { "kind": "scene", "scene": "ingest",
-    "sfx": [ { "t": 0.4, "type": "tick", "n": 10, "every": 0.16, "gain": 0.3 }, { "word": "split", "type": "whoosh" }, { "word": "split", "type": "pop", "offset": 0.3, "n": 9, "every": 0.09, "gain": 0.35 } ],
-    "blocks": [ [ { "t": "The fix is" }, { "t": "RAG.", "s": "big", "c": "blue" } ], [ { "t": "First, extract the text" } ], [ { "t": "and split it into chunks.", "s": "big", "c": "cyan" } ] ] },
-
-  { "kind": "scene", "scene": "embed",
-    "sfx": [ { "word": "model", "type": "pop", "offset": -0.2 }, { "word": "vector", "type": "tick", "n": 3, "every": 0.16 }, { "word": "meaning", "type": "whoosh", "offset": -0.6 } ],
-    "blocks": [ [ { "t": "An embedding model turns each chunk" } ], [ { "t": "into a vector,", "s": "big", "c": "cyan" } ], [ { "t": "numbers that capture its meaning." } ] ] },
-
-  { "kind": "scene", "scene": "vectorDb",
-    "sfx": [ { "t": 0.1, "type": "whoosh" }, { "t": 0.5, "type": "pop", "n": 6, "every": 0.16, "gain": 0.4 }, { "word": "thousands", "type": "chime", "offset": 0.6 } ],
-    "blocks": [ [ { "t": "Store them all in a" } ], [ { "t": "vector database,", "s": "big", "c": "blue" } ], [ { "t": "thousands of chunks, searchable by meaning." } ] ] },
-
-  { "kind": "scene", "scene": "retrieve",
-    "sfx": [ { "t": 0.15, "type": "pop" }, { "word": "embedded", "type": "whoosh" }, { "word": "closest", "type": "pop", "offset": -0.25, "n": 5, "every": 0.1 } ],
-    "blocks": [ [ { "t": "Now someone asks a question." } ], [ { "t": "It's embedded the same way," } ],
-      [ { "t": "and only the" }, { "t": "5 closest", "s": "big", "c": "violet", "say": "five closest" } ], [ { "t": "chunks come back." } ] ] },
-
-  { "kind": "scene", "scene": "generate",
-    "sfx": [ { "word": "prompt", "type": "whoosh", "offset": -0.3 }, { "word": "answers", "type": "tick", "n": 6, "every": 0.12, "gain": 0.3 }, { "word": "retraining", "type": "pop" }, { "word": "never", "type": "pop" } ],
-    "blocks": [ [ { "t": "They go into the prompt," } ], [ { "t": "and the model answers from them.", "s": "reg", "c": "blue" } ],
-      [ { "t": "No retraining.", "s": "bar" } ], [ { "t": "Never all 500 PDFs.", "s": "bar", "c": "amber", "say": "Never all five hundred PDFs." } ] ] },
-
-  { "kind": "scene", "scene": "chatAnswer", "minDur": 4.4,
-    "sfx": [ { "t": 0.35, "type": "tick", "n": 8, "every": 0.12, "gain": 0.3 }, { "word": "source", "type": "pop", "offset": 0.75 }, { "word": "source", "type": "chime", "offset": 1.2 } ],
-    "blocks": [ [ { "t": "Each answer can cite" } ], [ { "t": "its source,", "s": "big", "c": "blue" } ], [ { "t": "so you can check it." } ] ] },
-
-  { "kind": "follow",
-    "blocks": [ [ { "t": "Follow" } ], [ { "t": "@MiteshJourney", "s": "big", "c": "blue", "say": "Mitesh Journey" } ],
-      [ { "t": "for more" } ], [ { "t": "practical AI.", "s": "italic" } ],
-      [ { "t": "LEARN. BUILD. AUTOMATE.", "s": "bar", "say": "" } ] ] }
+  {
+   "kind": "scene",
+   "scene": "pdfCrash",
+   "minDur": 5.6,
+   "sfx": [
+    {
+     "t": 0.1,
+     "type": "tick",
+     "n": 16,
+     "every": 0.08,
+     "gain": 0.35
+    },
+    {
+     "word": "500",
+     "type": "pop"
+    },
+    {
+     "word": "chatbot",
+     "type": "whoosh",
+     "offset": -0.1
+    },
+    {
+     "word": "crashed",
+     "type": "error",
+     "offset": -0.12
+    },
+    {
+     "word": "crashed",
+     "type": "pop",
+     "offset": -0.05
+    },
+    {
+     "word": "window",
+     "type": "tick",
+     "n": 2,
+     "every": 0.12
+    }
+   ],
+   "blocks": [
+    [
+     {
+      "t": "I uploaded"
+     }
+    ],
+    [
+     {
+      "t": "500 company PDFs",
+      "s": "big",
+      "c": "blue",
+      "say": "five hundred company PDFs"
+     }
+    ],
+    [
+     {
+      "t": "to my chatbot..."
+     }
+    ],
+    [
+     {
+      "t": "and it crashed.",
+      "s": "bar",
+      "c": "#E5252A"
+     }
+    ],
+    [
+     {
+      "t": "Way too much for its context window."
+     }
+    ]
+   ]
+  },
+  {
+   "kind": "scene",
+   "scene": "chatFail",
+   "sfx": [
+    {
+     "t": 0.15,
+     "type": "pop"
+    },
+    {
+     "word": "fails",
+     "type": "error",
+     "offset": -0.1
+    },
+    {
+     "word": "trained",
+     "type": "tick",
+     "n": 4,
+     "every": 0.22
+    }
+   ],
+   "blocks": [
+    [
+     {
+      "t": "Ask it today,"
+     }
+    ],
+    [
+     {
+      "t": "and it fails.",
+      "s": "big",
+      "c": "amber"
+     }
+    ],
+    [
+     {
+      "t": "It was never trained on your files."
+     }
+    ]
+   ]
+  },
+  {
+   "kind": "scene",
+   "scene": "ingest",
+   "sfx": [
+    {
+     "t": 0.4,
+     "type": "tick",
+     "n": 10,
+     "every": 0.16,
+     "gain": 0.3
+    },
+    {
+     "word": "split",
+     "type": "whoosh"
+    },
+    {
+     "word": "split",
+     "type": "pop",
+     "offset": 0.3,
+     "n": 9,
+     "every": 0.09,
+     "gain": 0.35
+    }
+   ],
+   "blocks": [
+    [
+     {
+      "t": "The fix is"
+     },
+     {
+      "t": "RAG.",
+      "s": "big",
+      "c": "blue"
+     }
+    ],
+    [
+     {
+      "t": "First, extract the text"
+     }
+    ],
+    [
+     {
+      "t": "and split it into chunks.",
+      "s": "big",
+      "c": "cyan"
+     }
+    ]
+   ]
+  },
+  {
+   "kind": "scene",
+   "scene": "embed",
+   "sfx": [
+    {
+     "word": "model",
+     "type": "pop",
+     "offset": -0.2
+    },
+    {
+     "word": "vector",
+     "type": "tick",
+     "n": 3,
+     "every": 0.16
+    },
+    {
+     "word": "meaning",
+     "type": "whoosh",
+     "offset": -0.6
+    }
+   ],
+   "blocks": [
+    [
+     {
+      "t": "An embedding model turns each chunk"
+     }
+    ],
+    [
+     {
+      "t": "into a vector,",
+      "s": "big",
+      "c": "cyan"
+     }
+    ],
+    [
+     {
+      "t": "numbers that capture its meaning."
+     }
+    ]
+   ]
+  },
+  {
+   "kind": "scene",
+   "scene": "vectorDb",
+   "sfx": [
+    {
+     "t": 0.1,
+     "type": "whoosh"
+    },
+    {
+     "t": 0.5,
+     "type": "pop",
+     "n": 6,
+     "every": 0.16,
+     "gain": 0.4
+    },
+    {
+     "word": "thousands",
+     "type": "chime",
+     "offset": 0.6
+    }
+   ],
+   "blocks": [
+    [
+     {
+      "t": "Store them all in a"
+     }
+    ],
+    [
+     {
+      "t": "vector database,",
+      "s": "big",
+      "c": "blue"
+     }
+    ],
+    [
+     {
+      "t": "thousands of chunks, searchable by meaning."
+     }
+    ]
+   ]
+  },
+  {
+   "kind": "scene",
+   "scene": "retrieve",
+   "sfx": [
+    {
+     "t": 0.15,
+     "type": "pop"
+    },
+    {
+     "word": "embedded",
+     "type": "whoosh"
+    },
+    {
+     "word": "closest",
+     "type": "pop",
+     "offset": -0.25,
+     "n": 5,
+     "every": 0.1
+    }
+   ],
+   "blocks": [
+    [
+     {
+      "t": "Now someone asks a question."
+     }
+    ],
+    [
+     {
+      "t": "It's embedded the same way,"
+     }
+    ],
+    [
+     {
+      "t": "and only the"
+     },
+     {
+      "t": "5 closest",
+      "s": "big",
+      "c": "violet",
+      "say": "five closest"
+     }
+    ],
+    [
+     {
+      "t": "chunks come back."
+     }
+    ]
+   ]
+  },
+  {
+   "kind": "scene",
+   "scene": "generate",
+   "sfx": [
+    {
+     "word": "prompt",
+     "type": "whoosh",
+     "offset": -0.3
+    },
+    {
+     "word": "answers",
+     "type": "tick",
+     "n": 6,
+     "every": 0.12,
+     "gain": 0.3
+    },
+    {
+     "word": "retraining",
+     "type": "pop"
+    },
+    {
+     "word": "never",
+     "type": "pop"
+    }
+   ],
+   "blocks": [
+    [
+     {
+      "t": "They go into the prompt,"
+     }
+    ],
+    [
+     {
+      "t": "and the model answers from them.",
+      "s": "reg",
+      "c": "blue"
+     }
+    ],
+    [
+     {
+      "t": "No retraining.",
+      "s": "bar"
+     }
+    ],
+    [
+     {
+      "t": "Never all 500 PDFs.",
+      "s": "bar",
+      "c": "amber",
+      "say": "Never all five hundred PDFs."
+     }
+    ]
+   ]
+  },
+  {
+   "kind": "scene",
+   "scene": "chatAnswer",
+   "minDur": 4.4,
+   "sfx": [
+    {
+     "t": 0.35,
+     "type": "tick",
+     "n": 8,
+     "every": 0.12,
+     "gain": 0.3
+    },
+    {
+     "word": "source",
+     "type": "pop",
+     "offset": 0.75
+    },
+    {
+     "word": "source",
+     "type": "chime",
+     "offset": 1.2
+    }
+   ],
+   "blocks": [
+    [
+     {
+      "t": "Each answer can cite"
+     }
+    ],
+    [
+     {
+      "t": "its source,",
+      "s": "big",
+      "c": "blue"
+     }
+    ],
+    [
+     {
+      "t": "so you can check it."
+     }
+    ]
+   ]
+  },
+  {
+   "kind": "follow",
+   "blocks": [
+    [
+     {
+      "t": "Follow"
+     }
+    ],
+    [
+     {
+      "t": "@MiteshJourney",
+      "s": "big",
+      "c": "blue",
+      "say": "Mitesh Journey"
+     }
+    ],
+    [
+     {
+      "t": "for more"
+     }
+    ],
+    [
+     {
+      "t": "practical AI.",
+      "s": "italic"
+     }
+    ],
+    [
+     {
+      "t": "LEARN. BUILD. AUTOMATE.",
+      "s": "bar",
+      "say": ""
+     }
+    ]
+   ]
+  }
  ]
 }

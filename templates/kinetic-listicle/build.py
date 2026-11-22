@@ -24,6 +24,14 @@ for fn in sorted(os.listdir(os.path.join(BRAND, 'icons'))) if os.path.isdir(os.p
         if m: icons[fn[:-4]] = {'vb': m.group(1), 'body': m.group(2)}
 json.dump(icons, open(os.path.join(ROOT, 'src', 'icons.json'), 'w', encoding='utf-8'))
 print('icons', len(icons))
+# Pronunciation map: on-screen text stays as written, the voice says the mapped word ("RAG" -> "rag", not R-A-G).
+PRON = {}
+_prof = os.path.join(BRAND, 'profile.json')
+if os.path.exists(_prof): PRON.update(json.load(open(_prof, encoding='utf-8')).get('pronounce', {}))
+PRON.update(S.get('pronounce', {}))
+def speak(text):
+    for k, v in PRON.items(): text = re.sub(r'(?<![A-Za-z])' + re.escape(k) + r'(?![A-Za-z])', v, text)
+    return text
 os.makedirs(os.path.join(ROOT, 'public', 'audio'), exist_ok=True); os.makedirs(os.path.join(ROOT, 'audio', 'voice'), exist_ok=True)
 
 def lines(sec):  # MUST match sectionLines() in Listicle.tsx
@@ -47,13 +55,16 @@ norm = lambda w: re.sub(r"[^\w%&]+", "", w.lower())
 async def tts(text, path):
     for attempt in range(6):
         try:
-            c = edge_tts.Communicate(text, VOICE, rate=RATE, pitch=PITCH, boundary="WordBoundary")
-            marks = []
-            with open(path, 'wb') as f:
+            async def collect():
+                c = edge_tts.Communicate(text, VOICE, rate=RATE, pitch=PITCH, boundary="WordBoundary")
+                marks, audio = [], bytearray()
                 async for ch in c.stream():
-                    if ch['type'] == 'audio': f.write(ch['data'])
+                    if ch['type'] == 'audio': audio += ch['data']
                     elif ch['type'] == 'WordBoundary': marks.append((ch['offset'] / 1e7, (ch['offset'] + ch['duration']) / 1e7, ch['text']))
-            if marks: return marks
+                return marks, audio
+            marks, audio = await asyncio.wait_for(collect(), timeout=45)   # a stalled connection retries instead of hanging forever
+            if marks:
+                open(path, 'wb').write(bytes(audio)); return marks
         except Exception as e:
             print('retry', attempt, type(e).__name__)
         await asyncio.sleep(1.5)
@@ -64,7 +75,7 @@ async def main():
     voice = np.zeros(int(SR * 600))
     for i, sec in enumerate(S['sections']):
         sp = spans(sec)
-        say = [(s['say'] if s.get('say') is not None else s['t']) for s in sp]   # say == '' -> shown silently
+        say = [(s['say'] if s.get('say') is not None else speak(s['t'])) for s in sp]   # say == '' -> shown silently
         text = ' '.join(x for x in say if x).replace(' ,', ',')
         mp3 = os.path.join(ROOT, 'audio', 'voice', f's{i:02d}.mp3'); wav = mp3[:-4] + '.wav'
         marks = await tts(text, mp3)

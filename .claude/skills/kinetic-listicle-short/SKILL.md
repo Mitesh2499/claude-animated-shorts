@@ -61,7 +61,7 @@ Do not start `build.py` until handle + logo decision + CTA are known. Save every
 For concept/process explainers (not "N tools" lists) use `{"kind": "scene", "scene": "<name>", "blocks": [...], "sfx": [...], "minDur": s}`:
 - Word-synced header (the spoken lines, top 3-24 %) + a code-drawn animation on a 1080x1140 canvas (from y 470) from `src/scenes.tsx`.
 - Scenes receive `t` (s since section start), `d` (length) and `cue("word")` = when that word is spoken, so every visual beat lands on its word (counter hits 500 on "500", the bot fails on "fails", 5 dots light on "closest").
-- Library v1 (AI/RAG): `pdfSwarm` (500 PDF icons flood + counter + confused bot), `chatFail` (chat UI, failed answer, training-data checklist), `ingest` (PDF pile -> Extract text -> scissors -> chunk cards, "1 · INGESTION · RUNS ONCE"), `embed` (chunks -> embedding model -> vectors -> particles cluster by meaning), `vectorDb` (cylinder fills, chunk counter, topic tags), `retrieve` ("2 · QUERY TIME", question -> query vector -> radar search over a dot grid -> top-5 cards with scores), `generate` (5 chunks -> prompt -> LLM -> streamed grounded answer, "model weights unchanged", "500 PDFs never sent"), `chatAnswer` (polished chat, citation chip, cursor click, cited PDF page with highlight).
+- Library v1 (AI/RAG): `pdfCrash` (hook: 500 PDFs flood in + counter, the bot swallows them, crashes: red X, error dialog "context window exceeded", PDFs spill; cues 500/chatbot/crashed/window), `pdfSwarm` (500 PDF icons flood + counter + confused bot), `chatFail` (chat UI, failed answer, training-data checklist), `ingest` (PDF pile -> Extract text -> scissors -> chunk cards, "1 · INGESTION · RUNS ONCE"), `embed` (chunks -> embedding model -> vectors -> particles cluster by meaning), `vectorDb` (cylinder fills, chunk counter, topic tags), `retrieve` ("2 · QUERY TIME", question -> query vector -> radar search over a dot grid -> top-5 cards with scores), `generate` (5 chunks -> prompt -> LLM -> streamed grounded answer, "model weights unchanged", "500 PDFs never sent"), `chatAnswer` (polished chat, citation chip, cursor click, cited PDF page with highlight).
 - New scenes: add a component to `scenes.tsx` + register it in `SCENES`. Rules: something moves or appears every 0.3-0.5 s; label stages so it reads muted; brand palette only; icons via `<Icon>`; shapes code-drawn when more reliable than images.
 - `sfx`: `{"word": "500", "type": "pop"}` or `{"t": 0.4, "type": "tick", "n": 10, "every": 0.16, "gain": 0.3}`; types `pop | tick | whoosh | chime | error`. `minDur` keeps a scene on screen long enough for its animation.
 - Proven: `stories/reel03-rag-500-pdfs/Reel03_500_PDFs_to_Chatbot_RAG.mp4` (45.1 s, project `c:\Projects\reel03-rag-500-pdfs`, script.json + ASSETS.md beside it).
@@ -92,7 +92,12 @@ Be explicit with the user that this is frame + signal analysis, not literal view
 5. **Render**: `node scripts/render.mjs out/silent.mp4` then mux `ffmpeg -i out/silent.mp4 -i public/audio/mix.wav -map 0:v:0 -map 1:a:0 -c:v copy -c:a aac -b:a 192k -shortest out/<name>.mp4` (Remotion's ffmpeg: `bitter-fruit/node_modules/@remotion/compositor-win32-x64-msvc/ffmpeg.exe`).
 6. **Deliver** the mp4 + script.json to `stories/<name>/`, keep earlier versions (`v1_`, `v2_` ...), save memory.
 
+## Pronunciation (user rule)
+- On screen acronyms stay as written; the voice says them the way the creator says them. `brand/profile.json` -> `"pronounce": {"RAG": "rag"}` (also per script `pronounce`). build.py applies it to every span without an explicit `say`. RAG is said "rag" (one word), never R-A-G. Ask the user when a new acronym appears (MCP = M-C-P, LLM = L-L-M, SQL?).
+- Verify with the TTS boundaries: one word = one WordBoundary ("rag" 0.32 s), spelled = one per letter.
+
 ## Gotchas
+- edge-tts can stall forever on a dead socket: build.py wraps each request in `asyncio.wait_for(..., 45)` and retries; run long builds with `timeout 600`.
 - `sectionLines()` in Listicle.tsx and `lines()` in build.py must list tokens in the same order (ordinal, badge, head, sub, bullets / blocks). Change both or timing drifts.
 - Never call hooks inside `.map` branches (TextLine computes `now` once at the top).
 - Text width: a `huge` span longer than ~12 characters wraps; split it ("3" huge + "commands" big) or use big.

@@ -336,4 +336,58 @@ export const chatAnswer: React.FC<SceneProps> = ({ t, cue }) => {
   </svg>;
 };
 
-export const SCENES: Record<string, React.FC<SceneProps>> = { pdfSwarm, chatFail, ingest, embed, vectorDb, retrieve, generate, chatAnswer };
+
+// 1b. Hook "I uploaded 500 PDFs to my chatbot... and it crashed": swarm + counter, the bot swallows the PDFs, crash, error dialog, PDFs spill
+export const pdfCrash: React.FC<SceneProps> = ({ t, cue }) => {
+  const T500 = Math.max(0.6, cue("500")), Tbot = cue("chatbot"), Tc = cue("crashed") - 0.12, Tw = cue("window");
+  const N = 500, cols = 25, cw = 41.6, ch = 47, bx = 540, by = 700;
+  let arrived = 0;
+  const icons = Array.from({ length: N }).map((_, i) => {
+    const a = 0.05 + Math.pow(i / N, 0.9) * (T500 + 1.1);
+    if (t < a) return null;
+    const p = ease((t - a) / 0.45); if (p > 0.6) arrived++;
+    const gx = 20 + (i % cols) * cw, gy = 4 + Math.floor(i / cols) * ch;
+    const ang = random(`a${i}`) * Math.PI * 2, sx = 540 + Math.cos(ang) * 950, sy = 560 + Math.sin(ang) * 1150;
+    let x = sx + (gx - sx) * p, y = sy + (gy - sy) * p, sc = 1, r = (1 - p) * (random(`r${i}`) - 0.5) * 300, op = 1;
+    // sucked into the bot after it appears (staggered), then spat out and falling after the crash
+    const suck = ease((t - (Tbot + 0.1 + random(`s${i}`) * (Tc - Tbot - 0.35))) / 0.4);
+    if (suck > 0) { x += (bx - 16 - x) * suck; y += (by - 20 - y) * suck; sc = 1 - suck * 0.7; op = 1 - suck * 0.8; }
+    if (t > Tc) { const k = t - Tc, vx = (random(`vx${i}`) - 0.5) * 1400, vy = -300 - random(`vy${i}`) * 900;
+      x = bx - 16 + vx * k; y = by - 20 + vy * k + 0.5 * 2600 * k * k; sc = 0.9; op = 1; r = k * (random(`rr${i}`) - 0.5) * 900; }
+    return <image key={i} href={PDF()} x={x} y={y} width={32 * sc} height={39 * sc} opacity={op} transform={`rotate(${r} ${x + 16} ${y + 20})`} />;
+  });
+  const kc = sp(t, 0.15), up = ease((t - Tbot + 0.2) / 0.5);
+  const kb = sp(t, Tbot - 0.15, 11, 140), crash = t > Tc ? 1 : 0;
+  const shake = crash ? Math.sin((t - Tc) * 55) * 22 * Math.exp(-(t - Tc) * 3.5) : Math.sin(t * 30) * 3 * ease((t - Tbot - 0.3) / 0.5);
+  const swell = 1 + ease((t - Tbot - 0.2) / Math.max(0.3, Tc - Tbot - 0.2)) * 0.18 * (1 - crash);
+  const ke = sp(t, Tc + 0.15, 12, 170);
+  return <svg width={SW} height={SH}><Defs />
+    <rect width={SW} height={SH} fill="#f1f1f1" opacity={0.55 * ease((t - Tbot + 0.25) / 0.4)} />
+    {icons}
+    <g transform={`translate(540,${430 - up * 300}) scale(${kc * (1 - up * 0.3)})`}>
+      <rect x={-230} y={-110} width={460} height={220} rx={36} fill="#fff" filter="url(#shadow)" />
+      <image href={PDF()} x={-200} y={-62} width={100} height={124} />
+      <text x={70} y={30} textAnchor="middle" fontFamily={FONT} fontWeight={800} fontSize={124} fill={B.red}>{Math.min(500, arrived)}</text>
+      <text x={70} y={82} textAnchor="middle" fontFamily={FONT} fontWeight={700} fontSize={30} fill={B.grey}>company PDFs</text>
+    </g>
+    {t > Tbot - 0.2 ? <g transform={`translate(${shake},0)`}>
+      <g transform={`translate(${bx},${by}) scale(${kb * swell})`}>
+        <circle r={180} fill={crash ? B.red : B.blue} opacity={0.14} />
+        <circle r={150} fill={crash ? B.red : "url(#gBlue)"} filter="url(#shadow)" />
+        <Icon name={crash ? "circle-x" : "bot"} x={-93} y={-98} size={186} color="#fff" />
+      </g>
+      {crash ? Array.from({ length: 10 }).map((_, i) => { const a = (i / 10) * Math.PI * 2, k = ease((t - Tc) / 0.35);
+        return <line key={i} x1={bx + Math.cos(a) * 170} y1={by + Math.sin(a) * 170} x2={bx + Math.cos(a) * (170 + 110 * k)} y2={by + Math.sin(a) * (170 + 110 * k)} stroke={B.amber} strokeWidth={10} strokeLinecap="round" opacity={1 - ease((t - Tc - 0.3) / 0.4)} />; }) : null}
+    </g> : null}
+    {crash ? <g transform={`translate(540,${360}) scale(${ke})`}>
+      <rect x={-440} y={-120} width={880} height={240} rx={30} fill="#fff" stroke={B.red} strokeWidth={4} filter="url(#shadow)" />
+      <rect x={-440} y={-120} width={880} height={70} rx={30} fill={B.red} /><rect x={-440} y={-80} width={880} height={30} fill={B.red} />
+      <Icon name="circle-x" x={-410} y={-110} size={50} color="#fff" />
+      <text x={-345} y={-72} fontFamily={FONT} fontWeight={800} fontSize={32} fill="#fff">Error · request failed</text>
+      <text x={-400} y={10} fontFamily={MONO} fontWeight={700} fontSize={32} fill={B.ink}>Input too large:</text>
+      <text x={-400} y={60} fontFamily={MONO} fontWeight={700} fontSize={32} fill={t > Tw - 0.2 ? B.red : B.ink}>context window exceeded</text>
+    </g> : null}
+  </svg>;
+};
+
+export const SCENES: Record<string, React.FC<SceneProps>> = { pdfSwarm, pdfCrash, chatFail, ingest, embed, vectorDb, retrieve, generate, chatAnswer };
