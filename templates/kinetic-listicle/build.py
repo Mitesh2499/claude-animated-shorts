@@ -102,7 +102,7 @@ async def main():
                 a, b = starts[0], starts[-1] + 0.25
                 ts = [a + (b - a) * k / max(1, len(disp)) for k in range(len(disp))]
             times += [round(t + v, 3) for v in ts]
-        if times: dur = max(dur, times[-1] - t + 1.0)
+        if times and any(x.get("say") == "" for x in sp): dur = max(dur, times[-1] - t + 1.0)   # only sections with silent lines
         dur = max(dur, sec.get('minDur', 0))   # silent tag lines need ~1 s on screen after they appear
         voice[int(t * SR): int(t * SR) + len(x)] += x
         out_secs.append({'kind': sec['kind'], 't0': round(t, 3), 't1': round(t + dur + GAP, 3), 'words': times})
@@ -147,6 +147,9 @@ def mix(voice, secs, total):
                 kind = ev['type']; x = {'pop': pop, 'tick': tick, 'whoosh': whoosh}.get(kind)
                 if kind == 'chime': tt = np.arange(int(0.9 * SR)) / SR; x = lambda: sum(np.sin(2 * np.pi * f * tt) * np.exp(-tt * 4) * 0.12 for f in (1046.5, 1318.5, 1568))
                 if kind == 'error': tt = np.arange(int(0.3 * SR)) / SR; x = lambda: np.sign(np.sin(2 * np.pi * 140 * tt)) * np.exp(-tt * 9) * 0.12
+                if kind == 'glitch': tt = np.arange(int(0.35 * SR)) / SR; x = lambda: bp(rng.standard_normal(len(tt)), 800, 7000) * (np.sin(2 * np.pi * 23 * tt) > 0) * np.exp(-tt * 6) * 0.35
+                if kind == 'boom': tt = np.arange(int(0.9 * SR)) / SR; x = lambda: np.sin(2 * np.pi * np.cumsum(70 - 35 * tt / 0.9) / SR) * np.exp(-tt * 3.5) * 0.7
+                if kind == 'riser': tt = np.arange(int(1.2 * SR)) / SR; x = lambda: bp(rng.standard_normal(len(tt)), 600, 6000) * (tt / 1.2) ** 2 * 0.3
                 if x: put(sfx, x(), at + r * ev.get('every', 0.08), ev.get('gain', 0.8))
     # light pluck bed, 96 bpm, i - VI - III - VII in A minor
     beat = 60 / 96; chords = [[220, 261.6, 329.6], [174.6, 220, 261.6], [261.6, 329.6, 392], [196, 246.9, 293.7]]

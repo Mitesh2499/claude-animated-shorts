@@ -1,0 +1,69 @@
+{
+ "brand": "@MiteshJourney",
+ "brandLogo": "brand/logos/logo.png",
+ "watermarkLogo": "",
+ "voice": "en-US-AndrewNeural", "rate": "+14%", "pitch": "+0Hz",
+ "accent": "#2563EB",
+ "theme": { "bar": "#0B1220", "sparkle": "#2563EB", "blue": "#2563EB", "cyan": "#06B6D4", "amber": "#F59E0B", "violet": "#8B5CF6" },
+ "_source": "Reel 04 / Episode 03 (stories/reel04-pdf-updated/SCRIPT.md v2). Facts: Microsoft Learn (RAG and indexes; incremental indexing; updating chunks/deletion tracking), OpenAI (optimizing LLM accuracy: RAG vs fine-tuning). Illustrative: 18 -> 24 days, Dec 1, page 3, upload time, file names, '31 days'.",
+ "sections": [
+  { "kind": "scene", "scene": "liedStamp", "minDur": 2.8,
+    "sfx": [ { "word": "lied", "type": "glitch", "offset": -0.1 }, { "word": "lied", "type": "boom", "offset": -0.08 } ],
+    "blocks": [ [ { "t": "The chatbot" }, { "t": "I built", "s": "big", "c": "blue" } ], [ { "t": "just lied to me.", "s": "bar", "c": "#E5252A" } ] ] },
+
+  { "kind": "scene", "scene": "leaveChat",
+    "sfx": [ { "t": 0.1, "type": "pop" }, { "t": 0.65, "type": "tick", "n": 5, "every": 0.12, "gain": 0.3 }, { "word": "said", "type": "error", "offset": -0.05 },
+             { "word": "24", "type": "whoosh", "offset": -0.15 }, { "word": "24", "type": "pop" }, { "word": "myself", "type": "glitch", "offset": -0.1 } ],
+    "blocks": [ [ { "t": "I asked it how many leave days I get." } ],
+      [ { "t": "It said" }, { "t": "18.", "s": "big", "c": "#E5252A", "say": "eighteen." }, { "t": "18?", "s": "big", "say": "Eighteen?" } ],
+      [ { "t": "HR changed it to" } ], [ { "t": "24 yesterday...", "s": "big", "c": "blue", "say": "twenty-four yesterday..." } ],
+      [ { "t": "and I uploaded the new PDF" }, { "t": "myself!", "s": "big" } ] ] },
+
+  { "kind": "scene", "scene": "retrainQ", "minDur": 2.4,
+    "sfx": [ { "t": 0.05, "type": "whoosh" }, { "t": 0.35, "type": "pop" } ],
+    "blocks": [ [ { "t": "So... do I need to" } ], [ { "t": "retrain the AI?", "s": "big", "c": "amber" } ] ] },
+
+  { "kind": "scene", "scene": "threePlaces",
+    "sfx": [ { "word": "brain", "type": "pop", "offset": -0.15 }, { "word": "library", "type": "pop", "offset": -0.15 }, { "word": "desk", "type": "pop", "offset": -0.15 }, { "word": "desk", "type": "tick", "offset": 0.6 } ],
+    "blocks": [ [ { "t": "No.", "s": "bar" } ], [ { "t": "Your AI keeps three separate things." } ],
+      [ { "t": "Its brain:" }, { "t": "the model weights.", "c": "violet" } ], [ { "t": "Its library:" }, { "t": "the vector index.", "c": "blue" } ],
+      [ { "t": "And the pages on its desk:" }, { "t": "the context.", "c": "cyan" } ] ] },
+
+  { "kind": "scene", "scene": "notSynced",
+    "sfx": [ { "t": 0.1, "type": "whoosh" }, { "word": "update", "type": "error", "offset": -0.1 }, { "word": "old", "type": "tick", "n": 2, "every": 0.15 } ],
+    "blocks": [ [ { "t": "Uploading a PDF doesn't update" } ], [ { "t": "the library.", "s": "big", "c": "#E5252A" } ], [ { "t": "Search still finds the old chunks." } ] ] },
+
+  { "kind": "scene", "scene": "syncPipeline",
+    "sfx": [ { "word": "detect", "type": "tick", "offset": 0.2 }, { "word": "extract", "type": "tick", "offset": 0.2 }, { "word": "chunk", "type": "tick", "offset": 0.2 }, { "word": "embed", "type": "tick", "offset": 0.2 }, { "word": "update", "type": "whoosh" }, { "word": "index", "type": "chime" } ],
+    "blocks": [ [ { "t": "You have to" }, { "t": "sync it:", "s": "big", "c": "cyan" } ], [ { "t": "detect the change, extract, chunk," } ], [ { "t": "embed with the same model," } ], [ { "t": "and update the index." } ] ] },
+
+  { "kind": "scene", "scene": "conflict",
+    "sfx": [ { "t": 0.1, "type": "pop" }, { "word": "both", "type": "pop", "offset": -0.15 }, { "word": "both", "type": "glitch", "offset": 0.4 } ],
+    "blocks": [ [ { "t": "But if the old chunks stay," } ], [ { "t": "search returns both.", "s": "big", "c": "#E5252A" } ],
+      [ { "t": "18", "s": "big", "c": "amber", "say": "Eighteen" }, { "t": "and" }, { "t": "24.", "s": "big", "c": "#16A34A", "say": "twenty-four." } ] ] },
+
+  { "kind": "scene", "scene": "versionFilter",
+    "sfx": [ { "t": 0.05, "type": "tick", "n": 10, "every": 0.12, "gain": 0.25 }, { "word": "filter", "type": "whoosh", "offset": -0.15 }, { "word": "current", "type": "pop", "offset": 0.4 } ],
+    "blocks": [ [ { "t": "So store a version and a date" } ], [ { "t": "with every chunk," } ], [ { "t": "and filter to the" }, { "t": "current one.", "s": "big", "c": "blue" } ] ] },
+
+  { "kind": "scene", "scene": "proofChat", "minDur": 3.6,
+    "sfx": [ { "t": 0.05, "type": "pop" }, { "t": 0.5, "type": "chime" }, { "t": 1.4, "type": "pop" } ],
+    "blocks": [ [ { "t": "Same question. Same model." } ], [ { "t": "24 days,", "s": "huge", "c": "blue", "say": "Twenty-four days," } ], [ { "t": "with the new source." } ] ] },
+
+  { "kind": "scene", "scene": "takeaway", "minDur": 2.8,
+    "sfx": [ { "word": "knowledge", "type": "chime", "offset": -0.1 } ],
+    "blocks": [ [ { "t": "RAG updates knowledge,", "s": "big", "c": "blue" } ], [ { "t": "not the model.", "s": "bar" } ] ] },
+
+  { "kind": "scene", "scene": "handbookCliff",
+    "sfx": [ { "t": 0.05, "type": "chime" }, { "word": "handbook", "type": "whoosh", "offset": -0.3 }, { "word": "answered", "type": "pop" }, { "word": "isn't", "type": "glitch", "offset": -0.1 },
+             { "word": "How", "type": "riser", "offset": -1.0 }, { "word": "Episode", "type": "boom", "offset": -0.15 } ],
+    "blocks": [ [ { "t": "Fixed.", "s": "bar", "c": "#16A34A" } ], [ { "t": "Then I uploaded our full HR handbook." } ], [ { "t": "Tables, scanned pages..." } ],
+      [ { "t": "and it answered with a number" } ], [ { "t": "that isn't anywhere in the PDF.", "c": "#E5252A" } ],
+      [ { "t": "How?", "s": "big" }, { "t": "Episode 4.", "s": "big", "c": "amber", "say": "Episode four." } ] ] },
+
+  { "kind": "follow",
+    "blocks": [ [ { "t": "Follow" } ], [ { "t": "@MiteshJourney", "s": "big", "c": "blue", "say": "Mitesh Journey" } ],
+      [ { "t": "for Episode 4." , "say": "for episode four." } ], [ { "t": "Practical AI engineering.", "s": "italic" } ],
+      [ { "t": "LEARN. BUILD. AUTOMATE.", "s": "bar", "say": "" } ] ] }
+ ]
+}

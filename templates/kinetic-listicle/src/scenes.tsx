@@ -390,4 +390,270 @@ export const pdfCrash: React.FC<SceneProps> = ({ t, cue }) => {
   </svg>;
 };
 
-export const SCENES: Record<string, React.FC<SceneProps>> = { pdfSwarm, pdfCrash, chatFail, ingest, embed, vectorDb, retrieve, generate, chatAnswer };
+
+// ============================================================== Library v2: "stale knowledge" episode (Reel 04)
+const GREEN = "#16A34A";
+const Stamp: React.FC<{ x: number; y: number; text: string; color: string; k: number; rot?: number; size?: number }> = ({ x, y, text, color, k, rot = -8, size = 64 }) => {
+  const s = 1 + (1 - k) * 1.4;
+  return <g transform={`translate(${x},${y}) rotate(${rot}) scale(${s})`} opacity={cl(k * 1.6)}>
+    <rect x={-text.length * size * 0.33 - 30} y={-size * 0.85} width={text.length * size * 0.66 + 60} height={size * 1.4} rx={14} fill="none" stroke={color} strokeWidth={8} />
+    <text textAnchor="middle" y={size * 0.32} fontFamily={FONT} fontWeight={900} fontSize={size} fill={color} letterSpacing={3}>{text}</text>
+  </g>;
+};
+const Glitch: React.FC<{ t: number; at: number; children: React.ReactNode }> = ({ t, at, children }) => {
+  const g = t > at && t < at + 0.45 ? 1 : 0; const j = Math.floor(t * 30);
+  const dx = g ? (random(`gx${j}`) - 0.5) * 30 : 0, dy = g ? (random(`gy${j}`) - 0.5) * 12 : 0;
+  return <g>{g ? <g opacity={0.5} transform={`translate(${dx + 10},${dy})`} style={{ filter: "hue-rotate(140deg)" }}>{children}</g> : null}<g transform={`translate(${-dx},${-dy})`}>{children}</g></g>;
+};
+const PdfCard: React.FC<{ x: number; y: number; w: number; name: string; l1: string; l2?: string; foot?: string; color?: string; k?: number; dim?: number }> = ({ x, y, w, name, l1, l2, foot, color = B.ink, k = 1, dim = 0 }) => (
+  <g transform={`translate(${x + w / 2},${y}) scale(${k}) translate(${-w / 2},0)`} opacity={cl(k * 1.5) * (1 - dim * 0.6)}>
+    <rect width={w} height={foot ? 210 : 170} rx={26} fill="#fff" filter="url(#shadow)" />
+    <image href={PDF()} x={24} y={26} width={86} height={106} />
+    <text x={130} y={64} fontFamily={MONO} fontWeight={700} fontSize={28} fill={B.slate}>{name}</text>
+    <text x={130} y={112} fontFamily={FONT} fontWeight={800} fontSize={36} fill={color}>{l1}</text>
+    {l2 ? <text x={130} y={150} fontFamily={FONT} fontWeight={600} fontSize={26} fill={B.grey}>{l2}</text> : null}
+    {foot ? <g><Icon name="circle-check" x={128} y={166} size={34} color={GREEN} /><text x={172} y={192} fontFamily={FONT} fontWeight={700} fontSize={24} fill={GREEN}>{foot}</text></g> : null}
+  </g>
+);
+const Card3: React.FC<{ y: number; icon: string; color: string; title: string; sub: string; on: number; lock?: number; glow?: number; status?: string }> = ({ y, icon, color, title, sub, on, lock = 0, glow = 0, status }) => (
+  <g transform={`translate(0,${(1 - on) * 40})`} opacity={0.35 + 0.65 * on}>
+    <rect x={40} y={y} width={1000} height={300} rx={36} fill="#fff" stroke={on > 0.5 ? color : "#e2e8f0"} strokeWidth={on > 0.5 ? 5 : 3} filter="url(#shadow)" />
+    {glow > 0 ? <rect x={40} y={y} width={1000} height={300} rx={36} fill={GREEN} opacity={0.12 * glow} /> : null}
+    <circle cx={180} cy={y + 150} r={100} fill={color} opacity={0.12} /><Icon name={icon} x={110} y={y + 80} size={140} color={color} />
+    <text x={320} y={y + 130} fontFamily={FONT} fontWeight={900} fontSize={54} fill={B.ink}>{title}</text>
+    <text x={320} y={y + 190} fontFamily={FONT} fontWeight={600} fontSize={32} fill={B.grey}>{sub}</text>
+    {lock > 0 ? <g opacity={lock} transform={`translate(860,${y + 30})`}><circle cx={60} cy={60} r={62} fill={B.navy} /><Icon name="lock" x={18} y={16} size={84} color="#fff" /></g> : null}
+    {status ? <g opacity={on}><rect x={320} y={y + 218} width={status.length * 15 + 40} height={50} rx={25} fill={lock ? B.navy : GREEN} /><text x={340} y={y + 252} fontFamily={FONT} fontWeight={800} fontSize={26} fill="#fff">{status}</text></g> : null}
+  </g>
+);
+
+// 1. "The chatbot I built just lied to me."
+export const liedStamp: React.FC<SceneProps> = ({ t, cue }) => {
+  const Tl = cue("lied") - 0.1; const kb = sp(t, 0.02, 12, 120), ks = sp(t, Tl, 9, 260);
+  const shake = t > Tl ? Math.sin((t - Tl) * 60) * 18 * Math.exp(-(t - Tl) * 4) : 0;
+  return <svg width={SW} height={SH}><Defs />
+    <g transform={`translate(${shake},0)`}>
+      <Glitch t={t} at={Tl}><BotDisc x={540} y={470} r={260} k={kb} /></Glitch>
+      {t > Tl ? <Stamp x={540} y={520} text="WRONG ANSWER" color={B.red} k={ks} rot={-10} size={84} /> : null}
+    </g>
+    {t > Tl ? <g opacity={ease((t - Tl - 0.3) / 0.3)}><Icon name="triangle-alert" x={470} y={860} size={140} color={B.red} /></g> : null}
+  </svg>;
+};
+
+// 2. Personal story: asked leave days -> "18" -> I uploaded the 24-day PDF myself
+export const leaveChat: React.FC<SceneProps> = ({ t, cue }) => {
+  const Ta = cue("said") - 0.1, T18b = cue("18", 2), T24 = cue("24"), Tme = cue("myself") - 0.1;
+  const typing = t > 0.6 && t < Ta; const ka = sp(t, Ta);
+  const zoom = t > T18b - 0.1 && t < T24 ? 1 + 0.1 * ease((t - T18b + 0.1) / 0.25) : 1;
+  return <svg width={SW} height={SH}><Defs />
+    <g transform={`translate(500,360) scale(${zoom}) translate(-500,-360)`}>
+      <rect x={50} y={10} width={980} height={620} rx={40} fill="#fff" filter="url(#shadow)" />
+      <ChatHeader x={50} y={10} w={980} />
+      <Bubble x={280} y={165} w={640} h={90} fill={B.blue} k={sp(t, 0.1)} ox={1}>
+        <text x={32} y={58} fontFamily={FONT} fontSize={34} fontWeight={600} fill="#fff">How many leave days do I get?</text>
+      </Bubble>
+      <Icon name="circle-user" x={930} y={172} size={78} color={B.navy} />
+      <circle cx={110} cy={330} r={30} fill="url(#gBlue)" /><Icon name="bot" x={88} y={308} size={44} color="#fff" />
+      {typing ? <g><rect x={160} y={290} width={150} height={84} rx={30} fill="#eef2f7" />{[0, 1, 2].map((i) => <circle key={i} cx={200 + i * 36} cy={332 - Math.max(0, Math.sin(t * 9 - i)) * 10} r={10} fill="#94a3b8" />)}</g> : null}
+      {t > Ta ? <Bubble x={160} y={285} w={700} h={130} fill="#f1f5f9" k={ka}>
+        <text x={34} y={82} fontFamily={FONT} fontSize={38} fontWeight={600} fill={B.ink}>You get <tspan fontWeight={900} fontSize={64} fill={B.red}>18 days</tspan> per year.</text>
+      </Bubble> : null}
+    </g>
+    {t > T24 - 0.1 ? <PdfCard x={50} y={700} w={980} name="HR_Policy_v2.pdf" l1="Annual leave: 24 days" l2="New policy · effective Dec 1" foot="uploaded by Mitesh · yesterday 6:42 pm" color={B.blue} k={sp(t, T24 - 0.1, 10, 220)} /> : null}
+    {t > Tme ? <g transform={`translate(890,640) scale(${sp(t, Tme, 9, 240)})`}><circle r={62} fill={B.red} /><Icon name="circle-x" x={-50} y={-50} size={100} color="#fff" /></g> : null}
+  </svg>;
+};
+
+// 3. "So... do I need to retrain the AI?"
+export const retrainQ: React.FC<SceneProps> = ({ t }) => {
+  const k = sp(t, 0.05, 11, 150);
+  return <svg width={SW} height={SH}><Defs />
+    <g transform={`translate(540,500) scale(${k}) rotate(${Math.sin(t * 5) * 4})`}>
+      <circle r={300} fill={B.violet} opacity={0.1} /><circle r={250} fill={B.navy} filter="url(#shadow)" />
+      <Icon name="brain-circuit" x={-150} y={-160} size={300} color={B.violet} />
+      <g transform={`translate(170,-170) rotate(${t * 140})`}><Icon name="refresh-cw" x={-55} y={-55} size={110} color={B.amber} /></g>
+    </g>
+    <g transform={`translate(540,880) scale(${sp(t, 0.35, 10, 200)})`}>
+      <rect x={-200} y={-55} width={400} height={110} rx={55} fill={B.amber} /><text y={22} textAnchor="middle" fontFamily={FONT} fontWeight={900} fontSize={60} fill="#fff">RETRAIN?</text>
+    </g>
+  </svg>;
+};
+
+// 4. Three separate places: brain (weights) / library (index) / desk (context)
+export const threePlaces: React.FC<SceneProps> = ({ t, cue }) => {
+  const Tb = cue("brain") - 0.15, Tl = cue("library") - 0.15, Td = cue("desk") - 0.15;
+  return <svg width={SW} height={SH}><Defs />
+    <Card3 y={20} icon="brain-circuit" color={B.violet} title="Model weights" sub="the brain · learned in training" on={ease((t - Tb) / 0.3)} lock={ease((t - Td - 0.6) / 0.3)} status={t > Td + 0.6 ? "a PDF never changes this" : undefined} />
+    <Card3 y={380} icon="database" color={B.blue} title="Vector index" sub="the library · your documents" on={ease((t - Tl) / 0.3)} />
+    <Card3 y={740} icon="file-text" color={B.cyan} title="Context" sub="the pages on the desk · per question" on={ease((t - Td) / 0.3)} />
+  </svg>;
+};
+
+// 5. Uploading a PDF doesn't update the library: storage has v2, index still serves v1
+export const notSynced: React.FC<SceneProps> = ({ t, cue }) => {
+  const Tu = 0.1, Tb = cue("update") - 0.1, To = cue("old") - 0.2;
+  const drop = ease((t - Tu) / 0.5);
+  return <svg width={SW} height={SH}><Defs />
+    <g transform={`translate(40,60)`}>
+      <rect width={440} height={460} rx={36} fill="#fff" filter="url(#shadow)" />
+      <Icon name="folder" x={30} y={26} size={70} color={B.amber} /><text x={118} y={74} fontFamily={MONO} fontWeight={700} fontSize={32} fill={B.ink}>storage/</text>
+      <image href={PDF()} x={150} y={130 + (1 - drop) * -300} width={140} height={172} opacity={drop} />
+      <text x={220} y={350} textAnchor="middle" fontFamily={MONO} fontWeight={700} fontSize={26} fill={B.blue}>HR_Policy_v2.pdf</text>
+      {drop >= 1 ? <g><Icon name="circle-check" x={170} y={372} size={44} color={GREEN} /><text x={222} y={404} fontFamily={FONT} fontWeight={800} fontSize={26} fill={GREEN}>saved</text></g> : null}
+    </g>
+    <g transform={`translate(600,60)`}>
+      <rect width={440} height={460} rx={36} fill={B.navy} filter="url(#shadow)" />
+      <Icon name="database" x={30} y={26} size={70} color={B.cyan} /><text x={118} y={74} fontFamily={FONT} fontWeight={800} fontSize={32} fill="#fff">Vector index</text>
+      {["Annual leave: 18 days", "Sick leave policy", "Holiday calendar"].map((s, i) => { const hot = i === 0 && t > To;
+        return <g key={i}><rect x={28} y={120 + i * 105} width={384} height={86} rx={18} fill={hot ? B.amber : "#1e293b"} stroke={hot ? "#fff" : "#334155"} strokeWidth={3} />
+          <text x={48} y={152 + i * 105} fontFamily={MONO} fontSize={20} fontWeight={700} fill={hot ? B.navy : "#94a3b8"}>{i === 0 ? "v1 · OLD" : "chunk"}</text>
+          <text x={48} y={186 + i * 105} fontFamily={FONT} fontSize={26} fontWeight={800} fill={hot ? B.navy : "#e2e8f0"}>{s}</text></g>; })}
+    </g>
+    <path d="M480,290 L600,290" stroke={t > Tb ? B.red : B.grey} strokeWidth={6} strokeDasharray="14 12" />
+    {t > Tb ? <g transform={`translate(540,290) scale(${sp(t, Tb, 9, 240)})`}><circle r={44} fill={B.red} /><Icon name="circle-x" x={-34} y={-34} size={68} color="#fff" /></g> : null}
+    {t > Tb ? <g transform={`translate(540,640) scale(${sp(t, Tb + 0.15)})`}><rect x={-230} y={-50} width={460} height={100} rx={50} fill={B.red} /><text y={18} textAnchor="middle" fontFamily={FONT} fontWeight={900} fontSize={50} fill="#fff">NOT SYNCED</text></g> : null}
+    {t > To ? <g opacity={ease((t - To) / 0.3)}>
+      <g transform="translate(540,830)"><rect x={-360} y={-60} width={720} height={120} rx={30} fill="#fff" filter="url(#shadow)" /><Icon name="search" x={-330} y={-38} size={76} color={B.violet} />
+        <text x={-235} y={-6} fontFamily={FONT} fontWeight={800} fontSize={30} fill={B.ink}>search: leave days</text><text x={-235} y={34} fontFamily={FONT} fontWeight={700} fontSize={28} fill={B.amber}>→ found "18 days" (old)</text></g>
+      <path d="M720,770 C760,700 780,620 800,560" stroke={B.amber} strokeWidth={6} fill="none" strokeDasharray="10 8" />
+    </g> : null}
+  </svg>;
+};
+
+// 6. Sync pipeline: detect -> extract -> chunk -> embed (same model) -> update index
+export const syncPipeline: React.FC<SceneProps> = ({ t, cue }) => {
+  const steps = [["detect", "file-search", "Detect the change", "HR_Policy_v2.pdf modified"], ["extract", "file-text", "Extract text", "text + tables + headings"], ["chunk", "scissors", "Chunk", "split into passages"], ["embed", "brain-circuit", "Embed", "same embedding model · not retrained"], ["update", "database", "Update the index", "upsert new chunks"]] as const;
+  return <svg width={SW} height={SH}><Defs />
+    <Stage n="↻" text="SYNC PIPELINE" color={B.cyan} t={t} />
+    <line x1={130} x2={130} y1={150} y2={150 + 4 * 190} stroke="#cbd5e1" strokeWidth={6} />
+    {steps.map(([w, icon, title, sub], i) => { const at = cue(w) - 0.12, k = ease((t - at) / 0.3), done = t > at + 0.35;
+      return <g key={i} transform={`translate(${(1 - k) * 60},0)`} opacity={0.3 + 0.7 * k}>
+        <rect x={40} y={90 + i * 190} width={1000} height={160} rx={30} fill="#fff" stroke={k > 0.5 ? B.cyan : "#e2e8f0"} strokeWidth={4} filter="url(#shadow)" />
+        <circle cx={130} cy={170 + i * 190} r={58} fill={k > 0.5 ? B.cyan : "#e2e8f0"} /><Icon name={icon} x={92} y={132 + i * 190} size={76} color="#fff" />
+        <text x={220} y={160 + i * 190} fontFamily={FONT} fontWeight={900} fontSize={44} fill={B.ink}>{title}</text>
+        <text x={220} y={206 + i * 190} fontFamily={FONT} fontWeight={600} fontSize={28} fill={i === 3 ? B.violet : B.grey}>{sub}</text>
+        {done ? <g transform={`translate(960,${170 + i * 190}) scale(${sp(t, at + 0.35, 10, 220)})`}><circle r={36} fill={GREEN} /><Icon name="circle-check" x={-28} y={-28} size={56} color="#fff" /></g> : null}
+      </g>; })}
+  </svg>;
+};
+
+// 7. The trap: old + new chunks both retrieved -> conflicting evidence
+export const conflict: React.FC<SceneProps> = ({ t, cue }) => {
+  const Tb = cue("both") - 0.15; const k1 = sp(t, 0.1), k2 = sp(t, Tb), fl = t > Tb + 0.4;
+  const jit = fl ? Math.sin(t * 50) * 6 : 0;
+  return <svg width={SW} height={SH}><Defs />
+    <text x={540} y={50} textAnchor="middle" fontFamily={FONT} fontWeight={800} fontSize={30} fill={B.grey}>Retrieved results for "leave days"</text>
+    <g transform={`translate(40,90) scale(${k1})`}><rect width={470} height={300} rx={30} fill="#fff" stroke={B.amber} strokeWidth={5} filter="url(#shadow)" />
+      <text x={30} y={56} fontFamily={MONO} fontWeight={700} fontSize={24} fill={B.amber}>CHUNK 1 · OLD POLICY</text><text x={30} y={150} fontFamily={FONT} fontWeight={900} fontSize={64} fill={B.ink}>18 days</text>
+      <image href={PDF()} x={30} y={190} width={58} height={72} /><text x={100} y={236} fontFamily={MONO} fontWeight={700} fontSize={24} fill={B.grey}>HR_Policy_v1.pdf</text></g>
+    {t > Tb ? <g transform={`translate(570,90) scale(${k2})`}><rect width={470} height={300} rx={30} fill="#fff" stroke={GREEN} strokeWidth={5} filter="url(#shadow)" />
+      <text x={30} y={56} fontFamily={MONO} fontWeight={700} fontSize={24} fill={GREEN}>CHUNK 2 · NEW POLICY</text><text x={30} y={150} fontFamily={FONT} fontWeight={900} fontSize={64} fill={B.ink}>24 days</text>
+      <image href={PDF()} x={30} y={190} width={58} height={72} /><text x={100} y={236} fontFamily={MONO} fontWeight={700} fontSize={24} fill={B.grey}>HR_Policy_v2.pdf</text></g> : null}
+    {fl ? <path d="M555,120 L515,240 L560,240 L515,370" stroke={B.amber} strokeWidth={12} fill="none" strokeLinejoin="round" opacity={0.6 + Math.sin(t * 30) * 0.4} /> : null}
+    {t > Tb ? <g>{[0, 1].map((i) => <path key={i} d={`M${i ? 805 : 275},390 C${i ? 805 : 275},520 540,520 540,600`} stroke={i ? GREEN : B.amber} strokeWidth={6} fill="none" strokeDasharray="12 10" strokeDashoffset={-t * 60} />)}</g> : null}
+    <g transform={`translate(${540 + jit},760) scale(${sp(t, 0.2)})`}>
+      <circle r={160} fill={fl ? B.red : B.blue} opacity={0.12} /><circle r={130} fill={fl ? B.red : "url(#gBlue)"} filter="url(#shadow)" />
+      <Icon name="sparkles" x={-62} y={-80} size={124} color="#fff" /><text y={82} textAnchor="middle" fontFamily={FONT} fontWeight={900} fontSize={40} fill="#fff">LLM</text>
+      {fl ? <text x={150} y={-90} fontFamily={FONT} fontWeight={900} fontSize={110} fill={B.amber}>?</text> : null}
+    </g>
+    {fl ? <Stamp x={540} y={1030} text="CONFLICT" color={B.red} k={sp(t, Tb + 0.4, 9, 260)} rot={-4} size={72} /> : null}
+  </svg>;
+};
+
+// 8. Fix: version + effective date metadata, filter to the current version, archive the old one
+export const versionFilter: React.FC<SceneProps> = ({ t, cue }) => {
+  const Tf = cue("filter") - 0.15, Tc = cue("current") - 0.1;
+  const json = ['{', '  "document_id": "HR-POLICY",', '  "version": 2,', '  "effective_from": "2026-12-01",', '  "is_current": true', '}'];
+  let budget = Math.floor(Math.max(0, t - 0.05) * 70);
+  const p1 = ease((t - Tc) / 0.7), p2 = ease((t - Tc - 0.1) / 0.7);
+  return <svg width={SW} height={SH}><Defs />
+    <rect x={40} y={10} width={1000} height={360} rx={30} fill={B.navy} filter="url(#shadow)" />
+    {json.map((l, i) => { const s = l.slice(0, Math.max(0, budget)); budget -= l.length + 2; const hot = i >= 2 && i <= 4;
+      return <text key={i} x={80} y={70 + i * 52} fontFamily={MONO} fontWeight={700} fontSize={34} fill={hot ? B.cyan : "#e2e8f0"} style={{ whiteSpace: "pre" }}>{s}</text>; })}
+    <g opacity={ease((t - Tf) / 0.3)}>
+      <path d="M300,440 L780,440 L600,640 L600,760 L480,800 L480,640 Z" fill="#fff" stroke={B.blue} strokeWidth={6} strokeLinejoin="round" filter="url(#shadow)" />
+      <Icon name="funnel" x={490} y={470} size={100} color={B.blue} />
+      <text x={540} y={420} textAnchor="middle" fontFamily={MONO} fontWeight={700} fontSize={28} fill={B.blue}>is_current = true</text>
+    </g>
+    <g transform={`translate(${130 - p1 * 50},${470 + p1 * 420})`} opacity={t > Tf ? 1 : 0}>
+      <rect width={250} height={110} rx={22} fill="#fff" stroke={B.grey} strokeWidth={3} opacity={1 - p1 * 0.4} />
+      <text x={20} y={46} fontFamily={MONO} fontWeight={700} fontSize={24} fill={B.grey}>v1 · 18 days</text><text x={20} y={86} fontFamily={FONT} fontWeight={800} fontSize={24} fill={B.grey}>{p1 > 0.9 ? "archived · history" : "superseded"}</text>
+    </g>
+    {p1 > 0.9 ? <g transform="translate(110,1010)"><Icon name="archive" x={0} y={0} size={70} color={B.grey} /><text x={84} y={48} fontFamily={FONT} fontWeight={800} fontSize={28} fill={B.grey}>ARCHIVE</text></g> : null}
+    <g transform={`translate(${700 - p2 * 285},${470 + p2 * 380})`} opacity={t > Tf ? 1 : 0}>
+      <rect width={250} height={110} rx={22} fill="#fff" stroke={GREEN} strokeWidth={4} filter="url(#shadow)" />
+      <text x={20} y={46} fontFamily={MONO} fontWeight={700} fontSize={24} fill={GREEN}>v2 · 24 days</text><text x={20} y={86} fontFamily={FONT} fontWeight={800} fontSize={24} fill={GREEN}>current ✓</text>
+    </g>
+  </svg>;
+};
+
+// 9. Proof: same question, same model -> 24 days with the new source
+export const proofChat: React.FC<SceneProps> = ({ t }) => {
+  const ka = sp(t, 0.5), kc = sp(t, 1.4), kb = sp(t, 1.9);
+  return <svg width={SW} height={SH}><Defs />
+    <rect x={50} y={10} width={980} height={820} rx={40} fill="#fff" filter="url(#shadow)" />
+    <ChatHeader x={50} y={10} w={980} />
+    <Bubble x={280} y={165} w={640} h={90} fill={B.blue} k={sp(t, 0.05)} ox={1}><text x={32} y={58} fontFamily={FONT} fontSize={34} fontWeight={600} fill="#fff">How many leave days do I get?</text></Bubble>
+    <Icon name="circle-user" x={930} y={172} size={78} color={B.navy} />
+    <circle cx={110} cy={330} r={30} fill="url(#gBlue)" /><Icon name="bot" x={88} y={308} size={44} color="#fff" />
+    <Bubble x={160} y={285} w={800} h={150} fill="#ecfdf5" stroke={GREEN} k={ka}>
+      <text x={34} y={90} fontFamily={FONT} fontSize={38} fontWeight={600} fill={B.ink}>You get <tspan fontWeight={900} fontSize={64} fill={GREEN}>24 days</tspan> from Dec 1.</text>
+    </Bubble>
+    <g transform={`translate(160,470) scale(${kc})`} opacity={cl(kc * 1.5)}>
+      <rect width={620} height={92} rx={26} fill="#eff6ff" stroke={B.blue} strokeWidth={3} /><image href={PDF()} x={20} y={14} width={52} height={64} />
+      <text x={90} y={58} fontFamily={FONT} fontWeight={800} fontSize={30} fill={B.blue} textDecoration="underline">HR_Policy_v2.pdf · page 3</text>
+      <Icon name="external-link" x={565} y={26} size={40} color={B.blue} />
+    </g>
+    <g transform={`translate(540,940) scale(${kb})`}><rect x={-380} y={-60} width={760} height={120} rx={60} fill={B.navy} /><Icon name="lock" x={-350} y={-38} size={76} color="#fff" />
+      <text x={30} y={14} textAnchor="middle" fontFamily={FONT} fontWeight={800} fontSize={36} fill="#fff">model weights unchanged ✓</text></g>
+  </svg>;
+};
+
+// 10. Takeaway: RAG updates knowledge, not the model
+export const takeaway: React.FC<SceneProps> = ({ t, cue }) => {
+  const Tk = cue("knowledge") - 0.2;
+  return <svg width={SW} height={SH}><Defs />
+    <Card3 y={120} icon="brain-circuit" color={B.violet} title="Model weights" sub="same model as before" on={1} lock={1} status="unchanged" />
+    <Card3 y={520} icon="database" color={B.blue} title="Vector index" sub="v2 chunks · v1 archived" on={1} glow={ease((t - Tk) / 0.4)} status={t > Tk ? "updated ✓" : undefined} />
+  </svg>;
+};
+
+// 11. Cliffhanger: the HR handbook (tables, scans) -> an answer with a number that isn't in the PDF -> Episode 4
+export const handbookCliff: React.FC<SceneProps> = ({ t, cue }) => {
+  const Th = cue("handbook") - 0.3, Ta = cue("answered") - 0.1, Tn = cue("isn't") - 0.1, Te = cue("Episode") - 0.2;
+  const kh = sp(t, Th, 11, 160), ka = sp(t, Ta), kn = sp(t, Tn, 10, 220), dark = ease((t - Te) / 0.35);
+  const kf = sp(t, 0.02, 10, 200), ff = 1 - ease((t - Th + 0.2) / 0.3);
+  return <svg width={SW} height={SH}><Defs />
+    {ff > 0 ? <g transform={`translate(540,420) scale(${kf})`} opacity={ff}><circle r={190} fill={GREEN} opacity={0.15} /><circle r={150} fill={GREEN} /><Icon name="circle-check" x={-110} y={-110} size={220} color="#fff" />
+      <text y={260} textAnchor="middle" fontFamily={FONT} fontWeight={900} fontSize={64} fill={GREEN}>24 DAYS · FIXED</text></g> : null}
+    <g transform={`translate(540,230) scale(${kh}) rotate(${-4 + Math.sin(t * 2) * 1})`}>
+      {[3, 2, 1, 0].map((i) => <rect key={i} x={-300 + i * 12} y={-190 + i * 12} width={600} height={380} rx={14} fill={i ? "#e2e8f0" : "#fff"} stroke="#cbd5e1" strokeWidth={3} />)}
+      <image href={PDF()} x={-270} y={-160} width={80} height={98} />
+      <text x={-170} y={-108} fontFamily={MONO} fontWeight={700} fontSize={28} fill={B.ink}>HR_Handbook_2026.pdf</text>
+      <text x={-170} y={-70} fontFamily={FONT} fontWeight={700} fontSize={24} fill={B.grey}>214 pages · tables · scans</text>
+      {[0, 1, 2, 3].map((r) => [0, 1, 2].map((c) => <rect key={`${r}${c}`} x={-260 + c * 170} y={-20 + r * 44} width={160} height={36} fill={r ? "#fff" : B.blue} stroke="#94a3b8" strokeWidth={2} />))}
+      <g transform="translate(160,40) rotate(9)"><rect x={-60} y={-80} width={150} height={190} fill="#d6d3cd" stroke="#a8a29e" strokeWidth={3} />{[0, 1, 2, 3, 4].map((i) => <rect key={i} x={-45} y={-60 + i * 30} width={110 - (i % 2) * 30} height={10} fill="#78716c" opacity={0.6} />)}<text x={15} y={100} textAnchor="middle" fontFamily={MONO} fontSize={18} fill="#57534e">scan.jpg</text></g>
+    </g>
+    {t > Ta ? <Bubble x={160} y={520} w={760} h={130} fill="#fff5f5" stroke={B.red} k={ka}>
+      <text x={34} y={84} fontFamily={FONT} fontSize={38} fontWeight={600} fill={B.ink}>You get <tspan fontWeight={900} fontSize={64} fill={B.red}>31 days</tspan> per year.</text>
+    </Bubble> : null}
+    {t > Ta ? <g><circle cx={110} cy={570} r={30} fill="url(#gBlue)" /><Icon name="bot" x={88} y={548} size={44} color="#fff" /></g> : null}
+    {t > Tn ? <Glitch t={t} at={Tn}><g transform={`translate(540,790) scale(${kn})`}>
+      <rect x={-400} y={-70} width={800} height={140} rx={30} fill="#fff" stroke={B.red} strokeWidth={4} filter="url(#shadow)" />
+      <Icon name="search" x={-370} y={-42} size={84} color={B.red} />
+      <text x={-260} y={-8} fontFamily={MONO} fontWeight={700} fontSize={32} fill={B.ink}>find in PDF: "31"</text>
+      <text x={-260} y={40} fontFamily={FONT} fontWeight={900} fontSize={36} fill={B.red}>0 matches</text>
+    </g></Glitch> : null}
+    {dark > 0 ? <g opacity={dark}>
+      <rect width={SW} height={SH} fill={B.navy} />
+      <g transform={`translate(540,470) scale(${sp(t, Te + 0.15, 10, 160)})`}>
+        <Icon name="spreadsheet" x={-120} y={-260} size={240} color={B.amber} />
+        <text y={110} textAnchor="middle" fontFamily={FONT} fontWeight={900} fontSize={96} fill="#fff">EPISODE 04</text>
+        <text y={180} textAnchor="middle" fontFamily={FONT} fontWeight={800} fontSize={40} fill={B.amber} letterSpacing={6}>COMING NEXT</text>
+        <text y={260} textAnchor="middle" fontFamily={FONT} fontWeight={600} fontSize={34} fill="#94a3b8">where did "31" come from?</text>
+      </g>
+    </g> : null}
+  </svg>;
+};
+
+export const SCENES: Record<string, React.FC<SceneProps>> = { pdfSwarm, pdfCrash, chatFail, ingest, embed, vectorDb, retrieve, generate, chatAnswer , liedStamp, leaveChat, retrainQ, threePlaces, notSynced, syncPipeline, conflict, versionFilter, proofChat, takeaway, handbookCliff };

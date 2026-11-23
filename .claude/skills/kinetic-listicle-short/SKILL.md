@@ -62,6 +62,10 @@ For concept/process explainers (not "N tools" lists) use `{"kind": "scene", "sce
 - Word-synced header (the spoken lines, top 3-24 %) + a code-drawn animation on a 1080x1140 canvas (from y 470) from `src/scenes.tsx`.
 - Scenes receive `t` (s since section start), `d` (length) and `cue("word")` = when that word is spoken, so every visual beat lands on its word (counter hits 500 on "500", the bot fails on "fails", 5 dots light on "closest").
 - Library v1 (AI/RAG): `pdfCrash` (hook: 500 PDFs flood in + counter, the bot swallows them, crashes: red X, error dialog "context window exceeded", PDFs spill; cues 500/chatbot/crashed/window), `pdfSwarm` (500 PDF icons flood + counter + confused bot), `chatFail` (chat UI, failed answer, training-data checklist), `ingest` (PDF pile -> Extract text -> scissors -> chunk cards, "1 · INGESTION · RUNS ONCE"), `embed` (chunks -> embedding model -> vectors -> particles cluster by meaning), `vectorDb` (cylinder fills, chunk counter, topic tags), `retrieve` ("2 · QUERY TIME", question -> query vector -> radar search over a dot grid -> top-5 cards with scores), `generate` (5 chunks -> prompt -> LLM -> streamed grounded answer, "model weights unchanged", "500 PDFs never sent"), `chatAnswer` (polished chat, citation chip, cursor click, cited PDF page with highlight).
+- Library v2 (story episode, Reel 04): `liedStamp` (shock stamp + glitch), `leaveChat` (personal chat with a wrong number + the uploaded PDF), `retrainQ`, `threePlaces` (weights / index / context cards, lock on the brain), `notSynced` (storage vs index, NOT SYNCED, search hits the old chunk), `syncPipeline` (5 steps tick on their words), `conflict` (old vs new chunk -> LLM CONFLICT), `versionFilter` (metadata JSON types itself, funnel, archive), `proofChat`, `takeaway`, `handbookCliff` (FIXED badge -> handbook -> wrong number -> "0 matches" -> EPISODE 04 card). Helpers: `Stamp`, `Glitch`, `PdfCard`, `Card3`.
+- Episodes: open with a first-person shock line in <= 3 s ("The chatbot I built just lied to me."), tell it as a personal story, end with an unresolved new problem + "Episode N" card (open loop), then follow.
+- Every scene sits in a slow push-in + drift (SceneSection), so holds never freeze; check the change-window metric (>= 90 %).
+- Sound types: pop, tick, whoosh, chime, error, glitch, boom, riser.
 - New scenes: add a component to `scenes.tsx` + register it in `SCENES`. Rules: something moves or appears every 0.3-0.5 s; label stages so it reads muted; brand palette only; icons via `<Icon>`; shapes code-drawn when more reliable than images.
 - `sfx`: `{"word": "500", "type": "pop"}` or `{"t": 0.4, "type": "tick", "n": 10, "every": 0.16, "gain": 0.3}`; types `pop | tick | whoosh | chime | error`. `minDur` keeps a scene on screen long enough for its animation.
 - Proven: `stories/reel03-rag-500-pdfs/Reel03_500_PDFs_to_Chatbot_RAG.mp4` (45.1 s, project `c:\Projects\reel03-rag-500-pdfs`, script.json + ASSETS.md beside it).
@@ -97,6 +101,7 @@ Be explicit with the user that this is frame + signal analysis, not literal view
 - Verify with the TTS boundaries: one word = one WordBoundary ("rag" 0.32 s), spelled = one per letter.
 
 ## Gotchas
+- Pacing: Andrew +8 % reads ~2.7 words/s, +14 % ~2.9 words/s; budget ~165 words = ~60-64 s. Section tails are short unless the section has silent (say "") lines.
 - edge-tts can stall forever on a dead socket: build.py wraps each request in `asyncio.wait_for(..., 45)` and retries; run long builds with `timeout 600`.
 - `sectionLines()` in Listicle.tsx and `lines()` in build.py must list tokens in the same order (ordinal, badge, head, sub, bullets / blocks). Change both or timing drifts.
 - Never call hooks inside `.map` branches (TextLine computes `now` once at the top).

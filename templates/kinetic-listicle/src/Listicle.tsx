@@ -262,7 +262,9 @@ const SceneSection: React.FC<{ s: Section; times: number[]; t0: number; t1: numb
   return (
     <AbsoluteFill style={{ fontFamily: FONT }}>
       <div style={{ position: "absolute", top: H * 0.03, left: 50, right: 50 }}>{L.map((x, i) => <TextLine key={i} line={x.line} times={times} start={st[i]} />)}</div>
-      <div style={{ position: "absolute", top: 470, left: 0, width: SW, height: SH }}>{Scene ? <Scene t={now - t0} d={t1 - t0} cue={cue} /> : null}</div>
+      <div style={{ position: "absolute", top: 470, left: 0, width: SW, height: SH,
+        /* slow push-in + drift so holds never freeze (target: visible change in >= 90 % of 0.4 s windows) */
+        transform: `scale(${1 + 0.05 * Math.min(1, (now - t0) / Math.max(1, t1 - t0))}) translate(${Math.sin((now - t0) * 0.9) * 6}px, ${Math.cos((now - t0) * 0.7) * 5}px)`, transformOrigin: "50% 45%" }}>{Scene ? <Scene t={now - t0} d={t1 - t0} cue={cue} /> : null}</div>
     </AbsoluteFill>
   );
 };
