@@ -1,0 +1,809 @@
+{
+ "brand": "@MiteshJourney",
+ "brandLogo": "brand/logos/logo.png",
+ "watermarkLogo": "",
+ "voice": "en-US-AndrewNeural",
+ "rate": "+18%",
+ "pitch": "+0Hz",
+ "accent": "#2563EB",
+ "theme": {
+  "bar": "#0B1220",
+  "sparkle": "#2563EB",
+  "blue": "#2563EB",
+  "cyan": "#06B6D4",
+  "amber": "#F59E0B",
+  "violet": "#8B5CF6"
+ },
+ "pronounce": {
+  "OCR": "O C R",
+  "TableFormer": "Table Former",
+  "DoclingDocument": "Docling document"
+ },
+ "_source": "Reel 05 / Episode 04 (stories/reel05-docling/SCRIPT.md v2). Facts: Docling docs (architecture, DoclingDocument, PDF pipeline options: layout, reading order, OCR engines, TableFormer, provenance; quickstart DocumentConverter().convert().document.export_to_markdown()). Illustrative: 1,470 days / 147 people, HR invite, 31 vs 21 carry-forward, smudged scan, leave table values, 500-character chunking failure.",
+ "sections": [
+  {
+   "kind": "scene",
+   "scene": "leaveCounter",
+   "minDur": 3.0,
+   "sfx": [
+    {
+     "t": 0.15,
+     "type": "tick",
+     "n": 14,
+     "every": 0.12,
+     "gain": 0.3
+    },
+    {
+     "word": "leave",
+     "type": "boom",
+     "offset": -0.1
+    },
+    {
+     "word": "leave",
+     "type": "glitch",
+     "offset": -0.05
+    }
+   ],
+   "blocks": [
+    [
+     {
+      "t": "My chatbot just gave away"
+     }
+    ],
+    [
+     {
+      "t": "1,500 days",
+      "s": "huge",
+      "c": "#E5252A",
+      "say": "fifteen hundred days"
+     }
+    ],
+    [
+     {
+      "t": "of free leave.",
+      "s": "bar",
+      "c": "#E5252A"
+     }
+    ]
+   ]
+  },
+  {
+   "kind": "scene",
+   "scene": "channelPost",
+   "sfx": [
+    {
+     "t": 0.1,
+     "type": "pop"
+    },
+    {
+     "t": 0.5,
+     "type": "tick",
+     "n": 8,
+     "every": 0.1,
+     "gain": 0.25
+    },
+    {
+     "word": "21",
+     "type": "error",
+     "offset": -0.1
+    },
+    {
+     "word": "why",
+     "type": "pop",
+     "offset": -0.2
+    },
+    {
+     "word": "why",
+     "type": "boom",
+     "offset": 0.0
+    }
+   ],
+   "blocks": [
+    [
+     {
+      "t": "It told"
+     },
+     {
+      "t": "147 people",
+      "s": "big",
+      "say": "a hundred and forty-seven people"
+     }
+    ],
+    [
+     {
+      "t": "they can carry forward"
+     },
+     {
+      "t": "31 days.",
+      "s": "big",
+      "c": "#E5252A",
+      "say": "thirty-one days."
+     }
+    ],
+    [
+     {
+      "t": "The handbook says"
+     },
+     {
+      "t": "21.",
+      "s": "big",
+      "c": "#16A34A",
+      "say": "twenty-one."
+     }
+    ],
+    [
+     {
+      "t": "And HR wants to know"
+     },
+     {
+      "t": "why.",
+      "s": "big",
+      "c": "amber"
+     }
+    ]
+   ]
+  },
+  {
+   "kind": "scene",
+   "scene": "zeroMatches",
+   "minDur": 2.2,
+   "sfx": [
+    {
+     "word": "PDF",
+     "type": "error",
+     "offset": 0.1
+    }
+   ],
+   "blocks": [
+    [
+     {
+      "t": "31",
+      "s": "big",
+      "c": "#E5252A",
+      "say": "Thirty-one"
+     },
+     {
+      "t": "isn't even in the PDF."
+     }
+    ]
+   ]
+  },
+  {
+   "kind": "scene",
+   "scene": "scanSmudge",
+   "sfx": [
+    {
+     "word": "scan",
+     "type": "whoosh",
+     "offset": -0.2
+    },
+    {
+     "word": "pixels",
+     "type": "glitch",
+     "offset": -0.05
+    },
+    {
+     "word": "smudged",
+     "type": "tick",
+     "n": 3,
+     "every": 0.08
+    },
+    {
+     "word": "three",
+     "type": "error",
+     "offset": -0.05
+    }
+   ],
+   "blocks": [
+    [
+     {
+      "t": "It came from"
+     },
+     {
+      "t": "page three:",
+      "s": "big",
+      "c": "blue"
+     },
+     {
+      "t": "a scan."
+     }
+    ],
+    [
+     {
+      "t": "Just pixels.",
+      "s": "big"
+     }
+    ],
+    [
+     {
+      "t": "My parser guessed,"
+     }
+    ],
+    [
+     {
+      "t": "and read a smudged"
+     },
+     {
+      "t": "2",
+      "s": "big",
+      "c": "#16A34A",
+      "say": "two"
+     },
+     {
+      "t": "as a"
+     },
+     {
+      "t": "3.",
+      "s": "big",
+      "c": "#E5252A",
+      "say": "three."
+     }
+    ]
+   ]
+  },
+  {
+   "kind": "scene",
+   "scene": "brokenExtract",
+   "sfx": [
+    {
+     "word": "columns",
+     "type": "whoosh",
+     "offset": -0.1
+    },
+    {
+     "word": "mixed",
+     "type": "glitch",
+     "offset": -0.05
+    },
+    {
+     "word": "table",
+     "type": "whoosh",
+     "offset": -0.1
+    },
+    {
+     "word": "rows",
+     "type": "error",
+     "offset": -0.05
+    }
+   ],
+   "blocks": [
+    [
+     {
+      "t": "Two columns got"
+     },
+     {
+      "t": "mixed.",
+      "s": "big",
+      "c": "#E5252A"
+     }
+    ],
+    [
+     {
+      "t": "The leave table"
+     },
+     {
+      "t": "lost its rows.",
+      "s": "big",
+      "c": "#E5252A"
+     }
+    ]
+   ]
+  },
+  {
+   "kind": "scene",
+   "scene": "doclingIntake",
+   "sfx": [
+    {
+     "word": "Docling",
+     "type": "whoosh",
+     "offset": -0.2
+    },
+    {
+     "word": "Docling",
+     "type": "pop",
+     "offset": 0.1
+    },
+    {
+     "word": "structure",
+     "type": "chime"
+    }
+   ],
+   "blocks": [
+    [
+     {
+      "t": "So I switched to"
+     },
+     {
+      "t": "Docling.",
+      "s": "big",
+      "c": "blue"
+     }
+    ],
+    [
+     {
+      "t": "It rebuilds"
+     },
+     {
+      "t": "the structure",
+      "s": "big",
+      "c": "cyan"
+     },
+     {
+      "t": "first."
+     }
+    ]
+   ]
+  },
+  {
+   "kind": "scene",
+   "scene": "layoutBoxes",
+   "sfx": [
+    {
+     "word": "title",
+     "type": "pop",
+     "offset": -0.05
+    },
+    {
+     "word": "paragraph",
+     "type": "pop",
+     "offset": -0.05
+    },
+    {
+     "word": "table",
+     "type": "pop",
+     "offset": -0.05
+    },
+    {
+     "word": "picture",
+     "type": "pop",
+     "offset": -0.05
+    }
+   ],
+   "blocks": [
+    [
+     {
+      "t": "Layout:",
+      "s": "big",
+      "c": "violet"
+     },
+     {
+      "t": "it boxes every"
+     }
+    ],
+    [
+     {
+      "t": "title,",
+      "c": "violet"
+     },
+     {
+      "t": "paragraph,",
+      "c": "blue"
+     },
+     {
+      "t": "table",
+      "c": "amber"
+     },
+     {
+      "t": "and"
+     },
+     {
+      "t": "picture.",
+      "c": "cyan"
+     }
+    ]
+   ]
+  },
+  {
+   "kind": "scene",
+   "scene": "readingOrder",
+   "minDur": 2.6,
+   "sfx": [
+    {
+     "word": "left",
+     "type": "whoosh",
+     "offset": -0.1
+    },
+    {
+     "word": "right",
+     "type": "chime",
+     "offset": 0.1
+    }
+   ],
+   "blocks": [
+    [
+     {
+      "t": "Reading order:",
+      "s": "big",
+      "c": "blue"
+     }
+    ],
+    [
+     {
+      "t": "the left column,"
+     },
+     {
+      "t": "then the right.",
+      "s": "big"
+     }
+    ]
+   ]
+  },
+  {
+   "kind": "scene",
+   "scene": "ocrBeam",
+   "sfx": [
+    {
+     "word": "scanned",
+     "type": "riser",
+     "offset": -0.3
+    },
+    {
+     "word": "text",
+     "type": "tick",
+     "n": 6,
+     "every": 0.07,
+     "gain": 0.3
+    },
+    {
+     "word": "21",
+     "type": "chime",
+     "offset": -0.05
+    }
+   ],
+   "blocks": [
+    [
+     {
+      "t": "OCR",
+      "s": "big",
+      "c": "cyan"
+     },
+     {
+      "t": "on the scanned page,"
+     }
+    ],
+    [
+     {
+      "t": "so the pixels become real text:"
+     }
+    ],
+    [
+     {
+      "t": "21.",
+      "s": "huge",
+      "c": "#16A34A",
+      "say": "twenty-one."
+     }
+    ]
+   ]
+  },
+  {
+   "kind": "scene",
+   "scene": "tableFormer",
+   "sfx": [
+    {
+     "word": "rows",
+     "type": "tick",
+     "n": 6,
+     "every": 0.08,
+     "gain": 0.35
+    },
+    {
+     "word": "columns",
+     "type": "tick",
+     "n": 6,
+     "every": 0.08,
+     "gain": 0.35
+    },
+    {
+     "word": "full-time",
+     "type": "chime",
+     "offset": -0.05
+    }
+   ],
+   "blocks": [
+    [
+     {
+      "t": "Then"
+     },
+     {
+      "t": "TableFormer",
+      "s": "big",
+      "c": "amber"
+     },
+     {
+      "t": "rebuilds rows and columns,"
+     }
+    ],
+    [
+     {
+      "t": "so"
+     },
+     {
+      "t": "24",
+      "s": "big",
+      "c": "blue",
+      "say": "twenty-four"
+     },
+     {
+      "t": "belongs to"
+     },
+     {
+      "t": "full-time",
+      "s": "big"
+     },
+     {
+      "t": "again."
+     }
+    ]
+   ]
+  },
+  {
+   "kind": "scene",
+   "scene": "doclingTree",
+   "sfx": [
+    {
+     "word": "string",
+     "type": "error",
+     "offset": -0.05
+    },
+    {
+     "word": "DoclingDocument",
+     "type": "whoosh",
+     "offset": -0.2
+    },
+    {
+     "word": "sections",
+     "type": "pop"
+    },
+    {
+     "word": "tables",
+     "type": "pop"
+    },
+    {
+     "word": "pictures",
+     "type": "pop"
+    },
+    {
+     "word": "page",
+     "type": "chime"
+    }
+   ],
+   "blocks": [
+    [
+     {
+      "t": "Not a string:"
+     },
+     {
+      "t": "a DoclingDocument,",
+      "s": "big",
+      "c": "blue"
+     }
+    ],
+    [
+     {
+      "t": "with sections, tables, pictures,"
+     }
+    ],
+    [
+     {
+      "t": "and the"
+     },
+     {
+      "t": "page",
+      "s": "big",
+      "c": "cyan"
+     },
+     {
+      "t": "each came from."
+     }
+    ]
+   ]
+  },
+  {
+   "kind": "scene",
+   "scene": "codeCard",
+   "minDur": 3.8,
+   "sfx": [
+    {
+     "t": 0.3,
+     "type": "tick",
+     "n": 22,
+     "every": 0.09,
+     "gain": 0.22
+    },
+    {
+     "t": 2.6,
+     "type": "chime"
+    }
+   ],
+   "blocks": [
+    [
+     {
+      "t": "Three lines",
+      "s": "big",
+      "c": "blue"
+     },
+     {
+      "t": "of Python."
+     }
+    ]
+   ]
+  },
+  {
+   "kind": "scene",
+   "scene": "proofRail",
+   "sfx": [
+    {
+     "t": 0.1,
+     "type": "pop"
+    },
+    {
+     "word": "21",
+     "type": "chime",
+     "offset": -0.1
+    },
+    {
+     "word": "vector",
+     "type": "whoosh",
+     "offset": -0.1
+    },
+    {
+     "word": "chunking",
+     "type": "pop"
+    }
+   ],
+   "blocks": [
+    [
+     {
+      "t": "Now:"
+     },
+     {
+      "t": "21 days,",
+      "s": "big",
+      "c": "#16A34A",
+      "say": "twenty-one days,"
+     },
+     {
+      "t": "page three."
+     }
+    ],
+    [
+     {
+      "t": "Docling isn't your vector database;"
+     }
+    ],
+    [
+     {
+      "t": "it's the step"
+     },
+     {
+      "t": "before chunking.",
+      "s": "big",
+      "c": "cyan"
+     }
+    ]
+   ]
+  },
+  {
+   "kind": "scene",
+   "scene": "chunkCliff",
+   "sfx": [
+    {
+     "word": "chunked",
+     "type": "whoosh",
+     "offset": -0.2
+    },
+    {
+     "word": "cut",
+     "type": "glitch",
+     "offset": -0.05
+    },
+    {
+     "word": "half",
+     "type": "error"
+    },
+    {
+     "word": "24",
+     "type": "glitch",
+     "offset": -0.05
+    },
+    {
+     "word": "Why",
+     "type": "riser",
+     "offset": -1.0
+    },
+    {
+     "word": "Episode",
+     "type": "boom",
+     "offset": -0.15
+    }
+   ],
+   "blocks": [
+    [
+     {
+      "t": "Then I chunked it into"
+     },
+     {
+      "t": "500-character",
+      "s": "big",
+      "say": "five-hundred-character"
+     },
+     {
+      "t": "pieces..."
+     }
+    ],
+    [
+     {
+      "t": "the table got"
+     },
+     {
+      "t": "cut in half.",
+      "s": "big",
+      "c": "#E5252A"
+     }
+    ],
+    [
+     {
+      "t": "Now part-timers get"
+     },
+     {
+      "t": "24 days.",
+      "s": "big",
+      "c": "#E5252A",
+      "say": "twenty-four days."
+     }
+    ],
+    [
+     {
+      "t": "Why?",
+      "s": "big"
+     },
+     {
+      "t": "Episode 5.",
+      "s": "big",
+      "c": "amber",
+      "say": "Episode five."
+     }
+    ]
+   ]
+  },
+  {
+   "kind": "follow",
+   "blocks": [
+    [
+     {
+      "t": "Follow"
+     }
+    ],
+    [
+     {
+      "t": "@MiteshJourney",
+      "s": "big",
+      "c": "blue",
+      "say": "Mitesh Journey"
+     }
+    ],
+    [
+     {
+      "t": "for Episode 5.",
+      "say": "for episode five."
+     }
+    ],
+    [
+     {
+      "t": "Practical AI engineering.",
+      "s": "italic",
+      "say": ""
+     }
+    ],
+    [
+     {
+      "t": "LEARN. BUILD. AUTOMATE.",
+      "s": "bar",
+      "say": ""
+     }
+    ]
+   ]
+  }
+ ]
+}
