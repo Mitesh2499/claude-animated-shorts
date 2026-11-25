@@ -17,12 +17,17 @@ missing = [p for p in [S.get('brandLogo'), S.get('watermarkLogo')] + [sec.get('b
 if missing: raise SystemExit('Missing assets (upload them or fetch logos first): ' + ', '.join(missing))
 # posters/cards actually present (scenes draw an <image> only for these, else a drawn title card)
 _cards = os.path.join(ROOT, 'public', 'brand', 'cards')
+os.makedirs(_cards, exist_ok=True)
+_imgs = os.path.join(ROOT, S.get('imagesDir', 'images'))   # project images (scene stills, the user's files) override brand/cards
+for f in (os.listdir(_imgs) if os.path.isdir(_imgs) else []):
+    if f.lower().endswith(('.jpg', '.jpeg', '.png', '.webp')): shutil.copyfile(os.path.join(_imgs, f), os.path.join(_cards, f))
 _pm = {}
 for f in (os.listdir(_cards) if os.path.isdir(_cards) else []):
     if f.lower().endswith(('.jpg', '.jpeg', '.png', '.webp')) and not f.startswith('_p_'):
         key = os.path.splitext(f)[0].lower(); safe = '_p_' + re.sub(r'[^a-z0-9]+', '_', key) + os.path.splitext(f)[1].lower()
         shutil.copyfile(os.path.join(_cards, f), os.path.join(_cards, safe)); _pm[key] = safe
 json.dump(_pm, open(os.path.join(ROOT, 'src', 'posters.json'), 'w'))
+subprocess.run([sys.executable, '-I', os.path.join(ROOT, 'scripts', 'img_contrast.py')], check=False)   # text-on-image contrast -> src/imgstats.json
 # theSVG UI icons (brand/icons/*.svg) -> src/icons.json for <Icon name="bot" color=...> (inlined, recoloured via currentColor)
 icons = {}
 for fn in sorted(os.listdir(os.path.join(BRAND, 'icons'))) if os.path.isdir(os.path.join(BRAND, 'icons')) else []:
@@ -65,8 +70,8 @@ ENGINE = S.get('engine', 'edge')
 KOKORO_PY = S.get('kokoroPython', 'C:/Projects/voice-lab/.venv/Scripts/python.exe')
 KOKORO_SCRIPT = S.get('kokoroScript', 'C:/Projects/voice-lab/kokoro_tts.py')
 _K = {}
-def kokoro_batch(texts):
-    items = [{'text': t, 'out': os.path.join(ROOT, 'audio', 'voice', f'k{i:02d}.wav').replace(os.sep, '/')} for i, t in enumerate(texts)]
+def kokoro_batch(texts, voices=None):
+    items = [{'text': t, 'out': os.path.join(ROOT, 'audio', 'voice', f'k{i:02d}.wav').replace(os.sep, '/'), **({'voice': voices[i]} if voices and voices[i] else {})} for i, t in enumerate(texts)]
     job = {'voice': S.get('kokoroVoice', 'hm_omega'), 'lang': S.get('kokoroLang', 'h'), 'speed': S.get('kokoroSpeed', 1.0), 'whisperLang': S.get('whisperLang', 'hi'), 'items': items}
     jp = os.path.join(ROOT, 'audio', 'kokoro_job.json'); json.dump(job, open(jp, 'w', encoding='utf-8'), ensure_ascii=False)
     subprocess.run([KOKORO_PY, KOKORO_SCRIPT, jp], check=True)
@@ -98,7 +103,7 @@ async def main():
         for sec in S['sections']:
             sp_ = spans(sec); say_ = [(s['say'] if s.get('say') is not None else speak(s['t'])) for s in sp_]
             texts.append(' '.join(x for x in say_ if x).replace(' ,', ','))
-        kokoro_batch(texts)
+        kokoro_batch(texts, [sec.get('kokoroVoice') for sec in S['sections']])   # per-section voice (e.g. a presenter aside)
     out_secs, t = [], 0.0
     voice = np.zeros(int(SR * 600))
     for i, sec in enumerate(S['sections']):
@@ -179,20 +184,36 @@ def mix(voice, secs, total):
                 if kind == 'boom': tt = np.arange(int(0.9 * SR)) / SR; x = lambda: np.sin(2 * np.pi * np.cumsum(70 - 35 * tt / 0.9) / SR) * np.exp(-tt * 3.5) * 0.7
                 if kind == "clack": tt = np.arange(int(0.07 * SR)) / SR; x = lambda: (bp(rng.standard_normal(len(tt)), 1800, 6500) * 0.5 + np.sin(2 * np.pi * 900 * tt)) * np.exp(-tt * 90) * 0.35
                 if kind == "rewind": tt = np.arange(int(1.0 * SR)) / SR; x = lambda: np.sin(2 * np.pi * np.cumsum(1400 - 1100 * tt) / SR * 3) * (np.sin(2 * np.pi * 18 * tt) > -0.3) * np.exp(-tt * 1.5) * 0.12
+                if kind == "heartbeat": tt = np.arange(int(0.7 * SR)) / SR; x = lambda: (np.sin(2 * np.pi * 52 * tt) * np.exp(-tt * 22) + np.sin(2 * np.pi * 46 * np.clip(tt - 0.24, 0, None)) * np.exp(-np.clip(tt - 0.24, 0, None) * 20) * (tt > 0.24)) * 0.9
+                if kind == "shutter": tt = np.arange(int(0.12 * SR)) / SR; x = lambda: bp(rng.standard_normal(len(tt)), 2000, 9000) * (np.exp(-tt * 70) + 0.6 * np.exp(-np.clip(tt - 0.05, 0, None) * 90) * (tt > 0.05)) * 0.5
+                if kind == "beep": tt = np.arange(int(0.12 * SR)) / SR; x = lambda: np.sin(2 * np.pi * 1000 * tt) * (tt < 0.1) * 0.15
                 if kind == "slam": tt = np.arange(int(0.45 * SR)) / SR; x = lambda: (np.sin(2 * np.pi * 60 * tt) * 0.8 + bp(rng.standard_normal(len(tt)), 200, 3000) * 0.6) * np.exp(-tt * 12) * 0.6
                 if kind == 'riser': tt = np.arange(int(1.2 * SR)) / SR; x = lambda: bp(rng.standard_normal(len(tt)), 600, 6000) * (tt / 1.2) ** 2 * 0.3
                 if x: put(sfx, x(), at + r * ev.get('every', 0.08), ev.get('gain', 0.8))
-    # light pluck bed, 96 bpm, i - VI - III - VII in A minor
-    beat = 60 / 96; chords = [[220, 261.6, 329.6], [174.6, 220, 261.6], [261.6, 329.6, 392], [196, 246.9, 293.7]]
-    t = 0.0; bar = 0
-    while t < total:
-        for b in range(4):
-            for j, f in enumerate(chords[bar % 4]):
-                tt = np.arange(int(0.9 * SR)) / SR
-                put(mus, (np.sin(2 * np.pi * f * tt) + 0.3 * np.sin(4 * np.pi * f * tt)) * np.exp(-tt * 5) * 0.05, t + b * beat + j * 0.02)
-            tt = np.arange(int(0.25 * SR)) / SR
-            if b % 2 == 0: put(mus, np.sin(2 * np.pi * (55 + 40 * np.exp(-tt * 30)) * tt) * np.exp(-tt * 12) * 0.25, t + b * beat)
-        t += 4 * beat; bar += 1
+    if S.get('music') == 'dark':   # cinematic bed for story/lore reels: slow D-minor pads + soft sub pulse, 70 bpm
+        beat = 60 / 70; chords = [[73.4, 146.8, 174.6, 220], [58.3, 116.5, 146.8, 174.6], [49, 98, 116.5, 146.8], [55, 110, 138.6, 164.8]]
+        t = 0.0; bar = 0; L = 4 * beat
+        while t < total:
+            tt = np.arange(int((L + 1.5) * SR)) / SR; env_ = np.minimum(1, tt / 1.2) * np.exp(-np.clip(tt - L, 0, None) * 2.5)
+            pad = sum(np.sin(2 * np.pi * f * tt) + 0.5 * np.sin(2 * np.pi * f * 1.003 * tt) for f in chords[bar % 4]) * env_ * 0.018
+            put(mus, pad, t)
+            for b in range(4):
+                ts_ = np.arange(int(0.5 * SR)) / SR; put(mus, np.sin(2 * np.pi * 42 * ts_) * np.exp(-ts_ * 7) * (0.22 if b == 0 else 0.1), t + b * beat)
+            t += L; bar += 1
+    else:
+      # light pluck bed, 96 bpm, i - VI - III - VII in A minor
+      beat = 60 / 96; chords = [[220, 261.6, 329.6], [174.6, 220, 261.6], [261.6, 329.6, 392], [196, 246.9, 293.7]]
+      t = 0.0; bar = 0
+      while t < total:
+          for b in range(4):
+              for j, f in enumerate(chords[bar % 4]):
+                  tt = np.arange(int(0.9 * SR)) / SR
+                  put(mus, (np.sin(2 * np.pi * f * tt) + 0.3 * np.sin(4 * np.pi * f * tt)) * np.exp(-tt * 5) * 0.05, t + b * beat + j * 0.02)
+              tt = np.arange(int(0.25 * SR)) / SR
+              if b % 2 == 0: put(mus, np.sin(2 * np.pi * (55 + 40 * np.exp(-tt * 30)) * tt) * np.exp(-tt * 12) * 0.25, t + b * beat)
+          t += 4 * beat; bar += 1
+    for sec, tl in zip(S['sections'], secs):   # "mute": true -> music drops out for that section (the silent beat before a gut punch)
+        if sec.get('mute'): a_, b_ = int(tl['t0'] * SR), int(tl['t1'] * SR); mus[a_:b_] *= np.linspace(1, 0, b_ - a_) ** 0.15 if sec.get('mute') == 'fade' else 0
     env = sosfilt(butter(1, 5, 'lowpass', fs=SR, output='sos'), np.abs(voice)); env = np.clip(env / (env.max() + 1e-9) * 3, 0, 1)
     mus *= (1 - 0.45 * env); fade = np.ones(N); fade[-int(1.2 * SR):] = np.linspace(1, 0, int(1.2 * SR)); mus *= fade
     m = voice * 0.95 + mus * 1.4 + sfx * 0.7          # standard mix: music under voice, SFX light

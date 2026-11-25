@@ -93,7 +93,7 @@ export const Box: React.FC<{ cam: Cam; F: Fit; x: number; z: number; w: number; 
   return <g opacity={o}>{out}</g>;
 };
 /** Soft floor shadow of a box (light from the upper right). */
-const BoxShadow: React.FC<{ cam: Cam; F: Fit; x: number; z: number; w: number; d: number; h: number; o?: number }> = ({ cam, F, x, z, w, d, h, o = 1 }) => {
+export const BoxShadow: React.FC<{ cam: Cam; F: Fit; x: number; z: number; w: number; d: number; h: number; o?: number }> = ({ cam, F, x, z, w, d, h, o = 1 }) => {
   const L = Math.min(h, 6) * 0.55; const pts: [number, number, number][] = [[x - w / 2, 0, z + d / 2], [x + w / 2, 0, z + d / 2], [x + w / 2 - L, 0, z - d / 2 - L * 0.4], [x - w / 2 - L, 0, z - d / 2 - L * 0.4]];
   const q = pts.map((p) => S2(proj(p, cam), F));
   return <polygon points={q.map((p) => `${p.x},${p.y}`).join(" ")} fill="#3a2f28" opacity={0.1 * o} />;

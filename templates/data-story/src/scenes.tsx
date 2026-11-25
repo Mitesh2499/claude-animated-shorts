@@ -394,10 +394,11 @@ export const pdfCrash: React.FC<SceneProps> = ({ t, cue }) => {
 
 // ============================================================== Library v2: "stale knowledge" episode (Reel 04)
 const GREEN = "#16A34A";
-const Stamp: React.FC<{ x: number; y: number; text: string; color: string; k: number; rot?: number; size?: number }> = ({ x, y, text, color, k, rot = -8, size = 64 }) => {
+/** bg: solid plate behind the stamp - use it whenever the stamp sits on a photo (keeps the text >= 4.5:1) */
+const Stamp: React.FC<{ x: number; y: number; text: string; color: string; k: number; rot?: number; size?: number; bg?: string }> = ({ x, y, text, color, k, rot = -8, size = 64, bg }) => {
   const s = 1 + (1 - k) * 1.4;
   return <g transform={`translate(${x},${y}) rotate(${rot}) scale(${s})`} opacity={cl(k * 1.6)}>
-    <rect x={-text.length * size * 0.33 - 30} y={-size * 0.85} width={text.length * size * 0.66 + 60} height={size * 1.4} rx={14} fill="none" stroke={color} strokeWidth={8} />
+    <rect x={-text.length * size * 0.33 - 30} y={-size * 0.85} width={text.length * size * 0.66 + 60} height={size * 1.4} rx={14} fill={bg ?? "none"} stroke={color} strokeWidth={8} />
     <text textAnchor="middle" y={size * 0.32} fontFamily={FONT} fontWeight={900} fontSize={size} fill={color} letterSpacing={3}>{text}</text>
   </g>;
 };

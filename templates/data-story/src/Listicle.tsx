@@ -8,6 +8,7 @@ import { SCENES, SW, SH } from "./scenes";
 import { SAFE_SCENES, CW, CH } from "./scenes_safe";
 import { DATA_SCENES } from "./scenes_data";
 import { DEPTH_SCENES } from "./scenes_depth";
+import { STORY_SCENES } from "./scenes_story";
 
 export const W = 1080, H = 1920, FPS = 30;
 export const TOTAL = Math.ceil(TL.total * FPS);
@@ -48,6 +49,9 @@ const SUB_SIZE: Record<string, React.CSSProperties> = {
 };
 
 // ------------------------------------------------------------------ token bookkeeping: must match build.py `tokens()` order
+/** subtitle auto-fit: lines longer than ~28 characters shrink (down to 72 %) instead of wrapping onto a 3rd line */
+const fitSizes = (line: Line): Record<string, React.CSSProperties> => { const n = line.map((x) => x.t).join(" ").length; const k = Math.max(0.72, Math.min(1, 28 / Math.max(1, n)));
+  return k >= 1 ? SUB_SIZE : Object.fromEntries(Object.entries(SUB_SIZE).map(([key, v]) => [key, { ...v, fontSize: Math.round(Number(v.fontSize) * k) }])); };
 const ease01 = (x: number) => { const c = Math.max(0, Math.min(1, x)); return 1 - Math.pow(1 - c, 3); };
 const words = (t: string) => t.split(/\s+/).filter(Boolean);
 export const sectionLines = (s: Section): { group: string; line: Line }[] => {
@@ -279,7 +283,7 @@ const SceneSection: React.FC<{ s: Section; times: number[]; t0: number; t1: numb
     // headline (static, pops in) -> visual canvas -> rolling 2-line karaoke subtitles
     const lineT = st.map((i) => times[i] ?? 1e9); let cur = 0; lineT.forEach((x, i) => { if (now >= x - 0.05) cur = i; });
     const from = Math.max(0, cur - 1);
-    const DS = s.data ? DATA_SCENES[s.scene ?? ""] ?? DEPTH_SCENES[s.scene ?? ""] : undefined; const SS = SAFE_SCENES[s.scene ?? ""]; const kh = spring({ frame: Math.max(0, (now - t0) * FPS), fps: FPS, config: { damping: 13, stiffness: 150 } });
+    const DS = s.data ? DATA_SCENES[s.scene ?? ""] ?? DEPTH_SCENES[s.scene ?? ""] ?? STORY_SCENES[s.scene ?? ""] : undefined; const SS = SAFE_SCENES[s.scene ?? ""]; const kh = spring({ frame: Math.max(0, (now - t0) * FPS), fps: FPS, config: { damping: 13, stiffness: 150 } });
     // section transitions learned from the RR reel: colour flash cut, zoom-through, drop-in, whip; exits: dive / whip / zoom
     const lt = now - t0, rt = t1 - now; const ke = s.enter ? ease01(lt / (s.enter === "flash" ? 0.28 : 0.4)) : 1; const kx = s.exit ? ease01(1 - rt / (s.exit === "dive" ? 0.45 : 0.3)) : 0;
     const enterT = s.enter === "zoom" ? `scale(${1 + (1 - ke) * 0.9})` : s.enter === "drop" ? `translateY(${-(1 - ke) * 420}px)` : s.enter === "whip" ? `translateX(${(1 - ke) * 1100}px)` : "";
@@ -299,7 +303,7 @@ const SceneSection: React.FC<{ s: Section; times: number[]; t0: number; t1: numb
           {DS ? <DS t={now - t0} d={t1 - t0} cue={cue} data={s.exit === "dive" ? { dive: true, ...s.data } : s.data} /> : SS ? <SS t={now - t0} d={t1 - t0} cue={cue} /> : Scene ? <div style={{ transform: `scale(${CH / SH})`, transformOrigin: "50% 0", width: SW, height: SH }}><Scene t={now - t0} d={t1 - t0} cue={cue} /></div> : null}
         </div>
         <div style={{ position: "absolute", top: ZONE.subs[0] - 6, height: ZONE.subs[1] - ZONE.subs[0] + 6, left: 70, right: 120, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-          {L.slice(from, cur + 1).map((x, j) => <TextLine key={from + j} line={x.line} times={times} start={st[from + j]} sizes={SUB_SIZE} />)}
+          {L.slice(from, cur + 1).map((x, j) => <TextLine key={from + j} line={x.line} times={times} start={st[from + j]} sizes={fitSizes(x.line)} />)}
         </div>
        </AbsoluteFill>
         {fl > 0.01 ? <AbsoluteFill style={{ background: s.flash ? COL[s.flash] ?? s.flash : COL.accent, opacity: fl }} /> : null}

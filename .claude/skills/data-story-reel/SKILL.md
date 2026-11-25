@@ -107,6 +107,41 @@ Scenes (`src/scenes_data.tsx`, all read `data`):
 - Every number shown as units must be the real count.
 - Share bars are computed from `flip.n / group.n`, never typed.
 
+**Story / lore scenes** (`src/scenes_story.tsx`) are for recap and explainer reels ("Before Doomsday", history, "previously on"). Proof: `C:\Projects\Reel\11-wanda-before-doomsday` (2026-11-25, `make_script.py` generates its script.json).
+| scene | use | data |
+|---|---|---|
+| `photo` | story beat: a print card floating in 3D with Ken Burns; shots switch on cue with a zoom-through flash | `rec?: true or "REPLAY"` (viewfinder), `shots[{img, cue?, caption?, kb: in, out, left or right, freeze?: cue, desat?: cue, dust?: cue, pos?, fallback{title,sub,color}}]` |
+| `chain` | 3D keycap tiles stacked vertically: cause chain or equation | `items[{t,cue,color?,ink?}], op: "↓"` or `ops: ["+","+","="]`, `result?: false`, `strike?{i,cue}` |
+| `explainer` | "MCU 101 / quick definition" aside: a LIVE viewfinder with the brand avatar, the term pops in, the definition builds line by line | `label?, term, termCue?, lines[{t,cue,c?}], avatar?` (pair it with `"kokoroVoice": "hm_psi"` so the aside sounds like a second person) |
+| `endCard` | cliffhanger / "PART 2" title on black | `kicker, title, cue, sub?` |
+
+Photo effects:
+- `freeze` stops the Ken Burns with a white flash and a FREEZE tag.
+- `desat` drains the colour (loss, guilt).
+- `dust` dissolves the shot into particles (the snap or death beat).
+
+**Images:**
+- Use only the user's own files. Put them in `<project>/images/` (copied to the cards on build) or in `brand/cards/`, and name them with the slot stem.
+- Never download film stills or clips from the brief's links, even when the brief lists them.
+- A missing image shows a designed placeholder that names its slot. Ship `images/README.md` (slot → shot → the user's reference) plus `rebuild.cmd`, so the user can drop files in and rebuild with the voice cached.
+
+**Text on photos is checked for contrast automatically.** `build.py` runs `scripts/img_contrast.py`, which does the following:
+- **Measures** each image as the card actually shows it (cover crop) in every overlay region: REC label, timecode, corner brackets, caption area and centre. It uses WCAG luminance at the 15th and 85th percentiles, then writes `src/imgstats.json` and `out/contrast_report.md`.
+- **Text** (4.5:1) is white, navy ink, or white on a dark pill.
+- **Graphics** (3:1) are white, ink, or white with a dark halo.
+
+The `Rec` overlay reads these modes per element. Caption pills and the FREEZE tag always sit on dark pills (6:1 or better in the worst case). Stamps on photos get a solid plate (`Stamp bg`). After adding images, LOOK at full-res stills of the brightest frames before rendering.
+
+**Story audio:**
+- `"music": "dark"` gives a cinematic D-minor pad with a sub pulse.
+- `"mute": true` on a section drops the music out for the silent gut-punch beat; `"mute": "fade"` fades it out on the ending.
+- Per-section `"kokoroVoice"` switches the voice (Hindi voices: `hm_omega` narrator, `hm_psi` second male, `hf_alpha` female).
+- SFX: `heartbeat`, `shutter` (freeze), `beep` (REC / aside start).
+
+**Length:** Kokoro Hindi speaks 2.5-2.7 words/s. A brief's "1:50" with about 550 spoken words is really about 3:40. Count `say` words / 2.6 before building. Instagram caps Reels at 3:00, so trim the voice to match the subtitles first, and use at most `kokoroSpeed` 1.08.
+
+**Subtitles** auto-fit: lines longer than about 28 characters shrink (to at least 72 %) instead of wrapping onto a 3rd line. Still aim for 20-28 characters.
+
 Colours accept names (red, green, amber, blue, cyan, violet, slate, saffron, navy, accent, chalk, grey) or hex. New chart type -> add a data-driven component to `scenes_data.tsx` (or `scenes_depth.tsx` for 3D objects, reusing `proj`/`fit`/`Ball`/`Box`) and register it.
 
 ## 5. Honesty rules for data

@@ -17,7 +17,7 @@ const SC = SCRIPT as any;
 const ENT: Record<string, Ent> = SC.entities ?? {};
 const FONT = "Inter, 'Noto Sans Devanagari', 'Nirmala UI', 'Segoe UI', sans-serif";
 const RED = "#E5252A", GREEN = "#16A34A", AMBER = "#F59E0B";
-const col = (c?: string) => (c && ({ red: RED, green: GREEN, amber: AMBER, blue: "#2563EB", cyan: "#06B6D4", violet: "#8B5CF6", slate: "#334155", saffron: "#FF9933" } as Record<string, string>)[c]) ?? c ?? "#2563EB";
+const col = (c?: string) => (c && ({ red: RED, green: GREEN, amber: AMBER, blue: "#2563EB", cyan: "#06B6D4", violet: "#8B5CF6", slate: "#334155", saffron: "#FF9933", accent: SC.accent ?? "#E0157A", navy: "#0B1220", ink: "#0B1220" } as Record<string, string>)[c]) ?? c ?? "#2563EB";
 const cueAt = (cue: SceneProps["cue"], w: any, dflt: number) => (w === undefined || w === null ? dflt : typeof w === "number" ? w : cue(String(w)));
 const dec = (v: number) => (Math.abs(v % 1) > 1e-9 ? 2 : 0);
 const cnt = (t: number, at: number, v: number, dur = 0.8) => v * ease((t - at) / dur);
@@ -289,7 +289,7 @@ const versus: React.FC<DP> = ({ t, cue, data: d }) => {
     <g transform={`translate(${(1 - kr) * 300},0) rotate(4 795 280)`}><EPoster id={d.right} x={625} y={40} w={360} h={500} k={1} /></g>
     <g transform={`translate(540,290) scale(${kv})`}><circle r={78} fill="#0B1220" stroke="#fff" strokeWidth={8} filter="url(#shadow)" />
       <text y={26} textAnchor="middle" fontFamily={FONT} fontWeight={900} fontSize={72} fill="#F59E0B" fontStyle="italic">VS</text></g>
-    {t > Ts ? <Stamp x={540} y={500} text={d.stamp.text} color={col(d.stamp.color ?? "red")} k={ks} rot={-7} size={64} /> : null}
+    {t > Ts ? <Stamp x={540} y={500} text={d.stamp.text} color={col(d.stamp.color ?? "red")} k={ks} rot={-7} size={64} bg="#FFFFFF" /> : null}
   </g></Svg>;
 };
 
