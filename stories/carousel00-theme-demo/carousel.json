@@ -1,0 +1,18 @@
+{
+  "title": "Layout + theme demo",
+  "series": "Demo",
+  "followLine": "Learn • Build • Explore • Grow",
+  "slides": [
+    { "layout": "cover", "theme": "explainer", "kicker": "Explainer theme", "title": "Developers have a\n==new habit== for\nshipping faster", "sub": "HINT: it starts with the *test*, not the code.", "image": { "src": "brand/logos/Thoughtful Blue-Lit Studio Portrait.png", "fit": "bleed", "pos": "50% 25%" }, "alt": "demo" },
+    { "layout": "stat", "theme": "editorial", "title": "Fastest *build*\never on this repo", "value": "28s", "color": "#E11D74", "label": "vs 61 s last month", "extra": [{ "v": "2.2x", "label": "faster CI" }], "image": { "src": "brand/logos/Thoughtful Blue-Lit Studio Portrait.png", "fit": "right", "pos": "60% 30%" }, "alt": "demo" },
+    { "layout": "compare", "theme": "notebook", "title": "React *vs* Vue", "a": { "title": "React", "icon": "layers", "items": ["JSX in JavaScript", "Huge ecosystem", "Hooks for state"] }, "b": { "title": "Vue", "icon": "sparkles", "items": ["HTML-like templates", "Built-in reactivity", "Incremental adoption"] }, "takeaway": "Pick the one that fits your team, not the trend.", "alt": "demo" },
+    { "layout": "table", "theme": "notebook", "title": "HTTP vs *HTTPS*", "columns": ["Feature", "HTTP", "HTTPS"], "rows": [["Encryption", "no", "yes"], ["Integrity check", "no", "yes"], ["Server identity", "no", "yes"], ["Default port", "80", "443"]], "alt": "demo" },
+    { "layout": "code", "theme": "midnight", "title": "One line *state*", "blocks": [{ "label": "React", "file": "Counter.jsx", "code": "const [count, setCount] = useState(0);\n// re-renders on every set\nreturn <button onClick={() => setCount(count + 1)}>{count}</button>;" }], "takeaway": "Hooks keep state next to the UI that uses it.", "alt": "demo" },
+    { "layout": "mythfact", "theme": "midnight", "title": "Does HTTPS *slow* a site?", "myth": "HTTPS makes every website noticeably slower.", "fact": "Modern TLS + HTTP/2 or HTTP/3 often makes sites **faster** overall.", "alt": "demo" },
+    { "layout": "timeline", "theme": "editorial", "title": "How we got *here*", "items": [{ "when": "2021", "text": "Copilot preview launches" }, { "when": "2023", "text": "Chat assistants in every IDE" }, { "when": "2025", "text": "Agents open pull requests", "hi": true }], "alt": "demo" },
+    { "layout": "numbered", "theme": "explainer", "title": "Sorting, *simply*", "items": [{ "title": "Bubble sort", "text": "Swap neighbours until nothing moves" }, { "title": "Merge sort", "text": "Split in half, sort, merge back" }, { "title": "Quick sort", "text": "Pick a pivot, partition, recurse" }], "alt": "demo" },
+    { "layout": "quote", "theme": "notebook", "kicker": "Worth remembering", "quote": "Make it work, make it right, *make it fast.*", "by": "Kent Beck", "alt": "demo" },
+    { "layout": "statement", "theme": "midnight", "title": "Claude *vs* Copilot", "visual": { "type": "vs", "a": { "label": "Agent", "icon": "bot", "color": "accent" }, "b": { "label": "Autocomplete", "icon": "sparkles", "color": "amber" } }, "alt": "demo" },
+    { "layout": "cta", "theme": "midnight", "title": "Which theme *wins*?", "sub": "Comment **1-4**.", "alt": "demo" }
+  ]
+}

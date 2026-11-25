@@ -1,0 +1,129 @@
+{
+  "title": "The AI Trust Gap",
+  "theme": "notebook",
+  "series": "AI · Data",
+  "followLine": "Evidence-based AI & dev breakdowns. No hype.",
+  "slides": [
+    {
+      "layout": "cover",
+      "kicker": "Stack Overflow survey 2025",
+      "title": "*84%* of developers\nare adopting AI.\nOnly ==33%== trust it.",
+      "sub": "Inside the AI trust gap, with data from 49,000+ developers.",
+      "visual": { "type": "rings", "items": [
+        { "v": 84, "label": "use or plan to\nuse AI tools", "color": "accent" },
+        { "v": 33, "label": "trust the accuracy\nof its output", "color": "amber" } ] },
+      "alt": "Cover slide. Headline: 84% of developers are adopting AI, only 33% trust it. Two ring charts: a blue ring filled to 84% labelled 'use or plan to use AI tools' and an amber ring filled to 33% labelled 'trust the accuracy of its output'. Source: Stack Overflow Developer Survey 2025."
+    },
+    {
+      "layout": "bars",
+      "title": "More devs *distrust*\nAI than trust it",
+      "sub": "How much do you trust the accuracy of AI tools?",
+      "max": 100, "unit": "%",
+      "items": [
+        { "label": "Use or plan to use AI tools", "v": 84, "color": "accent" },
+        { "label": "Distrust its accuracy", "v": 46, "color": "bad", "hi": true },
+        { "label": "Trust its accuracy", "v": 33, "color": "mute" },
+        { "label": "Highly trust it", "v": 3, "color": "mute" }
+      ],
+      "takeaway": "Adoption is near-universal. Confidence is not.",
+      "source": "Source: Stack Overflow Developer Survey 2025 (49K+ respondents, July 2025)",
+      "alt": "Horizontal bar chart. 84% use or plan to use AI tools, 46% distrust the accuracy of AI output, 33% trust it, and only 3% highly trust it. Takeaway: adoption is near-universal, confidence is not."
+    },
+    {
+      "layout": "columns",
+      "title": "Distrust jumped\nin *one year*",
+      "sub": "Developers who distrust AI accuracy",
+      "unit": "%", "height": 470,
+      "items": [
+        { "label": "2024", "v": 31, "color": "mute" },
+        { "label": "2025", "v": 46, "color": "bad", "sub": "+15 points" }
+      ],
+      "takeaway": "Usage went up. Trust went down. Both in the same year.",
+      "source": "Source: Stack Overflow Developer Survey 2024 & 2025, via InfoWorld",
+      "alt": "Column chart comparing developers who distrust AI accuracy: 31% in 2024 versus 46% in 2025, an increase of 15 percentage points."
+    },
+    {
+      "layout": "stat",
+      "kicker": "The #1 frustration",
+      "title": "Not wrong code.\n==Almost right== code.",
+      "value": "66%", "color": "accent",
+      "label": "say AI answers are \"almost right, but not quite\"",
+      "extra": [ { "v": "45%", "label": "say debugging AI code takes longer", "color": "bad" } ],
+      "takeaway": "Almost-right code looks finished, so it slips past review. That's what makes it expensive.",
+      "takeawayLabel": "Why it matters",
+      "source": "Source: Stack Overflow Developer Survey 2025",
+      "alt": "Big statistic: 66% of developers say AI solutions are 'almost right, but not quite', the top frustration. A second stat: 45% say debugging AI-generated code takes longer. Note: almost-right code looks finished, so it slips past review."
+    },
+    {
+      "layout": "columns",
+      "title": "They *felt* faster.\nThey were ==slower.==",
+      "sub": "A controlled trial: 16 experienced devs, 246 real tasks",
+      "height": 600,
+      "items": [
+        { "label": "Expected", "sub": "before the study", "v": 24, "display": "+24%", "color": "accent2" },
+        { "label": "Felt", "sub": "after finishing", "v": 20, "display": "+20%", "color": "accent2" },
+        { "label": "Measured", "sub": "actual speed", "v": -19, "display": "−19%", "color": "bad" }
+      ],
+      "source": "Source: METR, \"Measuring the Impact of Early-2025 AI on Experienced Open-Source Developer Productivity\" (July 2025)",
+      "save": true,
+      "alt": "Column chart from the METR randomized trial with 16 experienced open-source developers and 246 tasks. Developers expected AI to make them 24% faster and felt 20% faster afterwards, but measured completion time was 19% slower, shown as a red bar below the zero line."
+    },
+    {
+      "layout": "points",
+      "title": "Why the *slowdown*?",
+      "sub": "What the developers in the trial reported:",
+      "items": [
+        { "icon": "folder", "title": "They knew the code better than the AI", "text": "Least help on issues they were most familiar with" },
+        { "icon": "layers", "title": "Large, complex repos", "text": "Mature projects with 1M+ lines and strict standards" },
+        { "icon": "refresh-cw", "title": "Prompt, wait, review, fix", "text": "Time saved writing was spent checking output" }
+      ],
+      "takeaway": "A snapshot of early-2025 tools in one setting, not proof that AI slows everyone down.",
+      "takeawayLabel": "Fair caveat",
+      "source": "Source: METR (July 2025)",
+      "alt": "Three reasons for the slowdown reported in the METR trial: developers knew the code better than the AI, the repositories were large and complex, and time saved writing code was spent prompting, waiting and reviewing output. Caveat: a snapshot of early-2025 tools in one setting, not proof that AI slows everyone."
+    },
+    {
+      "layout": "checklist",
+      "kicker": "Save this",
+      "title": "5 habits that close\nthe *trust gap*",
+      "items": [
+        { "title": "Ask for small diffs", "text": "20 lines you can review beat 300 you can't" },
+        { "title": "Write the test first", "text": "Let the test catch \"almost right\"" },
+        { "title": "Feed it real context", "text": "Files, error logs, constraints, examples" },
+        { "title": "Read every line before you commit", "text": "You own the code, not the model" },
+        { "title": "Measure, don't guess", "text": "Time a task with and without AI" }
+      ],
+      "save": true,
+      "alt": "Checklist titled 5 habits that close the trust gap: ask for small diffs, write the test first, feed it real context such as files and error logs, read every line before you commit, and measure your speed with and without AI instead of guessing."
+    },
+    {
+      "layout": "cta",
+      "title": "Has AI made *you* faster, or does it just *feel* faster?",
+      "recap": [
+        "84% adopt AI, only 33% trust it",
+        "66% fight \"almost right\" code",
+        "Felt +20% faster, measured −19%"
+      ],
+      "sub": "Comment **FASTER**, **SLOWER** or **SAME**. I'll share the results.",
+      "nudges": ["comment", "save", "share"],
+      "alt": "Closing slide asking: has AI made you faster, or does it just feel faster? Comment faster, slower or same. Buttons for comment, save and share, and a follow card for @MiteshJourney: evidence-based AI and dev breakdowns, no hype."
+    }
+  ],
+  "post": {
+    "caption": "84% of developers are adopting AI coding tools, but only 33% trust what those tools write.\n\nThe Stack Overflow Developer Survey 2025 (49,000+ devs) found that more developers now distrust AI accuracy (46%) than trust it. The #1 frustration: AI code that's \"almost right, but not quite\" (66%).\n\nThen there's METR's controlled trial. Experienced open-source developers expected AI to make them 24% faster and felt 20% faster afterwards. Measured on 246 real tasks, they were 19% slower. It's a small study of early-2025 tools, but the gap between how fast AI feels and how fast it actually is should worry anyone who has stopped checking.\n\nSlide 7 has 5 habits that close that gap. Save it for your next AI-assisted PR.\n\nHonest answer in the comments: has AI made you FASTER, SLOWER or the SAME?",
+    "hashtags": ["#AIcoding", "#developers", "#softwareengineering", "#programming", "#githubcopilot"],
+    "keywords": {
+      "primary": "AI coding tools",
+      "secondary": ["developer survey 2025", "AI productivity", "trust in AI", "AI generated code", "Stack Overflow survey", "developer productivity", "AI pair programming", "code review"],
+      "longtail": ["do developers trust AI code", "does AI make developers faster", "AI coding tools slow down developers study", "how to review AI generated code", "METR AI productivity study"]
+    },
+    "firstComment": "Sources: Stack Overflow Developer Survey 2025 (survey.stackoverflow.co/2025/ai) · METR study, July 2025 (metr.org) · InfoWorld coverage of the 2024 vs 2025 trust numbers."
+  },
+  "sources": [
+    "Stack Overflow Developer Survey 2025, AI section: https://survey.stackoverflow.co/2025/ai",
+    "Stack Overflow blog, 29 Jul 2025: https://stackoverflow.blog/2025/07/29/developers-remain-willing-but-reluctant-to-use-ai-the-2025-developer-survey-results-are-here/",
+    "InfoWorld (31% -> 46% distrust): https://www.infoworld.com/article/4031673/",
+    "METR, 10 Jul 2025: https://metr.org/blog/2025-07-10-early-2025-ai-experienced-os-dev-study/",
+    "arXiv 2507.09089: https://arxiv.org/abs/2507.09089"
+  ]
+}

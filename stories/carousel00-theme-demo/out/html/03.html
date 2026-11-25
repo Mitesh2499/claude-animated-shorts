@@ -1,0 +1,35 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="file:///C:/Projects/claude-animated-shorts/templates/carousel/fonts/fonts.css"><link rel="stylesheet" href="file:///C:/Projects/claude-animated-shorts/templates/carousel/slide.css"></head>
+<body><div data-grow="1" class="slide theme-notebook L-compare  " style="">
+
+<header class="hd"><img class="av" src="file:///C:/Projects/claude-animated-shorts/brand/logos/logo.png"><div class="who"><b>Mitesh</b><span>@MiteshJourney</span></div><div class="series">Demo</div></header>
+<main class="ct"><h2 class="ttl ">React <em class="ac">vs</em> Vue</h2><div class="cmp"><div class="cc" style="--c:var(--ac)"><span class="ccic"><svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24" overflow="visible"><path d="M12.728 3.905L19.984 7.936L19.984 9.064L12.728 13.095L11.272 13.095L4.016 9.064L4.016 7.936L11.272 3.905L12.728 3.905Z" fill="currentColor" opacity="0.22"/><defs><mask id="layers-duotone-c1" maskUnits="userSpaceOnUse" x="-2" y="-2" width="28" height="28"><rect x="-2" y="-2" width="28" height="28" fill="#fff"/><polygon points="5.55,12.42 2.11,10.5 0.45,12.58 1.98,13.43" fill="#000"/><polygon points="19.73,14.71 23.17,12.8 22.27,10.29 20.75,11.14" fill="#000"/></mask></defs><defs><mask id="layers-duotone-c2" maskUnits="userSpaceOnUse" x="-2" y="-2" width="28" height="28"><rect x="-2" y="-2" width="28" height="28" fill="#fff"/><polygon points="5.55,16.42 2.11,14.5 0.45,16.58 1.98,17.43" fill="#000"/><polygon points="19.73,18.71 23.17,16.8 22.27,14.29 20.75,15.14" fill="#000"/></mask></defs><g fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M12.728 3.905L19.984 7.936L19.984 9.064L12.728 13.095L11.272 13.095L4.016 9.064L4.016 7.936L11.272 3.905L12.728 3.905Z"/><path d="M3 12.5L11.272 17.095L12.728 17.095L21 12.5" mask="url(#layers-duotone-c1)"/><path d="M3 16.5L11.272 21.095L12.728 21.095L21 16.5" mask="url(#layers-duotone-c2)"/></g></svg>
+</span><h3>React</h3><ul><li>JSX in JavaScript</li><li>Huge ecosystem</li><li>Hooks for state</li></ul></div><div class="cc" style="--c:var(--ac2)"><span class="ccic"><svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24" overflow="visible"><path d="M10.251 5.864L11.57 10.408L12.592 11.43L17.136 12.749L17.136 13.251L12.592 14.57L11.57 15.592L10.251 20.136L9.749 20.136L8.43 15.592L7.408 14.57L2.864 13.251L2.864 12.749L7.408 11.43L8.43 10.408L9.749 5.864L10.251 5.864Z" fill="currentColor" opacity="0.22"/><path d="M19.326 3.339L19.461 3.685L20.315 4.539L20.661 4.674L20.661 5.326L20.315 5.461L19.461 6.315L19.326 6.661L18.674 6.661L18.539 6.315L17.685 5.461L17.339 5.326L17.339 4.674L17.685 4.539L18.539 3.685L18.674 3.339L19.326 3.339Z" fill="currentColor" opacity="0.22"/><g fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="butt" stroke-linejoin="miter"><path d="M10.251 5.864L11.57 10.408L12.592 11.43L17.136 12.749L17.136 13.251L12.592 14.57L11.57 15.592L10.251 20.136L9.749 20.136L8.43 15.592L7.408 14.57L2.864 13.251L2.864 12.749L7.408 11.43L8.43 10.408L9.749 5.864L10.251 5.864Z"/><path d="M19.326 3.339L19.461 3.685L20.315 4.539L20.661 4.674L20.661 5.326L20.315 5.461L19.461 6.315L19.326 6.661L18.674 6.661L18.539 6.315L17.685 5.461L17.339 5.326L17.339 4.674L17.685 4.539L18.539 3.685L18.674 3.339L19.326 3.339Z"/></g></svg>
+</span><h3>Vue</h3><ul><li>HTML-like templates</li><li>Built-in reactivity</li><li>Incremental adoption</li></ul></div></div><div class="take"><b>Key takeaway</b><span>Pick the one that fits your team, not the trend.</span></div></main>
+
+<footer class="ft"><div class="pg"><b>03</b>/11</div><div class="prog"><i style="width:27.3%"></i></div>
+<div class="swipe"><span class="gl"><svg viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></svg></span></div></footer>
+</div><pre id="qa"></pre><script>
+(async () => {
+  try { await document.fonts.ready; } catch (e) {}
+  await Promise.all([...document.images].map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; })));
+  const S = document.querySelector('.slide'), M = document.querySelector('.ct');
+  let k = 1; const over = () => M.scrollHeight > M.clientHeight + 1 || M.scrollWidth > M.clientWidth + 1;
+  if (S.dataset.grow) { while (!over() && k < 1.22) { k += 0.02; S.style.setProperty('--k', k.toFixed(2)); } }
+  while (over() && k > 0.72) { k -= 0.02; S.style.setProperty('--k', k.toFixed(2)); }
+  document.querySelectorAll('.ttl').forEach(t => { let tk = 1; while (t.scrollWidth > t.clientWidth + 1 && tk > 0.6) { tk -= 0.03; t.style.setProperty('--tk', tk.toFixed(2)); } });
+  const q = { k: +k.toFixed(2), errors: [], warns: [] };
+  if (over()) q.errors.push('content overflows the safe area even at k=' + k.toFixed(2) + ' - cut words or split the slide');
+  const W = S.clientWidth, H = S.clientHeight;
+  let minF = 99, words = 0;
+  const walker = document.createTreeWalker(M, NodeFilter.SHOW_TEXT);
+  while (walker.nextNode()) { const tn = walker.currentNode; const tx = tn.textContent.trim(); if (!tx) continue;
+    const el = tn.parentElement; if (el.closest('svg')) { words += tx.split(/\s+/).length; continue; }
+    const fs = parseFloat(getComputedStyle(el).fontSize); minF = Math.min(minF, fs); words += tx.split(/\s+/).length;
+    const r = el.getBoundingClientRect(); if (r.width && (r.left < 40 || r.right > W - 40 || r.bottom > H - 70)) q.errors.push('text outside safe margins: "' + tx.slice(0, 40) + '"'); }
+  if (minF < 23.5) q.warns.push('smallest text ' + minF.toFixed(0) + 'px (< 24px is hard to read on a phone)');
+  if (words > 75) q.warns.push(words + ' words on one slide (aim <= 60)');
+  if (k < 0.86) q.warns.push('text shrunk to ' + Math.round(k * 100) + '% to fit - slide is dense');
+  document.querySelectorAll('img').forEach(im => { if (!im.naturalWidth) q.errors.push('image failed: ' + im.src.slice(-60)); });
+  q.minFont = Math.round(minF); q.words = words;
+  document.getElementById('qa').textContent = 'QA' + JSON.stringify(q) + 'QA';
+})();</script></body></html>

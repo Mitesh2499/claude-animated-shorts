@@ -1,0 +1,36 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="file:///C:/Projects/claude-animated-shorts/templates/carousel/fonts/fonts.css"><link rel="stylesheet" href="file:///C:/Projects/claude-animated-shorts/templates/carousel/slide.css"></head>
+<body><div data-grow="" class="slide theme-notebook L-cover  " style="">
+
+<header class="hd"><img class="av" src="file:///C:/Projects/claude-animated-shorts/brand/logos/logo.png"><div class="who"><b>Mitesh</b><span>@MiteshJourney</span></div><div class="series">AI · Data</div></header>
+<main class="ct"><div class="kick pill">Stack Overflow survey 2025</div><h1 class="ttl xxl"><em class="ac">84%</em> of developers<br>are adopting AI.<br>Only <mark class="hl"><span>33%</span></mark> trust it.</h1><p class="sub lg">Inside the AI trust gap, with data from 49,000+ developers.</p>
+    <div class="vis"><div class="rings"><div class="ring"><svg viewBox="0 0 300 300"><circle cx="150" cy="150" r="120" class="trk"/><circle cx="150" cy="150" r="120" class="val" style="stroke:var(--ac)" stroke-dasharray="633.3450789637022 753.9822368615503" transform="rotate(-90 150 150)"/></svg>
+      <div class="rv" style="color:var(--ac)"><span>84<small>%</small></span></div><div class="rl">use or plan to<br>use AI tools</div></div><div class="ring"><svg viewBox="0 0 300 300"><circle cx="150" cy="150" r="120" class="trk"/><circle cx="150" cy="150" r="120" class="val" style="stroke:var(--amber)" stroke-dasharray="248.8141381643116 753.9822368615503" transform="rotate(-90 150 150)"/></svg>
+      <div class="rv" style="color:var(--amber)"><span>33<small>%</small></span></div><div class="rl">trust the accuracy<br>of its output</div></div></div></div></main>
+
+<footer class="ft"><div class="pg"><b>01</b>/08</div><div class="prog"><i style="width:12.5%"></i></div>
+<div class="swipebig">Swipe <span class="gl"><svg viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></svg></span></div></footer>
+</div><pre id="qa"></pre><script>
+(async () => {
+  try { await document.fonts.ready; } catch (e) {}
+  await Promise.all([...document.images].map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; })));
+  const S = document.querySelector('.slide'), M = document.querySelector('.ct');
+  let k = 1; const over = () => M.scrollHeight > M.clientHeight + 1 || M.scrollWidth > M.clientWidth + 1;
+  if (S.dataset.grow) { while (!over() && k < 1.22) { k += 0.02; S.style.setProperty('--k', k.toFixed(2)); } }
+  while (over() && k > 0.72) { k -= 0.02; S.style.setProperty('--k', k.toFixed(2)); }
+  document.querySelectorAll('.ttl').forEach(t => { let tk = 1; while (t.scrollWidth > t.clientWidth + 1 && tk > 0.6) { tk -= 0.03; t.style.setProperty('--tk', tk.toFixed(2)); } });
+  const q = { k: +k.toFixed(2), errors: [], warns: [] };
+  if (over()) q.errors.push('content overflows the safe area even at k=' + k.toFixed(2) + ' - cut words or split the slide');
+  const W = S.clientWidth, H = S.clientHeight;
+  let minF = 99, words = 0;
+  const walker = document.createTreeWalker(M, NodeFilter.SHOW_TEXT);
+  while (walker.nextNode()) { const tn = walker.currentNode; const tx = tn.textContent.trim(); if (!tx) continue;
+    const el = tn.parentElement; if (el.closest('svg')) { words += tx.split(/\s+/).length; continue; }
+    const fs = parseFloat(getComputedStyle(el).fontSize); minF = Math.min(minF, fs); words += tx.split(/\s+/).length;
+    const r = el.getBoundingClientRect(); if (r.width && (r.left < 40 || r.right > W - 40 || r.bottom > H - 70)) q.errors.push('text outside safe margins: "' + tx.slice(0, 40) + '"'); }
+  if (minF < 23.5) q.warns.push('smallest text ' + minF.toFixed(0) + 'px (< 24px is hard to read on a phone)');
+  if (words > 75) q.warns.push(words + ' words on one slide (aim <= 60)');
+  if (k < 0.86) q.warns.push('text shrunk to ' + Math.round(k * 100) + '% to fit - slide is dense');
+  document.querySelectorAll('img').forEach(im => { if (!im.naturalWidth) q.errors.push('image failed: ' + im.src.slice(-60)); });
+  q.minFont = Math.round(minF); q.words = words;
+  document.getElementById('qa').textContent = 'QA' + JSON.stringify(q) + 'QA';
+})();</script></body></html>

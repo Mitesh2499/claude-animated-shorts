@@ -1,0 +1,74 @@
+[
+ {
+  "slide": 1,
+  "layout": "cover",
+  "k": 0.92,
+  "errors": [],
+  "warns": [],
+  "minFont": 24,
+  "words": 41
+ },
+ {
+  "slide": 2,
+  "layout": "bars",
+  "k": 1,
+  "errors": [],
+  "warns": [],
+  "minFont": 26,
+  "words": 45
+ },
+ {
+  "slide": 3,
+  "layout": "columns",
+  "k": 1,
+  "errors": [],
+  "warns": [],
+  "minFont": 26,
+  "words": 29
+ },
+ {
+  "slide": 4,
+  "layout": "stat",
+  "k": 1,
+  "errors": [],
+  "warns": [],
+  "minFont": 26,
+  "words": 43
+ },
+ {
+  "slide": 5,
+  "layout": "columns",
+  "k": 1,
+  "errors": [],
+  "warns": [],
+  "minFont": 26,
+  "words": 28
+ },
+ {
+  "slide": 6,
+  "layout": "points",
+  "k": 1.1,
+  "errors": [],
+  "warns": [],
+  "minFont": 29,
+  "words": 67
+ },
+ {
+  "slide": 7,
+  "layout": "checklist",
+  "k": 0.96,
+  "errors": [],
+  "warns": [],
+  "minFont": 25,
+  "words": 64
+ },
+ {
+  "slide": 8,
+  "layout": "cta",
+  "k": 1,
+  "errors": [],
+  "warns": [],
+  "minFont": 24,
+  "words": 52
+ }
+]

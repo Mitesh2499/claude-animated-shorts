@@ -1,0 +1,101 @@
+[
+ {
+  "slide": 1,
+  "layout": "cover",
+  "k": 0.92,
+  "errors": [],
+  "warns": [],
+  "minFont": 24,
+  "words": 20
+ },
+ {
+  "slide": 2,
+  "layout": "stat",
+  "k": 1,
+  "errors": [],
+  "warns": [],
+  "minFont": 26,
+  "words": 15
+ },
+ {
+  "slide": 3,
+  "layout": "compare",
+  "k": 1.22,
+  "errors": [],
+  "warns": [],
+  "minFont": 32,
+  "words": 31
+ },
+ {
+  "slide": 4,
+  "layout": "table",
+  "k": 1.22,
+  "errors": [],
+  "warns": [],
+  "minFont": 35,
+  "words": 15
+ },
+ {
+  "slide": 5,
+  "layout": "code",
+  "k": 1.22,
+  "errors": [],
+  "warns": [],
+  "minFont": 24,
+  "words": 34
+ },
+ {
+  "slide": 6,
+  "layout": "mythfact",
+  "k": 1.22,
+  "errors": [],
+  "warns": [],
+  "minFont": 29,
+  "words": 24
+ },
+ {
+  "slide": 7,
+  "layout": "timeline",
+  "k": 1.22,
+  "errors": [],
+  "warns": [],
+  "minFont": 34,
+  "words": 19
+ },
+ {
+  "slide": 8,
+  "layout": "numbered",
+  "k": 1.22,
+  "errors": [],
+  "warns": [],
+  "minFont": 37,
+  "words": 27
+ },
+ {
+  "slide": 9,
+  "layout": "quote",
+  "k": 1.22,
+  "errors": [],
+  "warns": [],
+  "minFont": 32,
+  "words": 14
+ },
+ {
+  "slide": 10,
+  "layout": "statement",
+  "k": 1,
+  "errors": [],
+  "warns": [],
+  "minFont": 46,
+  "words": 6
+ },
+ {
+  "slide": 11,
+  "layout": "cta",
+  "k": 1,
+  "errors": [],
+  "warns": [],
+  "minFont": 24,
+  "words": 20
+ }
+]
