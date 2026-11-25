@@ -1,0 +1,35 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="file:///C:/Projects/claude-animated-shorts/templates/carousel/fonts/fonts.css"><link rel="stylesheet" href="file:///C:/Projects/claude-animated-shorts/templates/carousel/slide.css"></head>
+<body><div data-grow="" class="slide theme-arena light L-cta  " style="--ac:#1D3A8A;--ac2:#15803D">
+
+<header class="hd"><img class="av" src="file:///C:/Projects/claude-animated-shorts/brand/logos/logo.png"><div class="who"><b>Mitesh</b><span>@MiteshJourney</span></div><div class="series">IPL 2027 · Auction</div></header>
+<main class="ct"><h2 class="ttl xl">Which team should go <em class="ac">all-in</em> for Stokes?</h2><p class="sub">Comment your team (CSK, MI, RCB, KKR…) and <b>YES</b> or <b>NO</b>: would you pay <mark class="hl"><span>₹10 cr+</span></mark>?</p><div class="recap"><div class="rc"><span class="rcg"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Base price ₹2 cr · auction 16 Dec, Goa</span></div><div class="rc"><span class="rcg"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>45 games · 935 runs · 28 wickets</span></div><div class="rc"><span class="rcg"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span>Last sold for ₹16.25 cr (2023)</span></div></div>
+    <div class="nudges"><div class="ng"><span class="ngi"><svg viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg></span><span>Comment</span></div><div class="ng"><span class="ngi"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4.5L6 21z"/></svg></span><span>Save</span></div><div class="ng"><span class="ngi"><svg viewBox="0 0 24 24"><path d="M21 3 10 14M21 3l-7 18-4-7-7-4z"/></svg></span><span>Share</span></div></div>
+    <div class="follow"><img class="flogo" src="file:///C:/Projects/claude-animated-shorts/brand/logos/logo.png"><div class="ftx"><b>Follow @MiteshJourney</b><span>IPL auction intel &amp; data-backed cricket breakdowns</span></div><span class="fbtn">Follow</span></div></main>
+
+<footer class="ft"><div class="pg"><b>09</b>/09</div><div class="prog"><i style="width:100.0%"></i></div>
+</footer>
+</div><pre id="qa"></pre><script>
+(async () => {
+  try { await document.fonts.ready; } catch (e) {}
+  await Promise.all([...document.images].map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; })));
+  const S = document.querySelector('.slide'), M = document.querySelector('.ct');
+  let k = 1; const over = () => M.scrollHeight > M.clientHeight + 1 || M.scrollWidth > M.clientWidth + 1 || [...M.querySelectorAll(".vis")].some((v) => v.scrollHeight > v.clientHeight + 2);
+  if (S.dataset.grow) { while (!over() && k < 1.22) { k += 0.02; S.style.setProperty('--k', k.toFixed(2)); } }
+  while (over() && k > 0.72) { k -= 0.02; S.style.setProperty('--k', k.toFixed(2)); }
+  document.querySelectorAll('.ttl').forEach(t => { let tk = 1; while (t.scrollWidth > t.clientWidth + 1 && tk > 0.6) { tk -= 0.03; t.style.setProperty('--tk', tk.toFixed(2)); } });
+  const q = { k: +k.toFixed(2), errors: [], warns: [] };
+  if (over()) q.errors.push('content overflows the safe area even at k=' + k.toFixed(2) + ' - cut words or split the slide');
+  const W = S.clientWidth, H = S.clientHeight;
+  let minF = 99, words = 0;
+  const walker = document.createTreeWalker(M, NodeFilter.SHOW_TEXT);
+  while (walker.nextNode()) { const tn = walker.currentNode; const tx = tn.textContent.trim(); if (!tx) continue;
+    const el = tn.parentElement; if (el.closest('svg')) { words += tx.split(/\s+/).length; continue; }
+    const fs = parseFloat(getComputedStyle(el).fontSize); minF = Math.min(minF, fs); words += tx.split(/\s+/).length;
+    const r = el.getBoundingClientRect(); if (r.width && (r.left < 40 || r.right > W - 40 || r.bottom > H - 70)) q.errors.push('text outside safe margins: "' + tx.slice(0, 40) + '"'); }
+  if (minF < 23.5) q.warns.push('smallest text ' + minF.toFixed(0) + 'px (< 24px is hard to read on a phone)');
+  if (words > 75) q.warns.push(words + ' words on one slide (aim <= 60)');
+  if (k < 0.86) q.warns.push('text shrunk to ' + Math.round(k * 100) + '% to fit - slide is dense');
+  document.querySelectorAll('img').forEach(im => { if (!im.naturalWidth) q.errors.push('image failed: ' + im.src.slice(-60)); });
+  q.minFont = Math.round(minF); q.words = words;
+  document.getElementById('qa').textContent = 'QA' + JSON.stringify(q) + 'QA';
+})();</script></body></html>

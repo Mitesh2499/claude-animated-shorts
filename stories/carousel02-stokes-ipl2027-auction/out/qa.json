@@ -1,0 +1,90 @@
+[
+ {
+  "slide": 1,
+  "layout": "cover",
+  "k": 0.88,
+  "errors": [],
+  "warns": [
+   "smallest text 23px (< 24px is hard to read on a phone)"
+  ],
+  "minFont": 23,
+  "words": 28
+ },
+ {
+  "slide": 2,
+  "layout": "timeline",
+  "k": 0.9,
+  "errors": [],
+  "warns": [],
+  "minFont": 25,
+  "words": 58
+ },
+ {
+  "slide": 3,
+  "layout": "stat",
+  "k": 0.98,
+  "errors": [],
+  "warns": [],
+  "minFont": 25,
+  "words": 50
+ },
+ {
+  "slide": 4,
+  "layout": "tiles",
+  "k": 1.22,
+  "errors": [],
+  "warns": [],
+  "minFont": 34,
+  "words": 25
+ },
+ {
+  "slide": 5,
+  "layout": "bars",
+  "k": 0.9,
+  "errors": [],
+  "warns": [
+   "smallest text 23px (< 24px is hard to read on a phone)"
+  ],
+  "minFont": 23,
+  "words": 47
+ },
+ {
+  "slide": 6,
+  "layout": "columns",
+  "k": 0.94,
+  "errors": [],
+  "warns": [],
+  "minFont": 24,
+  "words": 37
+ },
+ {
+  "slide": 7,
+  "layout": "board",
+  "k": 0.94,
+  "errors": [],
+  "warns": [
+   "smallest text 23px (< 24px is hard to read on a phone)",
+   "115 words on one slide (aim <= 60)"
+  ],
+  "minFont": 23,
+  "words": 115
+ },
+ {
+  "slide": 8,
+  "layout": "compare",
+  "k": 1.18,
+  "errors": [],
+  "warns": [],
+  "minFont": 31,
+  "words": 68
+ },
+ {
+  "slide": 9,
+  "layout": "cta",
+  "k": 1,
+  "errors": [],
+  "warns": [],
+  "minFont": 24,
+  "words": 61
+ }
+]

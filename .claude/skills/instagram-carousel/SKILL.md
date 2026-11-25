@@ -52,6 +52,12 @@ Text mini-markup: `*accent*`, `==highlight box==`, `**bold**`, `__marker__`, `~~
 | `timeline` | dated events | `items[{when,text,hi?}]` |
 | `quote` | quote card | `quote, by, kicker?` |
 | `cta` | last slide: question + recap + nudges + follow card | `title, sub, recap[], nudges[comment,save,share,like]` |
+| `tiles` | 2-4 giant stat rows (career numbers) | `items[{v,label,sub,color}]` |
+| `board` | compact leaderboard with colour code chips (team purses, rankings), sorted by v | `rows[{code,name,v,display?,meta?,color,ink?,hi?}], colLabels[2], total?` (`total` is checked against the row sum) |
+
+Themes: `notebook`, `explainer`, `editorial`, `midnight`, and **`arena`** (sports/news stat posts: navy stadium-light background, Anton display type for titles and big numbers only, `accent` = money/hero colour). For sports posts, set `accent`/`accent2` from the hero photo's kit colours. Proof: `stories/carousel02-stokes-ipl2027-auction/`.
+Image fits: `bleed`, `right`, `full`, and **`cutout`** (transparent PNG player cut-out, bottom-right, text keeps the left 58 %). Trim the alpha bounding box first.
+Photos of real people: use the user's own files, or Wikimedia Commons public-domain/CC images with the credit in `source`. Check the user's photo for signs of editing (wrong kit, era, stars or sponsors) and flag it. Never generate a likeness. League and team logos are trademarks and not in the theSVG registry, so use colour code chips unless the user supplies the logos.
 Colours: `accent, accent2, amber, good, bad, mute, violet, ink` or any hex. Icons: file stems in `brand/icons/` (`folder, layers, refresh-cw, bot, sparkles, lock, trophy, trending-up, trending-down, triangle-alert, chart-column, brain-circuit, database, globe, search, …`).
 
 ## 4. Build + QA
@@ -78,3 +84,4 @@ Then LOOK: Read `out/overview.png`, then every slide that matters at full size (
 - Long unbreakable words in titles shrink the title (`--tk`) instead of overflowing; prefer manual `\n` breaks so words don't get orphaned.
 - `image.fit: bleed` reserves the bottom 46 % for the photo (footer turns white). `right` keeps text in the left 56 %. Use photos the user owns.
 - Hindi: set `"lang": "hi"`. Line-height is raised automatically; keep titles shorter (Devanagari is wider).
+- **White is the user's feed default** (2026-11-25): all posts use light backgrounds. For sports use `"theme": "arena light"`; use dark `arena`/`midnight` only when asked. On white, kit colours such as CSK yellow are fills under dark text, never text (check contrast: text ≥ 4.5:1, bars/graphics ≥ 3:1). Proof: `stories/carousel03-stokes-ipl2027-auction-white/`.

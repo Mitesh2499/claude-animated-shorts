@@ -12,7 +12,7 @@
   try { await document.fonts.ready; } catch (e) {}
   await Promise.all([...document.images].map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; })));
   const S = document.querySelector('.slide'), M = document.querySelector('.ct');
-  let k = 1; const over = () => M.scrollHeight > M.clientHeight + 1 || M.scrollWidth > M.clientWidth + 1;
+  let k = 1; const over = () => M.scrollHeight > M.clientHeight + 1 || M.scrollWidth > M.clientWidth + 1 || [...M.querySelectorAll(".vis")].some((v) => v.scrollHeight > v.clientHeight + 2);
   if (S.dataset.grow) { while (!over() && k < 1.22) { k += 0.02; S.style.setProperty('--k', k.toFixed(2)); } }
   while (over() && k > 0.72) { k -= 0.02; S.style.setProperty('--k', k.toFixed(2)); }
   document.querySelectorAll('.ttl').forEach(t => { let tk = 1; while (t.scrollWidth > t.clientWidth + 1 && tk > 0.6) { tk -= 0.03; t.style.setProperty('--tk', tk.toFixed(2)); } });

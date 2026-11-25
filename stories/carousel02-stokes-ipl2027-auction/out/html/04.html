@@ -1,0 +1,33 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="file:///C:/Projects/claude-animated-shorts/templates/carousel/fonts/fonts.css"><link rel="stylesheet" href="file:///C:/Projects/claude-animated-shorts/templates/carousel/slide.css"></head>
+<body><div data-grow="1" class="slide theme-arena L-tiles  " style="--ac:#FDE101;--ac2:#22C55E">
+
+<header class="hd"><img class="av" src="file:///C:/Projects/claude-animated-shorts/brand/logos/logo.png"><div class="who"><b>Mitesh</b><span>@MiteshJourney</span></div><div class="series">IPL 2027 · Auction</div></header>
+<main class="ct"><h2 class="ttl ">The numbers behind <em class="ac">Stokes</em></h2><div class="tiles"><div class="tile2" style="--c:#FDE101"><span class="tv">45</span><div class="tx"><b>IPL matches</b><span>3 franchises · 2017–2023</span></div></div><div class="tile2" style="--c:#F8FAFC"><span class="tv">935</span><div class="tx"><b>Runs</b><span>2 hundreds · best 107* (2020)</span></div></div><div class="tile2" style="--c:#22C55E"><span class="tv">28</span><div class="tx"><b>Wickets</b><span>a genuine bat-and-ball all-rounder</span></div></div></div></main>
+<div class="src">IPL career totals: Sportskeeda, myKhel player records</div>
+<footer class="ft"><div class="pg"><b>04</b>/09</div><div class="prog"><i style="width:44.4%"></i></div>
+<div class="savehint"><span class="gl"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4.5L6 21z"/></svg></span> Save this</div><div class="swipe"><span class="gl"><svg viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></svg></span></div></footer>
+</div><pre id="qa"></pre><script>
+(async () => {
+  try { await document.fonts.ready; } catch (e) {}
+  await Promise.all([...document.images].map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; })));
+  const S = document.querySelector('.slide'), M = document.querySelector('.ct');
+  let k = 1; const over = () => M.scrollHeight > M.clientHeight + 1 || M.scrollWidth > M.clientWidth + 1 || [...M.querySelectorAll(".vis")].some((v) => v.scrollHeight > v.clientHeight + 2);
+  if (S.dataset.grow) { while (!over() && k < 1.22) { k += 0.02; S.style.setProperty('--k', k.toFixed(2)); } }
+  while (over() && k > 0.72) { k -= 0.02; S.style.setProperty('--k', k.toFixed(2)); }
+  document.querySelectorAll('.ttl').forEach(t => { let tk = 1; while (t.scrollWidth > t.clientWidth + 1 && tk > 0.6) { tk -= 0.03; t.style.setProperty('--tk', tk.toFixed(2)); } });
+  const q = { k: +k.toFixed(2), errors: [], warns: [] };
+  if (over()) q.errors.push('content overflows the safe area even at k=' + k.toFixed(2) + ' - cut words or split the slide');
+  const W = S.clientWidth, H = S.clientHeight;
+  let minF = 99, words = 0;
+  const walker = document.createTreeWalker(M, NodeFilter.SHOW_TEXT);
+  while (walker.nextNode()) { const tn = walker.currentNode; const tx = tn.textContent.trim(); if (!tx) continue;
+    const el = tn.parentElement; if (el.closest('svg')) { words += tx.split(/\s+/).length; continue; }
+    const fs = parseFloat(getComputedStyle(el).fontSize); minF = Math.min(minF, fs); words += tx.split(/\s+/).length;
+    const r = el.getBoundingClientRect(); if (r.width && (r.left < 40 || r.right > W - 40 || r.bottom > H - 70)) q.errors.push('text outside safe margins: "' + tx.slice(0, 40) + '"'); }
+  if (minF < 23.5) q.warns.push('smallest text ' + minF.toFixed(0) + 'px (< 24px is hard to read on a phone)');
+  if (words > 75) q.warns.push(words + ' words on one slide (aim <= 60)');
+  if (k < 0.86) q.warns.push('text shrunk to ' + Math.round(k * 100) + '% to fit - slide is dense');
+  document.querySelectorAll('img').forEach(im => { if (!im.naturalWidth) q.errors.push('image failed: ' + im.src.slice(-60)); });
+  q.minFont = Math.round(minF); q.words = words;
+  document.getElementById('qa').textContent = 'QA' + JSON.stringify(q) + 'QA';
+})();</script></body></html>

@@ -1,0 +1,33 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="file:///C:/Projects/claude-animated-shorts/templates/carousel/fonts/fonts.css"><link rel="stylesheet" href="file:///C:/Projects/claude-animated-shorts/templates/carousel/slide.css"></head>
+<body><div data-grow="1" class="slide theme-arena light L-board  " style="--ac:#1D3A8A;--ac2:#15803D">
+
+<header class="hd"><img class="av" src="file:///C:/Projects/claude-animated-shorts/brand/logos/logo.png"><div class="who"><b>Mitesh</b><span>@MiteshJourney</span></div><div class="series">IPL 2027 · Auction</div></header>
+<main class="ct"><h2 class="ttl ">Who can <em class="ac">afford</em> him?</h2><p class="sub">Purse left after retentions · open slots · overseas (OS) slots</p><div class="board"><div class="bdh"><span>Team · slots</span><span>Purse ₹ cr</span></div><div class="bdr hi"><span class="bdc" style="background:#0A75C2;color:#fff">LSG</span><div class="bdm"><div class="bdt"><b>Lucknow Super Giants</b><span>7 slots · 3 OS</span></div><div class="bdb"><i style="width:100.0%"></i></div></div><span class="bdv">47.45</span></div><div class="bdr hi"><span class="bdc" style="background:#3A225D;color:#fff">KKR</span><div class="bdm"><div class="bdt"><b>Kolkata Knight Riders</b><span>8 slots · 3 OS</span></div><div class="bdb"><i style="width:87.8%"></i></div></div><span class="bdv">41.65</span></div><div class="bdr hi"><span class="bdc" style="background:#F26522;color:#fff">SRH</span><div class="bdm"><div class="bdt"><b>Sunrisers Hyderabad</b><span>7 slots · 3 OS</span></div><div class="bdb"><i style="width:84.6%"></i></div></div><span class="bdv">40.15</span></div><div class="bdr hi"><span class="bdc" style="background:#17479E;color:#fff">DC</span><div class="bdm"><div class="bdt"><b>Delhi Capitals</b><span>9 slots · 4 OS</span></div><div class="bdb"><i style="width:83.2%"></i></div></div><span class="bdv">39.50</span></div><div class="bdr "><span class="bdc" style="background:#004BA0;color:#fff">MI</span><div class="bdm"><div class="bdt"><b>Mumbai Indians</b><span>9 slots · 2 OS</span></div><div class="bdb"><i style="width:63.8%"></i></div></div><span class="bdv">30.25</span></div><div class="bdr "><span class="bdc" style="background:#F9CD05;color:#0B1220">CSK</span><div class="bdm"><div class="bdt"><b>Chennai Super Kings</b><span>6 slots · 2 OS</span></div><div class="bdb"><i style="width:59.1%"></i></div></div><span class="bdv">28.05</span></div><div class="bdr "><span class="bdc" style="background:#EA1A85;color:#fff">RR</span><div class="bdm"><div class="bdt"><b>Rajasthan Royals</b><span>6 slots · 3 OS</span></div><div class="bdb"><i style="width:57.0%"></i></div></div><span class="bdv">27.05</span></div><div class="bdr "><span class="bdc" style="background:#DD1F2D;color:#fff">PBKS</span><div class="bdm"><div class="bdt"><b>Punjab Kings</b><span>6 slots · 2 OS</span></div><div class="bdb"><i style="width:39.2%"></i></div></div><span class="bdv">18.60</span></div><div class="bdr "><span class="bdc" style="background:#B3121E;color:#fff">RCB</span><div class="bdm"><div class="bdt"><b>Royal Challengers Bengaluru</b><span>5 slots · 1 OS</span></div><div class="bdb"><i style="width:29.8%"></i></div></div><span class="bdv">14.15</span></div><div class="bdr "><span class="bdc" style="background:#1C2C5B;color:#fff">GT</span><div class="bdm"><div class="bdt"><b>Gujarat Titans</b><span>3 slots · 2 OS</span></div><div class="bdb"><i style="width:18.4%"></i></div></div><span class="bdv">8.75</span></div></div></main>
+<div class="src">Source: IPLT20.com media advisory, 25 Nov 2026 (total ₹295.60 cr · 66 slots · 25 OS)</div>
+<footer class="ft"><div class="pg"><b>07</b>/09</div><div class="prog"><i style="width:77.8%"></i></div>
+<div class="savehint"><span class="gl"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4.5L6 21z"/></svg></span> Save this</div><div class="swipe"><span class="gl"><svg viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></svg></span></div></footer>
+</div><pre id="qa"></pre><script>
+(async () => {
+  try { await document.fonts.ready; } catch (e) {}
+  await Promise.all([...document.images].map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; })));
+  const S = document.querySelector('.slide'), M = document.querySelector('.ct');
+  let k = 1; const over = () => M.scrollHeight > M.clientHeight + 1 || M.scrollWidth > M.clientWidth + 1 || [...M.querySelectorAll(".vis")].some((v) => v.scrollHeight > v.clientHeight + 2);
+  if (S.dataset.grow) { while (!over() && k < 1.22) { k += 0.02; S.style.setProperty('--k', k.toFixed(2)); } }
+  while (over() && k > 0.72) { k -= 0.02; S.style.setProperty('--k', k.toFixed(2)); }
+  document.querySelectorAll('.ttl').forEach(t => { let tk = 1; while (t.scrollWidth > t.clientWidth + 1 && tk > 0.6) { tk -= 0.03; t.style.setProperty('--tk', tk.toFixed(2)); } });
+  const q = { k: +k.toFixed(2), errors: [], warns: [] };
+  if (over()) q.errors.push('content overflows the safe area even at k=' + k.toFixed(2) + ' - cut words or split the slide');
+  const W = S.clientWidth, H = S.clientHeight;
+  let minF = 99, words = 0;
+  const walker = document.createTreeWalker(M, NodeFilter.SHOW_TEXT);
+  while (walker.nextNode()) { const tn = walker.currentNode; const tx = tn.textContent.trim(); if (!tx) continue;
+    const el = tn.parentElement; if (el.closest('svg')) { words += tx.split(/\s+/).length; continue; }
+    const fs = parseFloat(getComputedStyle(el).fontSize); minF = Math.min(minF, fs); words += tx.split(/\s+/).length;
+    const r = el.getBoundingClientRect(); if (r.width && (r.left < 40 || r.right > W - 40 || r.bottom > H - 70)) q.errors.push('text outside safe margins: "' + tx.slice(0, 40) + '"'); }
+  if (minF < 23.5) q.warns.push('smallest text ' + minF.toFixed(0) + 'px (< 24px is hard to read on a phone)');
+  if (words > 75) q.warns.push(words + ' words on one slide (aim <= 60)');
+  if (k < 0.86) q.warns.push('text shrunk to ' + Math.round(k * 100) + '% to fit - slide is dense');
+  document.querySelectorAll('img').forEach(im => { if (!im.naturalWidth) q.errors.push('image failed: ' + im.src.slice(-60)); });
+  q.minFont = Math.round(minF); q.words = words;
+  document.getElementById('qa').textContent = 'QA' + JSON.stringify(q) + 'QA';
+})();</script></body></html>

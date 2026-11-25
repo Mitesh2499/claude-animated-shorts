@@ -126,6 +126,12 @@ const L = {
   mythfact: (s) => `${head(s)}<div class="mf"><div class="myth"><span class="tag">${glyph("cross")} ${esc(s.mythLabel || "Myth")}</span><p>${md(s.myth)}</p></div><div class="fact"><span class="tag">${glyph("check")} ${esc(s.factLabel || "Fact")}</span><p>${md(s.fact)}</p></div></div>${tail(s)}`,
   timeline: (s) => `${head(s)}<div class="tl">${s.items.map((it) => `<div class="te ${it.hi ? "hi" : ""}"><span class="td">${md(it.when)}</span><span class="tt">${md(it.text)}</span></div>`).join("")}</div>${tail(s)}`,
   quote: (s) => `${s.kicker ? `<div class="kick">${md(s.kicker)}</div>` : ""}<div class="qt"><span class="qm">“</span><p>${md(s.quote)}</p>${s.by ? `<cite>${md(s.by)}</cite>` : ""}</div>${tail(s)}`,
+  // giant stat rows (X data-card idea): items[{v, label, sub?, color?}]
+  tiles: (s) => `${head(s)}<div class="tiles">${s.items.map((it) => `<div class="tile2" style="--c:${col(it.color)}"><span class="tv">${esc(it.v)}</span><div class="tx"><b>${md(it.label)}</b>${it.sub ? `<span>${md(it.sub)}</span>` : ""}</div></div>`).join("")}</div>${tail(s)}`,
+  // compact leaderboard with team colour chips (X data-card idea): rows[{code, name, v, display?, color, ink?, meta?, hi?}], sorted by v desc
+  board: (s) => { const rows = [...s.rows].sort((a, b) => b.v - a.v), mx = s.max ?? rows[0].v;
+    if (s.total != null) { const sum = Math.round(rows.reduce((a, r) => a + r.v, 0) * 100) / 100; if (sum !== s.total) warnGlobal.push(`board "${s.title}": rows sum to ${sum}, total says ${s.total}`); }
+    return `${head(s)}<div class="board">${s.colLabels ? `<div class="bdh"><span>${md(s.colLabels[0])}</span><span>${md(s.colLabels[1] || "")}</span></div>` : ""}${rows.map((r) => `<div class="bdr ${r.hi ? "hi" : ""}"><span class="bdc" style="background:${r.color};color:${r.ink || "#fff"}">${esc(r.code)}</span><div class="bdm"><div class="bdt"><b>${md(r.name)}</b>${r.meta ? `<span>${md(r.meta)}</span>` : ""}</div><div class="bdb"><i style="width:${(100 * r.v / mx).toFixed(1)}%"></i></div></div><span class="bdv">${esc(r.display ?? r.v)}</span></div>`).join("")}</div>${tail(s)}`; },
   cta: (s) => `${head(s, true)}${s.recap ? `<div class="recap">${s.recap.map((r) => `<div class="rc">${glyph("check", "rcg")}<span>${md(r)}</span></div>`).join("")}</div>` : ""}
     <div class="nudges">${(s.nudges || ["comment", "save", "share"]).map((n) => `<div class="ng">${glyph(n === "save" ? "save" : n === "share" ? "share" : n === "like" ? "heart" : "comment", "ngi")}<span>${esc({ comment: "Comment", save: "Save", share: "Share", like: "Like" }[n] || n)}</span></div>`).join("")}</div>
     <div class="follow">${logoImg("flogo")}<div class="ftx"><b>Follow @${esc(PROFILE.handle || C.handle || "")}</b><span>${md(s.followLine || C.followLine || "")}</span></div><span class="fbtn">Follow</span></div>`,
@@ -140,7 +146,7 @@ const logoSrc = C.logo || PROFILE.brandLogo || "brand/logos/logo.png";
 function logoImg(cls) { const u = fileUrl(logoSrc); return u ? `<img class="${cls}" src="${u}">` : `<span class="${cls} lph">${esc((PROFILE.name || "M")[0])}</span>`; }
 
 // ---------- page ----------
-const GROW = ["points", "numbered", "checklist", "compare", "table", "timeline", "quote", "mythfact", "code"];
+const GROW = ["points", "numbered", "checklist", "compare", "table", "timeline", "quote", "mythfact", "code", "tiles", "board"];
 const n = C.slides.length;
 function page(s, i) {
   const theme = s.theme || C.theme || "notebook";
@@ -165,7 +171,7 @@ const FIT_JS = `
   try { await document.fonts.ready; } catch (e) {}
   await Promise.all([...document.images].map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; })));
   const S = document.querySelector('.slide'), M = document.querySelector('.ct');
-  let k = 1; const over = () => M.scrollHeight > M.clientHeight + 1 || M.scrollWidth > M.clientWidth + 1;
+  let k = 1; const over = () => M.scrollHeight > M.clientHeight + 1 || M.scrollWidth > M.clientWidth + 1 || [...M.querySelectorAll(".vis")].some((v) => v.scrollHeight > v.clientHeight + 2);
   if (S.dataset.grow) { while (!over() && k < 1.22) { k += 0.02; S.style.setProperty('--k', k.toFixed(2)); } }
   while (over() && k > 0.72) { k -= 0.02; S.style.setProperty('--k', k.toFixed(2)); }
   document.querySelectorAll('.ttl').forEach(t => { let tk = 1; while (t.scrollWidth > t.clientWidth + 1 && tk > 0.6) { tk -= 0.03; t.style.setProperty('--tk', tk.toFixed(2)); } });

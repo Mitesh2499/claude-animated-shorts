@@ -1,0 +1,33 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="file:///C:/Projects/claude-animated-shorts/templates/carousel/fonts/fonts.css"><link rel="stylesheet" href="file:///C:/Projects/claude-animated-shorts/templates/carousel/slide.css"></head>
+<body><div data-grow="1" class="slide theme-arena L-timeline has-img img-right " style="--ac:#FDE101;--ac2:#22C55E">
+<div class="bgimg fit-right"><img src="file:///C:/Projects/claude-animated-shorts/brand/cards/stokes/stokes_ashes_2019_ccby_1600.jpg" style="object-position:63% 40%"></div>
+<header class="hd"><img class="av" src="file:///C:/Projects/claude-animated-shorts/brand/logos/logo.png"><div class="who"><b>Mitesh</b><span>@MiteshJourney</span></div><div class="series">IPL 2027 · Auction</div></header>
+<main class="ct"><h2 class="ttl ">No Stokes in the IPL since <em class="ac">2023</em>. Why?</h2><div class="tl"><div class="te "><span class="td">2017</span><span class="tt">IPL debut · Rising Pune Supergiant</span></div><div class="te "><span class="td">2018–21</span><span class="tt">Rajasthan Royals</span></div><div class="te "><span class="td">2023</span><span class="tt">Chennai Super Kings · last IPL game</span></div><div class="te "><span class="td">2025</span><span class="tt">Skipped the mega auction to focus on England</span></div><div class="te "><span class="td">2026</span><span class="tt">Rule: skip a mega auction → barred from the next one</span></div><div class="te hi"><span class="td">2027</span><span class="tt">Retired from Tests in June. Back in the register</span></div></div></main>
+<div class="src">Photo: Ben Sutherland, CC BY 2.0 (Headingley 2019)</div>
+<footer class="ft"><div class="pg"><b>02</b>/09</div><div class="prog"><i style="width:22.2%"></i></div>
+<div class="swipe"><span class="gl"><svg viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></svg></span></div></footer>
+</div><pre id="qa"></pre><script>
+(async () => {
+  try { await document.fonts.ready; } catch (e) {}
+  await Promise.all([...document.images].map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; })));
+  const S = document.querySelector('.slide'), M = document.querySelector('.ct');
+  let k = 1; const over = () => M.scrollHeight > M.clientHeight + 1 || M.scrollWidth > M.clientWidth + 1 || [...M.querySelectorAll(".vis")].some((v) => v.scrollHeight > v.clientHeight + 2);
+  if (S.dataset.grow) { while (!over() && k < 1.22) { k += 0.02; S.style.setProperty('--k', k.toFixed(2)); } }
+  while (over() && k > 0.72) { k -= 0.02; S.style.setProperty('--k', k.toFixed(2)); }
+  document.querySelectorAll('.ttl').forEach(t => { let tk = 1; while (t.scrollWidth > t.clientWidth + 1 && tk > 0.6) { tk -= 0.03; t.style.setProperty('--tk', tk.toFixed(2)); } });
+  const q = { k: +k.toFixed(2), errors: [], warns: [] };
+  if (over()) q.errors.push('content overflows the safe area even at k=' + k.toFixed(2) + ' - cut words or split the slide');
+  const W = S.clientWidth, H = S.clientHeight;
+  let minF = 99, words = 0;
+  const walker = document.createTreeWalker(M, NodeFilter.SHOW_TEXT);
+  while (walker.nextNode()) { const tn = walker.currentNode; const tx = tn.textContent.trim(); if (!tx) continue;
+    const el = tn.parentElement; if (el.closest('svg')) { words += tx.split(/\s+/).length; continue; }
+    const fs = parseFloat(getComputedStyle(el).fontSize); minF = Math.min(minF, fs); words += tx.split(/\s+/).length;
+    const r = el.getBoundingClientRect(); if (r.width && (r.left < 40 || r.right > W - 40 || r.bottom > H - 70)) q.errors.push('text outside safe margins: "' + tx.slice(0, 40) + '"'); }
+  if (minF < 23.5) q.warns.push('smallest text ' + minF.toFixed(0) + 'px (< 24px is hard to read on a phone)');
+  if (words > 75) q.warns.push(words + ' words on one slide (aim <= 60)');
+  if (k < 0.86) q.warns.push('text shrunk to ' + Math.round(k * 100) + '% to fit - slide is dense');
+  document.querySelectorAll('img').forEach(im => { if (!im.naturalWidth) q.errors.push('image failed: ' + im.src.slice(-60)); });
+  q.minFont = Math.round(minF); q.words = words;
+  document.getElementById('qa').textContent = 'QA' + JSON.stringify(q) + 'QA';
+})();</script></body></html>

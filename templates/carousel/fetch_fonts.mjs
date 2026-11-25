@@ -3,6 +3,7 @@
 import fs from "node:fs";
 const FAMILIES = [
   "Sora:wght@500;600;700;800",
+  "Anton",
   "Inter:wght@400;500;600;700;800",
   "Fraunces:opsz,wght@9..144,600;9..144,800;9..144,900",
   "JetBrains+Mono:wght@500;700",
