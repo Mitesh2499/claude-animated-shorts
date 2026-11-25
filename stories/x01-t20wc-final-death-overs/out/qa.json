@@ -1,0 +1,77 @@
+{
+ "problems": [],
+ "slides": [
+  {
+   "slide": 1,
+   "layout": "cover",
+   "k": 1,
+   "errors": [],
+   "warns": [],
+   "minFont": 23,
+   "words": 47
+  },
+  {
+   "slide": 2,
+   "layout": "ledger",
+   "k": 1.12,
+   "errors": [],
+   "warns": [],
+   "minFont": 25,
+   "words": 101
+  },
+  {
+   "slide": 3,
+   "layout": "split",
+   "k": 1.2,
+   "errors": [],
+   "warns": [],
+   "minFont": 26,
+   "words": 74
+  },
+  {
+   "slide": 4,
+   "layout": "leaderboard",
+   "k": 1.04,
+   "errors": [],
+   "warns": [],
+   "minFont": 23,
+   "words": 84
+  },
+  {
+   "slide": 5,
+   "layout": "player",
+   "k": 1.26,
+   "errors": [],
+   "warns": [],
+   "minFont": 28,
+   "words": 86
+  },
+  {
+   "slide": 6,
+   "layout": "player",
+   "k": 1.26,
+   "errors": [],
+   "warns": [],
+   "minFont": 28,
+   "words": 74
+  },
+  {
+   "slide": 7,
+   "layout": "player",
+   "k": 1.26,
+   "errors": [],
+   "warns": [],
+   "minFont": 28,
+   "words": 70
+  },
+  {
+   "slide": 8,
+   "layout": "end",
+   "k": 1.26,
+   "errors": [],
+   "warns": [],
+   "minFont": 29,
+   "words": 48
+  }
+ ]
+}
