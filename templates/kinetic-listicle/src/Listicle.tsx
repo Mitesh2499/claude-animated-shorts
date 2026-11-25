@@ -5,6 +5,7 @@ import { AbsoluteFill, Audio, Img, OffthreadVideo, continueRender, delayRender, 
 import SCRIPT from "../script.json";
 import TL from "./timeline.json";
 import { SCENES, SW, SH } from "./scenes";
+import { SAFE_SCENES, CW, CH } from "./scenes_safe";
 
 export const W = 1080, H = 1920, FPS = 30;
 export const TOTAL = Math.ceil(TL.total * FPS);
@@ -14,7 +15,7 @@ const TH = ((SCRIPT as any).theme ?? {}) as Record<string, string>;
 const C = { bg: TH.bg ?? "#f1f1f1", ink: TH.ink ?? "#1d1d1d", grey: "#525252", ghost: "#bdbab8", accent: (SCRIPT as any).accent ?? "#cc6e5a", mark: TH.mark ?? "#c6c6c6", bar: TH.bar ?? "#111111" };
 /** span colour names -> hex (theme can override): blue/cyan/amber/violet/accent */
 const COL: Record<string, string> = { blue: TH.blue ?? "#2563EB", cyan: TH.cyan ?? "#06B6D4", amber: TH.amber ?? "#F59E0B", violet: TH.violet ?? "#8B5CF6", accent: (SCRIPT as any).accent ?? "#cc6e5a" };
-const FONT = "'Inter','Segoe UI','Helvetica Neue',Arial,sans-serif";
+const FONT = "'Inter','Noto Sans Devanagari','Nirmala UI','Segoe UI',Arial,sans-serif";
 /** say: what the voice says instead of t ("" = shown silently right after the previous spoken word); c: colour name */
 type Span = { t: string; s?: "small" | "reg" | "big" | "huge" | "italic" | "bar"; say?: string; c?: string };
 type Line = Span[];
@@ -22,7 +23,7 @@ type Card = { kind: "image" | "video" | "terminal" | "context"; src?: string; li
 type Section = {
   kind: "hook" | "item" | "recap" | "cta" | "follow" | "scene"; blocks?: Line[]; ordinal?: string; scene?: string; minDur?: number;
   badge?: { name: string; say?: string; color?: string; glyph?: string; logo?: string }; head?: Line[]; card?: Card; sub?: Line[]; bullets?: (string | Span)[];
-  ordinalSay?: string; tag?: string; chips?: string[]; keyword?: string; cover?: string;
+  ordinalSay?: string; tag?: string; chips?: string[]; keyword?: string; cover?: string; title?: Span[];
 };
 // brandLogo / watermarkLogo: paths under public/ (build.py copies brand/ -> public/brand/), e.g. "brand/logos/logo.png"
 const S = SCRIPT as unknown as { brand: string; brandLogo?: string; watermarkLogo?: string; sections: Section[] };
@@ -30,6 +31,16 @@ const SIZE: Record<string, React.CSSProperties> = {
   small: { fontSize: 44, fontWeight: 500 }, reg: { fontSize: 50, fontWeight: 500 }, big: { fontSize: 72, fontWeight: 800, letterSpacing: -1 },
   huge: { fontSize: 124, fontWeight: 800, letterSpacing: -3, lineHeight: 1 }, italic: { fontSize: 62, fontWeight: 700, fontStyle: "italic" },
   bar: { fontSize: 56, fontWeight: 700, color: "#fff" },
+};
+
+// ------------------------------------------------------------------ Instagram safe-zone layout ("layout": "safe" in script.json)
+// 1080x1920: top 0-270 (14 %) and bottom 1248+ (35 %) are covered by Reels UI; 65 px side margins; lower-right = action buttons.
+// headline 285-465 (15-24 %) -> visual canvas 470-1070 (24-56 %) -> rolling 2-line subtitles 1082-1240 (56-65 %).
+export const SAFE = (SCRIPT as any).layout === "safe";
+export const ZONE = { top: 270, bottom: 1248, side: 65, head: [285, 465], canvas: [470, 1070], subs: [1082, 1240] } as const;
+const SUB_SIZE: Record<string, React.CSSProperties> = {
+  small: { fontSize: 44, fontWeight: 600 }, reg: { fontSize: 46, fontWeight: 600 }, big: { fontSize: 58, fontWeight: 800 },
+  huge: { fontSize: 66, fontWeight: 900 }, italic: { fontSize: 50, fontWeight: 700, fontStyle: "italic" }, bar: { fontSize: 50, fontWeight: 800, color: "#fff" },
 };
 
 // ------------------------------------------------------------------ token bookkeeping: must match build.py `tokens()` order
@@ -67,13 +78,13 @@ const mix = (a: string, b: string, k: number) => {
   const p = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
   const A = p(a), B = p(b); return `rgb(${A.map((v, i) => Math.round(v + (B[i] - v) * k)).join(",")})`;
 };
-const TextLine: React.FC<{ line: Line; times: number[]; start: number; align?: "center" | "left" }> = ({ line, times, start, align = "center" }) => {
+const TextLine: React.FC<{ line: Line; times: number[]; start: number; align?: "center" | "left"; sizes?: Record<string, React.CSSProperties> }> = ({ line, times, start, align = "center", sizes = SIZE }) => {
   const now = useNow();
   let k = start;
   return (
     <div style={{ textAlign: align, lineHeight: 1.12, margin: "4px 0" }}>
       {line.map((sp, i) => {
-        const ws = words(sp.t); const st = SIZE[sp.s ?? "small"];
+        const ws = words(sp.t); const st = sizes[sp.s ?? "small"];
         const el = ws.map((w, j) => <Word key={j} w={w} at={times[k + j] ?? 1e9} style={{ ...st, color: sp.s === "bar" ? "#fff" : sp.c ? COL[sp.c] ?? sp.c : st.color }} />);
         k += ws.length;
         if (sp.s === "bar") {
@@ -99,7 +110,7 @@ const Grid: React.FC<{ op?: number }> = ({ op = 0.5 }) => (
   <AbsoluteFill style={{ opacity: op, backgroundImage: "radial-gradient(#cfcfcf 2px, transparent 2px)", backgroundSize: "54px 54px" }} />
 );
 const Watermark: React.FC = () => (
-  <div style={{ position: "absolute", left: 0, right: 0, top: H * 0.855, display: "flex", justifyContent: "center", alignItems: "center", gap: 14, fontFamily: FONT, fontWeight: 700, fontSize: 40, color: C.mark }}>
+  <div style={{ position: "absolute", left: 0, right: 0, top: SAFE ? 1262 : H * 0.855, display: "flex", justifyContent: "center", alignItems: "center", gap: 14, fontFamily: FONT, fontWeight: 700, fontSize: SAFE ? 30 : 40, color: C.mark }}>
     {S.watermarkLogo ? <Img src={staticFile(S.watermarkLogo)} style={{ height: 44, opacity: 0.45 }} /> : null}{S.brand}
   </div>
 );
@@ -253,12 +264,33 @@ const ContextGrid: React.FC<{ t0: number; title?: string }> = ({ t0, title }) =>
   );
 };
 /** Word-synced header on top + a code-drawn animated scene (scenes.tsx) that can cue on spoken words. */
-const norm = (w: string) => w.toLowerCase().replace(/[^a-z0-9%$]+/g, "");
+const norm = (w: string) => w.toLowerCase().replace(/[^\p{L}\p{N}%$]+/gu, "");
 const SceneSection: React.FC<{ s: Section; times: number[]; t0: number; t1: number }> = ({ s, times, t0, t1 }) => {
   const now = useNow(); const L = sectionLines(s), st = lineStarts(s);
   const toks = L.flatMap(({ line }) => line.flatMap((sp) => words(sp.t)));
   const cue = (w: string, nth = 1) => { let n = 0; const q = norm(w); for (let i = 0; i < toks.length; i++) if (norm(toks[i]).includes(q) && ++n === nth) return (times[i] ?? t0) - t0; return 0.5; };
   const Scene = SCENES[s.scene ?? ""];
+  if (SAFE) {
+    // headline (static, pops in) -> visual canvas -> rolling 2-line karaoke subtitles
+    const lineT = st.map((i) => times[i] ?? 1e9); let cur = 0; lineT.forEach((x, i) => { if (now >= x - 0.05) cur = i; });
+    const from = Math.max(0, cur - 1);
+    const SS = SAFE_SCENES[s.scene ?? ""]; const kh = spring({ frame: Math.max(0, (now - t0) * FPS), fps: FPS, config: { damping: 13, stiffness: 150 } });
+    return (
+      <AbsoluteFill style={{ fontFamily: FONT }}>
+        {s.title ? <div style={{ position: "absolute", top: ZONE.head[0], height: ZONE.head[1] - ZONE.head[0], left: ZONE.side, right: ZONE.side, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
+          <div style={{ opacity: kh, transform: `translateY(${(1 - kh) * 30}px) scale(${0.92 + 0.08 * kh})`, fontSize: 78, fontWeight: 900, lineHeight: 1.12, letterSpacing: -1, color: C.ink }}>
+            {s.title.map((sp, i) => <span key={i} style={{ color: sp.c ? COL[sp.c] ?? sp.c : C.ink, fontSize: sp.s === "small" || sp.s === "reg" ? 44 : sp.s === "huge" ? 96 : undefined, fontWeight: sp.s === "small" || sp.s === "reg" ? 700 : undefined, marginRight: "0.25em", display: sp.s === "small" || sp.s === "reg" ? "block" : "inline" }}>{sp.t}</span>)}
+          </div></div> : null}
+        <div style={{ position: "absolute", top: ZONE.canvas[0], left: 0, width: CW, height: CH,
+          transform: `scale(${1 + 0.07 * Math.min(1, (now - t0) / Math.max(1, t1 - t0))}) translate(${Math.sin((now - t0) * 1.1) * 9}px, ${Math.cos((now - t0) * 0.9) * 6}px)`, transformOrigin: "50% 50%" }}>
+          {SS ? <SS t={now - t0} d={t1 - t0} cue={cue} /> : Scene ? <div style={{ transform: `scale(${CH / SH})`, transformOrigin: "50% 0", width: SW, height: SH }}><Scene t={now - t0} d={t1 - t0} cue={cue} /></div> : null}
+        </div>
+        <div style={{ position: "absolute", top: ZONE.subs[0], height: ZONE.subs[1] - ZONE.subs[0], left: 70, right: 130, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+          {L.slice(from, cur + 1).map((x, j) => <TextLine key={from + j} line={x.line} times={times} start={st[from + j]} sizes={SUB_SIZE} />)}
+        </div>
+      </AbsoluteFill>
+    );
+  }
   return (
     <AbsoluteFill style={{ fontFamily: FONT }}>
       <div style={{ position: "absolute", top: H * 0.03, left: 50, right: 50 }}>{L.map((x, i) => <TextLine key={i} line={x.line} times={times} start={st[i]} />)}</div>
@@ -274,7 +306,7 @@ const Cta: React.FC<{ s: Section; times: number[]; t0: number }> = ({ s, times, 
   return (
     <AbsoluteFill style={{ fontFamily: FONT }}>
       <Grid op={0.4} />
-      <div style={{ position: "absolute", top: H * 0.07, left: 40, right: 40 }}>{L.slice(0, 2).map((x, i) => <TextLine key={i} line={x.line} times={times} start={st[i]} />)}</div>
+      <div style={{ position: "absolute", top: SAFE ? ZONE.head[0] : H * 0.07, left: 40, right: 40 }}>{L.slice(0, 2).map((x, i) => <TextLine key={i} line={x.line} times={times} start={st[i]} />)}</div>
       {s.cover ? <div style={{ position: "absolute", top: H * 0.27, left: 0, right: 0, display: "flex", justifyContent: "center", perspective: 1600 }}>
         <Img src={staticFile(s.cover)} style={{ width: 560, borderRadius: 10, boxShadow: "30px 40px 70px rgba(0,0,0,0.3)", transform: `rotateY(${-22 + Math.sin(now) * 6}deg) rotateZ(-8deg) scale(${0.8 + 0.2 * k})` }} />
       </div> : null}
@@ -289,13 +321,13 @@ const Follow: React.FC<{ s: Section; times: number[]; t0: number }> = ({ s, time
   return (
     <AbsoluteFill style={{ fontFamily: FONT }}>
       <Grid op={0.45} />
-      <div style={{ position: "absolute", top: H * 0.06, left: 40, right: 40 }}>{L.slice(0, half).map((x, i) => <TextLine key={i} line={x.line} times={times} start={st[i]} />)}</div>
-      <div style={{ position: "absolute", top: H * 0.3, left: 0, right: 0, display: "flex", justifyContent: "center" }}>
-        <div style={{ width: 380, height: 380, borderRadius: 190, background: "#111", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 200, transform: `scale(${k})`, boxShadow: "0 40px 80px rgba(0,0,0,0.25)", overflow: "hidden" }}>
+      <div style={{ position: "absolute", top: SAFE ? ZONE.head[0] : H * 0.06, left: 40, right: 40 }}>{L.slice(0, half).map((x, i) => <TextLine key={i} line={x.line} times={times} start={st[i]} />)}</div>
+      <div style={{ position: "absolute", top: SAFE ? 500 : H * 0.3, left: 0, right: 0, display: "flex", justifyContent: "center" }}>
+        <div style={{ width: SAFE ? 320 : 380, height: SAFE ? 320 : 380, borderRadius: 190, background: "#111", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 200, transform: `scale(${k})`, boxShadow: "0 40px 80px rgba(0,0,0,0.25)", overflow: "hidden" }}>
           {S.brandLogo ? <Img src={staticFile(S.brandLogo)} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : S.brand.replace(/^@/, "")[0]?.toUpperCase()}
         </div>
       </div>
-      <div style={{ position: "absolute", top: H * 0.58, left: 40, right: 40 }}>{L.slice(half).map((x, i) => <TextLine key={i} line={x.line} times={times} start={st[i + half]} />)}</div>
+      <div style={{ position: "absolute", top: SAFE ? 860 : H * 0.58, left: 40, right: SAFE ? 100 : 40 }}>{L.slice(half).map((x, i) => <TextLine key={i} line={x.line} times={times} start={st[i + half]} />)}</div>
     </AbsoluteFill>
   );
 };
@@ -305,10 +337,10 @@ const useInter = () => {
   const [h] = useState(() => delayRender("font"));
   useEffect(() => {
     const l = document.createElement("link"); l.rel = "stylesheet";
-    l.href = "https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,700;0,800;1,700&display=block";
+    l.href = "https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,700;0,800;1,700&family=Noto+Sans+Devanagari:wght@500;700;800;900&display=block";
     document.head.appendChild(l);
     const done = () => continueRender(h);
-    l.onload = () => Promise.all(["500", "700", "800"].map((w) => (document as any).fonts.load(`${w} 40px Inter`))).then(done, done);
+    l.onload = () => Promise.all([...["500", "700", "800"].map((w) => (document as any).fonts.load(`${w} 40px Inter`)), ...["500", "700", "800", "900"].map((w) => (document as any).fonts.load(`${w} 40px 'Noto Sans Devanagari'`, "रामायण करोड़"))]).then(done, done);
     l.onerror = done; setTimeout(done, 8000);
   }, [h]);
 };

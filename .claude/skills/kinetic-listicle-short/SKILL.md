@@ -10,6 +10,30 @@ Template: `templates/kinetic-listicle/` (`src/Listicle.tsx`, `build.py`, `script
 Proven demo: `stories/kinetic-demo/demo_3_claude_code_commands.mp4` (34 s, built from `script.example.json`, project `c:\Projects\kinetic-demo`).
 The reference's brand, watermark, logo, ebook and lines are theirs: never copy them. Our own handle/brand goes in `brand`.
 
+> Data / stats / box-office analysis reels have their own skill: `data-story-reel` (data-driven charts + posters, same safe-zone layout, template `templates/data-story/`). Use this skill for tool/tip listicles and concept explainers.
+
+## Screen layout: Instagram / Reels safe zones (DEFAULT for every new video, user rule 2026-11-23)
+A Reel is a 100 % mobile screen, but Instagram covers the top (status, "Reels", camera) and the bottom third (username, caption, audio) and puts the action buttons (like/comment/share) down the RIGHT side. Design for one thing at a time, inside the visible band:
+
+| Zone (1080x1920) | y px | % height | What goes there |
+|---|---|---|---|
+| Top UI clearance | 0-270 | 0-14 % | nothing important (background only) |
+| Headline | 285-465 | 15-24 % | 4-8 word claim/question, 78 px bold, one colour accent (`title` spans per section) |
+| Visual / data | 470-1070 | 24-56 % | the poster / chart / animation (1080x600 canvas, content inside x 65-1015) |
+| Subtitles | 1082-1240 | 56-65 % | karaoke voice-over, MAX 2 lines (rolling), 44-58 px; kept left of the right-side buttons (right margin 130 px) |
+| Bottom UI clearance | 1248-1920 | 65-100 % | only the small non-critical watermark (y 1262) |
+| Sides | 65 px each | 6 % | keep clear |
+
+- Turn it on with `"layout": "safe"` in script.json (Listicle.tsx `SAFE`, `ZONE`). Scene sections then render: static headline (pops in) -> `SAFE_SCENES[name]` from `src/scenes_safe.tsx` on the 1080x600 canvas (legacy 1080x1140 scenes are scaled to fit as a fallback) -> rolling 2-line subtitles. Follow card + CTA also move into the band.
+- Attention order to design for: visual interruption (face / poster / huge number) -> headline -> evidence (numbers, chart) -> explanation (voice + subtitles) -> payoff / CTA question.
+- Hierarchy: headline 70-90 px, key numbers 48-96 px inside the visual, subtitles 38-58 px. Never everything bold/animated/highlighted at once; one statistic on screen per beat; never 5 numbers at once.
+- Never put subtitles at the very bottom, charts behind the right-side buttons, or text in the top 14 %.
+- Write `blocks` as short subtitle lines (one idea, ~30 characters) because only the current + previous line are shown.
+- QA: draw red guide lines at 14 % and 65 % on the contact sheet; every headline, number and subtitle must sit between them. Canvas push-in in safe mode is 7 % (needed for the >= 90 % motion metric on the smaller canvas) so keep canvas content >= ~40 px from its edges.
+- Legacy layouts (item / hook / recap kinds with header at 4.5-15 %) predate this rule: before using them, move their text into the band too.
+- Data reels (box office, stats): show the source line ("स्रोत: X · date · estimates") on every chart, label zoomed axes ("ज़ूम: 1,650-1,850"), label derived values with "≈", call projections "our scenarios, not predictions", and never show fake poll results.
+- Movie/third-party posters: never download them; the user drops them in `brand/cards/` (any name; build.py copies them to space-free `_p_<name>` files and lists them in `src/posters.json`; scenes draw a styled title card when a poster is missing).
+
 ## The format (rules)
 1. **Hook in <= 4 s** = qualifier + number + urgency: "If you use [X], these are the [N] [things] you need right now." Pattern-interrupt visual in the first 1.5 s (real result card + accent bursts).
 2. **Every item has the same 4 beats**: ordinal ("First is", big) -> badge pill with the NAME slides in -> header (small lead-in + **bold key phrase**) over a real screen card -> sub-line + 2-4 sparkle bullets of concrete benefits ("no switching tabs", "no copy pasting"). 8-11 s per item.
@@ -82,7 +106,7 @@ Be explicit with the user that this is frame + signal analysis, not literal view
 ## Design tokens (measured; in Listicle.tsx `C` + `SIZE`)
 - Background #f1f1f1, ink #1d1d1d, secondary #525252, unrevealed/fresh words #bdbab8, accent #cc6e5a (hook bursts/badge tile), watermark #c6c6c6 bold at 85.5 % height.
 - Inter (Google Fonts, loaded with delayRender) 500/700/800 + 700 italic. Sizes at 1080 wide: small 44, reg 50, big 72/800, huge 124/800, italic 62/700, bar 56/700 white on #111.
-- Zones: header 4.5-15 %, card 20-50 % (860x560, radius 22, soft double shadow, 3D tilt that settles, slow float), sub + bullets 52-80 %, keep the bottom 12 % free (platform UI).
+- Zones (LEGACY, from the reference; superseded by the safe-zone table above): header 4.5-15 %, card 20-50 %, sub + bullets 52-80 %.
 - Motion: springs for card/badge/logo entries, hard cuts between sections, a whoosh on every cut, pop on every badge, tick on every bullet (build.py), soft pluck bed at 96 bpm ducked under the voice.
 
 ## Pipeline
@@ -102,6 +126,8 @@ Be explicit with the user that this is frame + signal analysis, not literal view
 - Verify with the TTS boundaries: one word = one WordBoundary ("rag" 0.32 s), spelled = one per letter.
 
 ## Gotchas
+- Hindi / Devanagari: voice hi-IN-MadhurNeural reads ~1.8 words/s at +12 % (first Reel 06 cut ran 99 s) -> use +25 % and short lines; write numbers as spoken Hindi words in `say` ("अठारह सौ तेरह") or the voice reads "1,813" slowly digit-group by digit-group; load Noto Sans Devanagari (Listicle.tsx font loader) and keep the cue `norm` unicode-aware (`\p{L}\p{N}`).
+- Print Hindi from Python with `sys.stdout.reconfigure(encoding="utf-8")` (cp1252 console crashes otherwise; `-I` ignores PYTHONIOENCODING).
 - Length budget: count words BEFORE voicing. Reel 05's 200-word script voiced at 79.8 s at +14 %; cut to ~180 words at +18 % -> 69.7 s. Aim <= 170 words for ~60 s.
 - edge-tts sometimes refuses one specific sentence (NoAudioReceived on every retry, e.g. "And TableFormer rebuilds..."): rephrase the first word ("Then ...") or remove a comma; test single lines with a small script first.
 - Motion metric: compare each 0.4 s window's first and last frame (mean abs diff > 1.0 at 270x480). Frame-to-frame diffs under-count slow push-in/drift (Reel 05: 70 % frame metric vs 97 % window metric).

@@ -15,6 +15,14 @@ BRAND = S.get('brandDir', "C:/Projects/claude-animated-shorts/brand")   # shared
 if os.path.isdir(BRAND): shutil.copytree(BRAND, os.path.join(ROOT, 'public', 'brand'), dirs_exist_ok=True)
 missing = [p for p in [S.get('brandLogo'), S.get('watermarkLogo')] + [sec.get('badge', {}).get('logo') for sec in S['sections']] + [sec.get('cover') for sec in S['sections']] if p and not os.path.exists(os.path.join(ROOT, 'public', p))]
 if missing: raise SystemExit('Missing assets (upload them or fetch logos first): ' + ', '.join(missing))
+# posters/cards actually present (scenes draw an <image> only for these, else a drawn title card)
+_cards = os.path.join(ROOT, 'public', 'brand', 'cards')
+_pm = {}
+for f in (os.listdir(_cards) if os.path.isdir(_cards) else []):
+    if f.lower().endswith(('.jpg', '.jpeg', '.png', '.webp')) and not f.startswith('_p_'):
+        key = os.path.splitext(f)[0].lower(); safe = '_p_' + re.sub(r'[^a-z0-9]+', '_', key) + os.path.splitext(f)[1].lower()
+        shutil.copyfile(os.path.join(_cards, f), os.path.join(_cards, safe)); _pm[key] = safe
+json.dump(_pm, open(os.path.join(ROOT, 'src', 'posters.json'), 'w'))
 # theSVG UI icons (brand/icons/*.svg) -> src/icons.json for <Icon name="bot" color=...> (inlined, recoloured via currentColor)
 icons = {}
 for fn in sorted(os.listdir(os.path.join(BRAND, 'icons'))) if os.path.isdir(os.path.join(BRAND, 'icons')) else []:
