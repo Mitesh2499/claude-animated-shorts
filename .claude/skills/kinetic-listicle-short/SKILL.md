@@ -121,6 +121,9 @@ Be explicit with the user that this is frame + signal analysis, not literal view
 5. **Render**: `node scripts/render.mjs out/silent.mp4` then mux `ffmpeg -i out/silent.mp4 -i public/audio/mix.wav -map 0:v:0 -map 1:a:0 -c:v copy -c:a aac -b:a 192k -shortest out/<name>.mp4` (Remotion's ffmpeg: `bitter-fruit/node_modules/@remotion/compositor-win32-x64-msvc/ffmpeg.exe`).
 6. **Deliver** the mp4 + script.json to `stories/<name>/`, keep earlier versions (`v1_`, `v2_` ...), save memory.
 
+## Voice (user rule 2026-11-25)
+edge-tts sounds robotic to the user. Use the Kokoro engine for new videos (`"engine": "kokoro"` - see `data-story-reel` section 0; build.py in `templates/data-story/` has it, copy that build.py). Never raise the voice rate to shorten a video; cut words.
+
 ## Pronunciation (user rule)
 - On screen acronyms stay as written; the voice says them the way the creator says them. `brand/profile.json` -> `"pronounce": {"RAG": "rag"}` (also per script `pronounce`). build.py applies it to every span without an explicit `say`. RAG is said "rag" (one word), never R-A-G. Ask the user when a new acronym appears (MCP = M-C-P, LLM = L-L-M, SQL?).
 - Verify with the TTS boundaries: one word = one WordBoundary ("rag" 0.32 s), spelled = one per letter.

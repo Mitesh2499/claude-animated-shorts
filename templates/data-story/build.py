@@ -60,7 +60,21 @@ def spans(sec):
 
 norm = lambda w: re.sub(r"[^\w%&]+", "", w.lower())
 
+# Voice engine: "edge" (edge-tts, online) or "kokoro" (local Kokoro-82M via C:/Projects/voice-lab, natural Hindi; user's pick 2026-11-25).
+ENGINE = S.get('engine', 'edge')
+KOKORO_PY = S.get('kokoroPython', 'C:/Projects/voice-lab/.venv/Scripts/python.exe')
+KOKORO_SCRIPT = S.get('kokoroScript', 'C:/Projects/voice-lab/kokoro_tts.py')
+_K = {}
+def kokoro_batch(texts):
+    items = [{'text': t, 'out': os.path.join(ROOT, 'audio', 'voice', f'k{i:02d}.wav').replace(os.sep, '/')} for i, t in enumerate(texts)]
+    job = {'voice': S.get('kokoroVoice', 'hm_omega'), 'lang': S.get('kokoroLang', 'h'), 'speed': S.get('kokoroSpeed', 1.0), 'whisperLang': S.get('whisperLang', 'hi'), 'items': items}
+    jp = os.path.join(ROOT, 'audio', 'kokoro_job.json'); json.dump(job, open(jp, 'w', encoding='utf-8'), ensure_ascii=False)
+    subprocess.run([KOKORO_PY, KOKORO_SCRIPT, jp], check=True)
+    for t, it in zip(texts, items): _K[t] = (it['out'], [tuple(m) for m in json.load(open(it['out'] + '.marks.json', encoding='utf-8'))])
+
 async def tts(text, path):
+    if ENGINE == 'kokoro':
+        out, marks = _K[text]; shutil.copyfile(out, path); return marks
     for attempt in range(6):
         try:
             async def collect():
@@ -79,6 +93,12 @@ async def tts(text, path):
     raise SystemExit('edge-tts failed: ' + text[:60])
 
 async def main():
+    if ENGINE == 'kokoro':
+        texts = []
+        for sec in S['sections']:
+            sp_ = spans(sec); say_ = [(s['say'] if s.get('say') is not None else speak(s['t'])) for s in sp_]
+            texts.append(' '.join(x for x in say_ if x).replace(' ,', ','))
+        kokoro_batch(texts)
     out_secs, t = [], 0.0
     voice = np.zeros(int(SR * 600))
     for i, sec in enumerate(S['sections']):

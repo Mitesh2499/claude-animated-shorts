@@ -1,0 +1,706 @@
+{
+ "layout": "safe",
+ "engine": "kokoro",
+ "kokoroVoice": "hm_omega",
+ "kokoroSpeed": 1.0,
+ "whisperLang": "hi",
+ "brand": "@MiteshJourney",
+ "brandLogo": "brand/logos/logo.png",
+ "watermarkLogo": "",
+ "accent": "#2563EB",
+ "theme": {
+  "bar": "#0B1220",
+  "sparkle": "#2563EB",
+  "blue": "#2563EB",
+  "cyan": "#06B6D4",
+  "amber": "#F59E0B",
+  "violet": "#8B5CF6"
+ },
+ "source": "स्रोत: Sacnilk · रामायण 5 Nov · डूम्सडे 25 Nov 2026 · ब्लॉक सीट सहित",
+ "entities": {
+  "ram": {
+   "name": "रामायण",
+   "en": "RAMAYANA",
+   "color": "#F59E0B",
+   "dark": "#7c2d12",
+   "poster": "ramayana"
+  },
+  "doom": {
+   "name": "डूम्सडे",
+   "en": "AVENGERS: DOOMSDAY",
+   "color": "#16A34A",
+   "dark": "#052e16",
+   "poster": "doomsday"
+  }
+ },
+ "_source": "Sacnilk Ramayana Overall Advance Booking Report (updated 5 Nov 2026 6:00 AM): pre-release advance ₹130.12 Cr incl. block seats (₹105.12 Cr excl.), 36.37 lakh tickets (29.59 lakh). Sacnilk Avengers: Doomsday Overall Advance Booking Report (data 25 Nov 2026 10:50 AM): ₹61.05 Cr (₹52.87 Cr), 9.67 lakh tickets (8.41 lakh), English 84 % of gross, 4 show dates on sale, release 17 Dec 2026 (22 days). Derived: per ticket 61.05e7/9.67e5 = ₹631, 130.12e7/36.37e5 = ₹358; tickets 36.37/9.67 = 3.76x; gap 130.12-61.05 = ₹69.07 Cr. Brief's ₹57.71 Cr / 9.13 lakh was an older snapshot; 'Ramayana crossed ₹50 Cr only in its final week' not supported -> dropped.",
+ "sections": [
+  {
+   "kind": "scene",
+   "scene": "versus",
+   "minDur": 4.0,
+   "title": [
+    {
+     "t": "भारत"
+    },
+    {
+     "t": "vs",
+     "c": "amber"
+    },
+    {
+     "t": "मार्वल"
+    }
+   ],
+   "data": {
+    "left": "ram",
+    "right": "doom",
+    "vsCue": "डूम्सडे",
+    "stamp": {
+     "text": "INDIA WINS?",
+     "cue": "पछाड़",
+     "color": "amber"
+    }
+   },
+   "sfx": [
+    {
+     "t": 0.05,
+     "type": "whoosh"
+    },
+    {
+     "word": "डूम्सडे",
+     "type": "pop",
+     "offset": -0.1
+    },
+    {
+     "word": "पछाड़",
+     "type": "boom",
+     "offset": -0.1
+    },
+    {
+     "word": "पछाड़",
+     "type": "glitch"
+    }
+   ],
+   "blocks": [
+    [
+     {
+      "t": "रामायण",
+      "s": "big",
+      "c": "amber"
+     },
+     {
+      "t": "ने"
+     }
+    ],
+    [
+     {
+      "t": "एवेंजर्स डूम्सडे",
+      "s": "big",
+      "c": "#16A34A"
+     },
+     {
+      "t": "को हरा दिया?"
+     }
+    ],
+    [
+     {
+      "t": "भारत ने"
+     },
+     {
+      "t": "जायंट मार्वल",
+      "s": "big"
+     }
+    ],
+    [
+     {
+      "t": "को पछाड़ दिया?!",
+      "s": "big",
+      "c": "#E5252A"
+     }
+    ]
+   ]
+  },
+  {
+   "kind": "scene",
+   "scene": "vbars",
+   "title": [
+    {
+     "t": "एडवांस"
+    },
+    {
+     "t": "बुकिंग",
+     "c": "blue"
+    }
+   ],
+   "data": {
+    "items": [
+     {
+      "id": "ram",
+      "v": 130.12,
+      "cue": "130"
+     },
+     {
+      "id": "doom",
+      "v": 61.05,
+      "cue": "61"
+     }
+    ],
+    "max": 150,
+    "unit": "₹",
+    "decimals": 2,
+    "label": "रिलीज़ से पहले की बुकिंग · ₹ करोड़",
+    "labelColor": "blue",
+    "labelIcon": "chart-column",
+    "win": "ram",
+    "trophy": true
+   },
+   "sfx": [
+    {
+     "word": "130",
+     "type": "pop"
+    },
+    {
+     "word": "130",
+     "type": "chime",
+     "offset": 0.7
+    },
+    {
+     "word": "61",
+     "type": "pop"
+    }
+   ],
+   "blocks": [
+    [
+     {
+      "t": "एडवांस बुकिंग:"
+     }
+    ],
+    [
+     {
+      "t": "रामायण"
+     },
+     {
+      "t": "₹130 करोड़!",
+      "s": "big",
+      "c": "amber",
+      "say": "एक सौ तीस करोड़!"
+     }
+    ],
+    [
+     {
+      "t": "डूम्सडे"
+     },
+     {
+      "t": "सिर्फ ₹61।",
+      "s": "big",
+      "c": "#16A34A",
+      "say": "सिर्फ इकसठ।"
+     }
+    ]
+   ],
+   "minDur": 6.4
+  },
+  {
+   "kind": "scene",
+   "scene": "catchFreeze",
+   "minDur": 2.4,
+   "title": [
+    {
+     "t": "रुको!",
+     "c": "#E5252A"
+    }
+   ],
+   "data": {
+    "stamp": "WAIT!",
+    "sub": "मैच अभी बाकी है",
+    "cue": "रुको",
+    "left": "ram",
+    "right": "doom"
+   },
+   "sfx": [
+    {
+     "word": "रुको",
+     "type": "boom",
+     "offset": -0.1
+    },
+    {
+     "word": "रुको",
+     "type": "glitch",
+     "offset": -0.05
+    }
+   ],
+   "blocks": [
+    [
+     {
+      "t": "पर"
+     },
+     {
+      "t": "रुको…",
+      "s": "big",
+      "c": "#E5252A"
+     }
+    ],
+    [
+     {
+      "t": "ये मैच अभी"
+     },
+     {
+      "t": "खत्म नहीं हुआ!",
+      "s": "big"
+     }
+    ]
+   ]
+  },
+  {
+   "kind": "scene",
+   "scene": "gauge",
+   "minDur": 3.6,
+   "title": [
+    {
+     "t": "रिकॉर्ड"
+    },
+    {
+     "t": "टूटेगा?",
+     "c": "#16A34A"
+    }
+   ],
+   "data": {
+    "now": 61.05,
+    "target": 130.12,
+    "cue": "22",
+    "unit": "₹",
+    "ofText": "/ ₹130 करोड़ · रामायण का रिकॉर्ड",
+    "needText": "₹69 करोड़ और चाहिए"
+   },
+   "sfx": [
+    {
+     "word": "22",
+     "type": "tick",
+     "n": 6,
+     "every": 0.1,
+     "gain": 0.3
+    },
+    {
+     "word": "69",
+     "type": "error",
+     "offset": -0.05
+    }
+   ],
+   "blocks": [
+    [
+     {
+      "t": "डूम्सडे के पास अभी"
+     }
+    ],
+    [
+     {
+      "t": "22 दिन बाकी हैं,",
+      "s": "big",
+      "c": "#16A34A",
+      "say": "बाईस दिन बाकी हैं,"
+     }
+    ],
+    [
+     {
+      "t": "और रिकॉर्ड बस"
+     },
+     {
+      "t": "₹69 करोड़ दूर!",
+      "s": "big",
+      "c": "#E5252A",
+      "say": "उनहत्तर करोड़ दूर!"
+     }
+    ]
+   ]
+  },
+  {
+   "kind": "scene",
+   "scene": "vbars",
+   "title": [
+    {
+     "t": "असली"
+    },
+    {
+     "t": "ट्विस्ट",
+     "c": "#E5252A"
+    }
+   ],
+   "data": {
+    "items": [
+     {
+      "id": "doom",
+      "v": 631,
+      "cue": "631"
+     },
+     {
+      "id": "ram",
+      "v": 358,
+      "cue": "358"
+     }
+    ],
+    "max": 700,
+    "unit": "₹",
+    "label": "औसत कमाई · प्रति टिकट",
+    "labelColor": "red",
+    "labelIcon": "trending-up",
+    "win": "doom"
+   },
+   "sfx": [
+    {
+     "word": "ट्विस्ट",
+     "type": "glitch",
+     "offset": -0.1
+    },
+    {
+     "word": "631",
+     "type": "chime",
+     "offset": -0.05
+    },
+    {
+     "word": "358",
+     "type": "pop"
+    }
+   ],
+   "blocks": [
+    [
+     {
+      "t": "असली ट्विस्ट:",
+      "s": "big",
+      "c": "#E5252A"
+     }
+    ],
+    [
+     {
+      "t": "डूम्सडे का हर टिकट"
+     },
+     {
+      "t": "₹631,",
+      "s": "big",
+      "c": "#16A34A",
+      "say": "छह सौ इकतीस रुपये,"
+     }
+    ],
+    [
+     {
+      "t": "रामायण का सिर्फ"
+     },
+     {
+      "t": "₹358!",
+      "s": "big",
+      "c": "amber",
+      "say": "तीन सौ अट्ठावन!"
+     }
+    ]
+   ]
+  },
+  {
+   "kind": "scene",
+   "scene": "bigNumber",
+   "title": [
+    {
+     "t": "इंग्लिश का"
+    },
+    {
+     "t": "जलवा",
+     "c": "#16A34A"
+    }
+   ],
+   "data": {
+    "v": 84,
+    "unit": "",
+    "suffix": "%",
+    "cue": "84",
+    "caption": "डूम्सडे की कमाई · इंग्लिश वर्ज़न से",
+    "color": "#16A34A",
+    "poster": "doom"
+   },
+   "sfx": [
+    {
+     "word": "84",
+     "type": "tick",
+     "n": 8,
+     "every": 0.08,
+     "gain": 0.3
+    },
+    {
+     "word": "84",
+     "type": "chime",
+     "offset": 0.6
+    }
+   ],
+   "blocks": [
+    [
+     {
+      "t": "और"
+     },
+     {
+      "t": "84%",
+      "s": "big",
+      "c": "#16A34A",
+      "say": "चौरासी प्रतिशत"
+     },
+     {
+      "t": "कमाई"
+     }
+    ],
+    [
+     {
+      "t": "सिर्फ इंग्लिश वर्ज़न से!",
+      "s": "big"
+     }
+    ]
+   ]
+  },
+  {
+   "kind": "scene",
+   "scene": "vbars",
+   "title": [
+    {
+     "t": "मास"
+    },
+    {
+     "t": "पावर",
+     "c": "amber"
+    }
+   ],
+   "data": {
+    "items": [
+     {
+      "id": "ram",
+      "v": 36.37,
+      "cue": "36"
+     },
+     {
+      "id": "doom",
+      "v": 9.67,
+      "cue": "गुना"
+     }
+    ],
+    "max": 42,
+    "unit": "",
+    "decimals": 2,
+    "label": "बिके टिकट · लाख में",
+    "labelColor": "amber",
+    "labelIcon": "chart-column",
+    "win": "ram",
+    "trophy": true
+   },
+   "sfx": [
+    {
+     "word": "36",
+     "type": "pop"
+    },
+    {
+     "word": "गुना",
+     "type": "chime",
+     "offset": -0.05
+    }
+   ],
+   "blocks": [
+    [
+     {
+      "t": "पर टिकटों में"
+     },
+     {
+      "t": "रामायण आगे:",
+      "s": "big",
+      "c": "amber"
+     }
+    ],
+    [
+     {
+      "t": "36 लाख टिकट,",
+      "s": "big",
+      "c": "amber",
+      "say": "छत्तीस लाख टिकट,"
+     }
+    ],
+    [
+     {
+      "t": "करीब 4 गुना!",
+      "s": "big",
+      "say": "करीब चार गुना!"
+     }
+    ]
+   ],
+   "minDur": 6.0
+  },
+  {
+   "kind": "scene",
+   "scene": "balance",
+   "title": [
+    {
+     "t": "कौन"
+    },
+    {
+     "t": "भारी?",
+     "c": "amber"
+    }
+   ],
+   "data": {
+    "left": {
+     "text": "🔥 MASS",
+     "color": "#F59E0B"
+    },
+    "right": {
+     "text": "💎 PREMIUM",
+     "color": "#16A34A"
+    },
+    "tipCue": "स्पीड",
+    "levelCue": "मास"
+   },
+   "sfx": [
+    {
+     "word": "स्पीड",
+     "type": "whoosh",
+     "offset": 0.1
+    },
+    {
+     "word": "मास",
+     "type": "chime"
+    }
+   ],
+   "blocks": [
+    [
+     {
+      "t": "एक तरफ"
+     },
+     {
+      "t": "मार्वल की स्पीड,",
+      "s": "big",
+      "c": "#16A34A"
+     }
+    ],
+    [
+     {
+      "t": "दूसरी तरफ"
+     },
+     {
+      "t": "रामायण की",
+      "c": "amber"
+     }
+    ],
+    [
+     {
+      "t": "मास पावर।",
+      "s": "big",
+      "c": "amber"
+     }
+    ]
+   ]
+  },
+  {
+   "kind": "scene",
+   "scene": "poll",
+   "minDur": 4.2,
+   "title": [
+    {
+     "t": "आपका"
+    },
+    {
+     "t": "फैसला?",
+     "c": "amber"
+    }
+   ],
+   "data": {
+    "question": "क्या डूम्सडे रिकॉर्ड तोड़ेगी?",
+    "sub": "₹130 CR · 22 DAYS LEFT",
+    "options": [
+     {
+      "t": "🏹 टीम रामायण",
+      "cue": "टीम",
+      "color": "amber"
+     },
+     {
+      "t": "🛡️ टीम एवेंजर्स",
+      "cue": "एवेंजर्स",
+      "color": "green"
+     }
+    ],
+    "commentCue": "कमेंट",
+    "button": "कमेंट करें 👇"
+   },
+   "sfx": [
+    {
+     "word": "टीम",
+     "type": "pop"
+    },
+    {
+     "word": "एवेंजर्स",
+     "type": "pop"
+    },
+    {
+     "word": "कमेंट",
+     "type": "chime",
+     "offset": -0.1
+    }
+   ],
+   "blocks": [
+    [
+     {
+      "t": "क्या डूम्सडे"
+     },
+     {
+      "t": "रिकॉर्ड तोड़ेगी?",
+      "s": "big",
+      "c": "#16A34A"
+     }
+    ],
+    [
+     {
+      "t": "टीम रामायण,",
+      "s": "big",
+      "c": "amber"
+     },
+     {
+      "t": "या"
+     }
+    ],
+    [
+     {
+      "t": "टीम एवेंजर्स?",
+      "s": "big",
+      "c": "#16A34A"
+     }
+    ],
+    [
+     {
+      "t": "कमेंट करो!",
+      "s": "bar"
+     }
+    ]
+   ]
+  },
+  {
+   "kind": "follow",
+   "blocks": [
+    [
+     {
+      "t": "फॉलो करो"
+     }
+    ],
+    [
+     {
+      "t": "@MiteshJourney",
+      "s": "big",
+      "c": "blue",
+      "say": "मितेश जर्नी।"
+     }
+    ],
+    [
+     {
+      "t": "हर नंबर के पीछे का सच।",
+      "say": ""
+     }
+    ],
+    [
+     {
+      "t": "LEARN. BUILD. AUTOMATE.",
+      "s": "bar",
+      "say": ""
+     }
+    ]
+   ]
+  }
+ ]
+}

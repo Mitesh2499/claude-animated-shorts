@@ -6,8 +6,16 @@ description: Make a 45-70 s vertical DATA-STORY / STATS ANALYSIS reel (box-offic
 # Data-story reel (safe-zone layout, data-driven charts, Remotion)
 
 Template: `templates/data-story/` (`script.example.json` = the full Ramayana reel, `src/scenes_data.tsx` = the 10 data scenes, `src/Listicle.tsx` = safe-zone layout + karaoke, `build.py` = voice/timeline/mix/posters).
-Proven: `stories/reel06-ramayana-boxoffice/` (v3 built only from script.json with this template; project `c:\Projects\reel07-ramayana-datastory`).
+Proven: `stories/reel08-gta6-vs-endgame/` (Kokoro voice, versus/overtake/catch/split/balance, 56 s) and `stories/reel06-ramayana-boxoffice/` (v3 built only from script.json with this template; project `c:\Projects\reel07-ramayana-datastory`).
 Shares the brand kit, voice pipeline, icons (theSVG) and QA with `kinetic-listicle-short` - read its Gotchas too.
+
+## 0. Voice: Kokoro hm_omega (DEFAULT, user's pick 2026-11-25)
+- The user judged edge-tts robotic; after an A/B of free voices (c:\Projectsoice-lab, COMPARE_*.wav) they picked **Kokoro-82M `hm_omega`** (Apache-2.0, local). Measured closest to natural reels: rhythm nPVI 46 vs refs 46-56 (edge Madhur at +25 % = 30), best Whisper intelligibility.
+- script.json: `"engine": "kokoro", "kokoroVoice": "hm_omega", "kokoroSpeed": 1.0, "whisperLang": "hi"`. build.py batches every section into `C:/Projects/voice-lab/kokoro_tts.py` (venv `C:/Projects/voice-lab/.venv`), which synthesises on CPU (~0.6x realtime) and gets word timings by running faster-whisper on the result and aligning character-by-character to our words (so karaoke stays word-accurate). Unchanged sections are cached.
+- NEVER speed the voice up to hit a length: speed-ups made edge voices robotic. Cut words instead. Kokoro Hindi speaks ~2.2 words/s -> ~110 spoken words for 50 s.
+- Write `say` in Devanagari only (Kokoro's Hindi G2P mangles Latin): "GTA 6" -> "जी टी ए सिक्स", "$3.79 बिलियन" -> "तीन पॉइंट सात नौ बिलियन डॉलर".
+- Cue words: matching strips matras/anusvara, so very short words ("हाँ" -> "ह") match the wrong token; cue on a distinctive word ("रिकॉर्ड") or a number.
+- If voice-lab is missing: create the venv, `pip install kokoro faster-whisper soundfile` (+ torch); Kokoro runs on CPU (GPU path hits a cuDNN conflict here).
 
 ## 1. The storyline (what makes a data reel watchable)
 A data reel is an argument, not a news bulletin. Shape every reel as:
@@ -23,9 +31,9 @@ One fact on screen per beat. Never five numbers at once.
 | Zone (1080x1920) | y px | % | Content |
 |---|---|---|---|
 | Top UI | 0-270 | 0-14 % | nothing important |
-| Headline | 285-465 | 15-24 % | section `title`: 4-8 words, 78 px, one accent colour, optional small second line (`"s":"small"`) |
+| Headline | 285-465 | 15-24 % | section `title`: 3-6 words, 90 px, one accent colour, optional small second line (`"s":"small"`) |
 | Visual | 470-1070 | 24-56 % | data scene on a 1080x600 canvas, content inside x 65-1015 |
-| Subtitles | 1082-1240 | 56-65 % | karaoke voice-over, max 2 rolling lines (current + previous), right margin 130 px (action buttons) |
+| Subtitles | 1076-1240 | 56-65 % | karaoke voice-over, max 2 rolling lines (current + previous), 52-78 px (user asked for bigger text), right margin 120 px; each block line <= ~22 characters so it never wraps |
 | Bottom UI | 1248-1920 | 65-100 % | only the small watermark |
 `"layout": "safe"` in script.json turns this on. Attention order: visual interruption -> headline -> evidence -> explanation (voice/subs) -> CTA question. Headline 70-90 px, key numbers 48-190 px, subtitles 44-58 px. Write `blocks` as short subtitle lines (~30 characters, one idea).
 
@@ -53,6 +61,11 @@ Scenes (`src/scenes_data.tsx`, all read `data`):
 | `lineChart` | daily trend + ghost reference line | `points[{name,v,cue?,approx?}], max, ticks, unit, label, ghost{v,text,cue}, srcExtra` |
 | `scenarios` | projection bars from "now" crossing benchmark lines (zoomed) | `now, nowLabel, lo, hi, lines[{text,v,id?|color,below?}], bars[{name,v,cue,color?}], introCue, srcExtra` |
 | `gauge` | progress to a round target + "still needed" | `now, target, cue, unit, ofText, needText, alt{v,cue,text}` |
+| `versus` | two posters + VS + stamp (hook / face-off) | `left, right, vsCue, stamp{text,cue}` |
+| `overtake` | bar B races past bar A + % badge | `a{id,v,label}, b{id,v,label,cue}, unit, suffix, max, diff{text,cue}` |
+| `catchFreeze` | grey freeze + WAIT! stamp (the twist) | `stamp, sub, cue, left, right` |
+| `splitCompare` | two columns of like-vs-unlike facts on cue | `left{id,head}, right{id,head}, rows[{l,r,cue}]` |
+| `balance` | see-saw tips then levels with ? (verdict) | `left{text,color}, right{text,color}, tipCue, levelCue` |
 | `poll` | prediction question, options pop on cue, cursor hover, comment button | `poster{id,img}?, question, sub?, options[{t,cue,color?}], commentCue, button` |
 Colours accept names (red, green, amber, blue, cyan, violet, slate, saffron) or hex. New chart type -> add a data-driven component to `scenes_data.tsx` and register it in `DATA_SCENES`.
 
@@ -69,5 +82,5 @@ Colours accept names (red, green, amber, blue, cyan, violet, slate, saffron) or 
 2. `mkdir c:\Projects\<name>`, copy `templates/data-story/*`, junction `node_modules` -> `C:\Projects\bitter-fruit\node_modules`.
 3. `python -I build.py` (voice per section with WordBoundary timings, `src/timeline.json`, `public/audio/mix.wav`, posters). Loop it up to 3x - edge-tts can drop a request. Check total length: target 55-70 s; Hindi runs long - shorten lines before raising the rate past +25 %.
 4. `npx tsc --noEmit -p .`, then stills at each section end with red guide lines at 14 % and 65 % (all headline/number/subtitle pixels between them).
-5. Render silent -> mux (`-map 0:v:0 -map 1:a:0`) -> QA on the final MP4: 0 black frames, motion metric (0.4 s windows, start-vs-end mean diff > 1.0) >= 90 % (safe-mode canvas push-in 7 % gives ~95 %), audio about -13 to -15 dB, peak <= 0.95.
+5. Render silent -> mux (`-map 0:v:0 -map 1:a:0`) -> QA on the final MP4: 0 black frames, motion metric (0.4 s windows, start-vs-end mean diff > 1.0) >= 90 % (safe-mode canvas push-in 7 %, origin 50 % 92 % so the canvas grows upward and never covers the subtitles, gives ~94 %), audio about -13 to -15 dB, peak <= 0.95.
 6. Deliver mp4 + cover still (hook end frame) + script.json + SCRIPT.md to `stories/<name>/`; keep older versions as `v1_`, `v2_`.

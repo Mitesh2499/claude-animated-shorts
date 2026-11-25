@@ -131,11 +131,12 @@ const vbars: React.FC<DP> = ({ t, cue, data: d }) => {
     {d.items.map((it: any, i: number) => { const at = cueAt(cue, it.cue, 0.5 + i * 0.6) - 0.2; const x = x0 + i * (cw + gap); const g = ease((t - at) / 0.8); const h = ((base - top) * it.v / d.max) * g; const on = t > at; const c = ENT[it.id]?.color ?? col(it.color);
       return <g key={it.id ?? i}>
         {on ? <rect x={x + 25} y={base - h} width={cw - 50} height={h} rx={14} fill={c} /> : null}
+        {on && g > 0.95 ? <rect x={x + 25} y={base - h + ((t * 0.9 + i * 0.37) % 1) * h - 20} width={cw - 50} height={40} fill="#fff" opacity={0.22} /> : null}
         {d.win === it.id && g > 0.9 ? <rect x={x + 17} y={base - h - 8} width={cw - 34} height={h + 8} rx={18} fill="none" stroke={GREEN} strokeWidth={7} opacity={0.6 + 0.4 * Math.sin(t * 8)} /> : null}
         {on ? <text x={x + cw / 2} y={base - h - 18} textAnchor="middle" fontFamily={FONT} fontWeight={900} fontSize={52} fill={B.ink}>{d.unit ?? ""}{fmt(cnt(t, at, it.v, 0.8), d.decimals ?? 0)}</text> : null}
-        {ENT[it.id] ? <EPoster id={it.id} x={x + cw / 2 - 52} y={base + 16} w={104} h={148} k={sp(t, at - 0.2)} dim={on ? 0 : 0.4} />
+        {ENT[it.id] ? <EPoster id={it.id} x={x + cw / 2 - 52} y={base + 16} w={104} h={148} k={sp(t, Math.min(at - 0.2, 0.1 + i * 0.12))} dim={on ? 0 : 0.5} ring={on ? undefined : "#cbd5e1"} />
           : <text x={x + cw / 2} y={base + 44} textAnchor="middle" fontFamily={FONT} fontWeight={900} fontSize={30} fill={B.ink}>{it.name}</text>}
-        {d.trophy && d.win === it.id && t > at + 0.8 ? <g transform={`translate(${x + cw / 2},${base - h - 120}) scale(${sp(t, at + 0.8, 9, 220)})`}><Icon name="trophy" x={-30} y={-30} size={60} color={AMBER} /></g> : null}
+        {d.trophy && d.win === it.id && t > at + 0.8 ? <g transform={`translate(${x + cw + 6},${base - h - 40}) scale(${sp(t, at + 0.8, 9, 220)})`}><Icon name="trophy" x={-30} y={-30} size={60} color={AMBER} /></g> : null}
       </g>; })}
     {t > Ti && mv < 1 ? <g transform={`translate(540,260) scale(${kg * (1 - mv * 0.8)})`} opacity={1 - mv}><circle r={150} fill={col(d.intro.color)} opacity={0.15} /><Icon name={d.intro.icon} x={-125} y={-125} size={250} color={col(d.intro.color)} rot={t * 50} /></g> : null}
     <Src />
@@ -225,11 +226,13 @@ const gauge: React.FC<DP> = ({ t, cue, data: d }) => {
   const T2 = cueAt(cue, d.cue, 0.3) - 0.2, Th = d.alt ? cueAt(cue, d.alt.cue, 2) - 0.2 : 1e9;
   const cx = 540, cy = 300, r = 230, a0 = Math.PI * 0.8, a1 = Math.PI * 2.2;
   const arc = (f: number) => { const a = a0 + (a1 - a0) * f; return `M${cx + r * Math.cos(a0)},${cy + r * Math.sin(a0)} A${r},${r} 0 ${a - a0 > Math.PI ? 1 : 0} 1 ${cx + r * Math.cos(a)},${cy + r * Math.sin(a)}`; };
-  const f1 = (d.now / d.target) * ease((t - T2) / 1.0), f2 = d.alt ? d.now / d.target + ((d.alt.v - d.now) / d.target) * ease((t - Th) / 0.8) : 0;
+  const f1 = (d.now / d.target) * ease((t - Math.min(T2, 0.4)) / 1.0), f2 = d.alt ? d.now / d.target + ((d.alt.v - d.now) / d.target) * ease((t - Th) / 0.8) : 0;
   return <Svg>
     <path d={arc(1)} fill="none" stroke="#e2e8f0" strokeWidth={44} strokeLinecap="round" />
     {t > Th ? <path d={arc(f2)} fill="none" stroke={GREEN} strokeWidth={44} strokeLinecap="round" opacity={0.45} /> : null}
+    <path d={arc(1)} fill="none" stroke={AMBER} strokeWidth={58} strokeLinecap="round" opacity={0.08 + 0.08 * Math.sin(t * 5)} />
     {f1 > 0.001 ? <path d={arc(f1)} fill="none" stroke={AMBER} strokeWidth={44} strokeLinecap="round" /> : null}
+    {f1 > 0.001 ? <path d={arc(f1)} fill="none" stroke="#fff" strokeWidth={10} strokeLinecap="round" strokeDasharray="30 90" strokeDashoffset={-t * 120} opacity={0.6} /> : null}
     <text x={cx} y={cy - 10} textAnchor="middle" fontFamily={FONT} fontWeight={900} fontSize={84} fill={B.ink}>{d.unit ?? ""}{fmt(d.target * f1, dec(d.now))}</text>
     <text x={cx} y={cy + 40} textAnchor="middle" fontFamily={FONT} fontWeight={800} fontSize={30} fill={B.grey}>{d.ofText}</text>
     {t > T2 + 0.9 ? <g transform={`translate(${cx},${cy + 150}) scale(${sp(t, T2 + 0.9)})`}><rect x={-240} y={-38} width={480} height={76} rx={38} fill="#fff5f5" stroke={RED} strokeWidth={3} />
@@ -260,10 +263,11 @@ const poll: React.FC<DP> = ({ t, cue, data: d }) => {
 };
 
 // ------------------------------------------------------------------ 10. bigNumber (one huge stat, counts up; good for hooks / "numbers first")
-// data: { v, unit?, suffix?, cue, caption, color?, sparks? }
+// data: { v, unit?, suffix?, cue, caption, color?, sparks?, poster? (entity id shown faintly behind) }
 const bigNumber: React.FC<DP> = ({ t, cue, data: d }) => {
   const T = cueAt(cue, d.cue, 0.4) - 0.3; const k = sp(t, 0.05, 12, 150); const c = col(d.color ?? "amber");
   return <Svg>
+    {d.poster ? <g opacity={0.28 * k}><EPoster id={d.poster} x={330} y={-10 - t * 6} w={420} h={600} /><rect x={300} y={-20} width={480} height={640} fill="#f1f1f1" opacity={0.35} /></g> : null}
     {(d.sparks ?? true) ? Array.from({ length: 14 }).map((_, i) => { const a = (i / 14) * Math.PI * 2 + t * 0.4, rr = 230 + random(`bn${i}`) * 60; return <circle key={i} cx={540 + Math.cos(a) * rr * 1.6} cy={270 + Math.sin(a) * rr * 0.8} r={6 + random(`bs${i}`) * 8} fill={c} opacity={0.35} />; }) : null}
     <g transform={`translate(540,290) scale(${k})`}>
       <text textAnchor="middle" y={40} fontFamily={FONT} fontWeight={900} fontSize={190} fill={c}>{d.unit ?? ""}{fmt(cnt(t, T, d.v, 1.0), dec(d.v))}{d.suffix ?? ""}</text>
@@ -273,4 +277,100 @@ const bigNumber: React.FC<DP> = ({ t, cue, data: d }) => {
   </Svg>;
 };
 
-export const DATA_SCENES: Record<string, React.FC<DP>> = { posterFaceoff, leaderboard, gapRuler, vbars, trendBars, lineChart, scenarios, gauge, poll, bigNumber };
+
+// ------------------------------------------------------------------ 11. versus (two posters, VS, optional stamp)
+// data: { left, right, stamp?:{text, cue, color?}, vsCue? }
+const versus: React.FC<DP> = ({ t, cue, data: d }) => {
+  const kl = sp(t, 0.05, 11, 150), kr = sp(t, 0.25, 11, 150), kv = sp(t, cueAt(cue, d.vsCue, 0.5), 8, 220);
+  const Ts = d.stamp ? cueAt(cue, d.stamp.cue, 2) - 0.15 : 1e9, ks = sp(t, Ts, 9, 240);
+  const shake = t > Ts ? Math.sin((t - Ts) * 55) * 12 * Math.exp(-(t - Ts) * 4) : 0;
+  return <Svg><g transform={`translate(${shake},0)`}>
+    <g transform={`translate(${(1 - kl) * -300},0) rotate(-4 285 280)`}><EPoster id={d.left} x={95} y={40} w={360} h={500} k={1} /></g>
+    <g transform={`translate(${(1 - kr) * 300},0) rotate(4 795 280)`}><EPoster id={d.right} x={625} y={40} w={360} h={500} k={1} /></g>
+    <g transform={`translate(540,290) scale(${kv})`}><circle r={78} fill="#0B1220" stroke="#fff" strokeWidth={8} filter="url(#shadow)" />
+      <text y={26} textAnchor="middle" fontFamily={FONT} fontWeight={900} fontSize={72} fill="#F59E0B" fontStyle="italic">VS</text></g>
+    {t > Ts ? <Stamp x={540} y={500} text={d.stamp.text} color={col(d.stamp.color ?? "red")} k={ks} rot={-7} size={64} /> : null}
+  </g></Svg>;
+};
+
+// ------------------------------------------------------------------ 12. overtake (bar B races past bar A, % badge)
+// data: { a:{id, v, label}, b:{id, v, label, cue}, unit, suffix, max, diff:{text, cue} }
+const overtake: React.FC<DP> = ({ t, cue, data: d }) => {
+  const Tb = cueAt(cue, d.b.cue, 1) - 0.3, Td = cueAt(cue, d.diff.cue, 2) - 0.2;
+  const ga = ease((t - 0.1) / 0.7), gb = ease((t - Tb) / 1.1); const W = 600;
+  const rows = [{ ...d.a, g: ga, at: 0.1, y: 40, dur: 0.7 }, { ...d.b, g: gb, at: Tb, y: 300, dur: 1.1 }];
+  const lead = gb * d.b.v > d.a.v;
+  return <Svg>
+    {rows.map((r: any, i: number) => { const bw = (r.v / d.max) * W * r.g; const on = t > r.at; const c = ENT[r.id]?.color ?? "#2563EB";
+      return <g key={i} opacity={on ? 1 : 0.25}>
+        <EPoster id={r.id} x={65} y={r.y} w={150} h={213} k={on ? sp(t, r.at) : 1} ring={i === 1 && lead ? GREEN : undefined} />
+        <text x={250} y={r.y + 50} fontFamily={FONT} fontWeight={900} fontSize={34} fill={B.ink}>{ENT[r.id]?.name ?? r.id}</text>
+        <text x={250} y={r.y + 86} fontFamily={FONT} fontWeight={700} fontSize={24} fill={B.grey}>{r.label}</text>
+        <rect x={250} y={r.y + 104} width={W} height={92} rx={20} fill="#e2e8f0" />
+        <rect x={250} y={r.y + 104} width={Math.max(0, bw)} height={92} rx={20} fill={c} />
+        <text x={Math.max(520, 250 + bw - 18)} y={r.y + 168} textAnchor="end" fontFamily={FONT} fontWeight={900} fontSize={58} fill="#fff">{d.unit}{(r.v * ease((t - r.at) / r.dur)).toFixed(2)}{d.suffix}</text>
+      </g>; })}
+    <line x1={250 + (d.a.v / d.max) * W} x2={250 + (d.a.v / d.max) * W} y1={140} y2={410} stroke={ENT[d.a.id]?.color ?? "#64748b"} strokeWidth={4} strokeDasharray="8 8" opacity={ga} />
+    {t > Td ? <g transform={`translate(880,${520}) scale(${sp(t, Td, 9, 230)})`}><rect x={-120} y={-48} width={240} height={96} rx={48} fill={GREEN} filter="url(#shadow)" />
+      <text y={20} textAnchor="middle" fontFamily={FONT} fontWeight={900} fontSize={54} fill="#fff">{d.diff.text}</text></g> : null}
+    <Src />
+  </Svg>;
+};
+
+// ------------------------------------------------------------------ 13. catchFreeze (grey freeze-frame + "WAIT!" stamp)
+// data: { stamp, sub?, cue?, left?, right? }
+const catchFreeze: React.FC<DP> = ({ t, cue, data: d }) => {
+  const T = cueAt(cue, d.cue, 0.15) - 0.1; const ks = sp(t, T, 8, 260); const flash = Math.max(0, 1 - (t - T) / 0.25);
+  return <Svg>
+    <g style={{ filter: "grayscale(1)" }} opacity={0.55}>
+      {d.left ? <EPoster id={d.left} x={120} y={60} w={300} h={420} /> : null}{d.right ? <EPoster id={d.right} x={660} y={60} w={300} h={420} /> : null}
+    </g>
+    <rect x={65} y={0} width={950} height={590} fill="#fff" opacity={t > T ? flash * 0.9 : 0} />
+    {t > T ? <Stamp x={540} y={260} text={d.stamp} color={RED} k={ks} rot={-6} size={92} /> : null}
+    {t > T && d.sub ? <g opacity={ease((t - T - 0.35) / 0.3)}><rect x={190} y={390} width={700} height={84} rx={42} fill="#0B1220" />
+      <text x={540} y={445} textAnchor="middle" fontFamily={FONT} fontWeight={900} fontSize={40} fill="#fff">{d.sub}</text></g> : null}
+  </Svg>;
+};
+
+// ------------------------------------------------------------------ 14. splitCompare (two columns of facts that appear on cue)
+// data: { left:{id, head}, right:{id, head}, rows:[{l, r, cue}] }
+const splitCompare: React.FC<DP> = ({ t, cue, data: d }) => {
+  const cols = [{ ...d.left, x: 65 }, { ...d.right, x: 552 }]; const w = 463;
+  return <Svg>
+    {cols.map((c: any, i: number) => { const cc = ENT[c.id]?.color ?? "#2563EB"; const k = sp(t, 0.05 + i * 0.15);
+      return <g key={i} opacity={cl(k * 1.5)}>
+        <rect x={c.x} y={10} width={w} height={575} rx={28} fill="#fff" stroke={cc} strokeWidth={4} filter="url(#shadow)" />
+        <EPoster id={c.id} x={c.x + 20} y={28} w={86} h={122} />
+        <text x={c.x + 124} y={82} fontFamily={FONT} fontWeight={900} fontSize={36} fill={cc}>{c.head}</text>
+        <text x={c.x + 124} y={124} fontFamily={FONT} fontWeight={800} fontSize={26} fill={B.grey}>{ENT[c.id]?.name}</text>
+      </g>; })}
+    {d.rows.map((r: any, i: number) => { const at = cueAt(cue, r.cue, 0.6 + i * 0.8) - 0.15; if (t < at) return null; const k = ease((t - at) / 0.35); const y = 175 + i * 102;
+      return <g key={i} opacity={k} transform={`translate(0,${(1 - k) * 20})`}>
+        {[r.l, r.r].map((s: string, j: number) => <g key={j}><rect x={cols[j].x + 18} y={y} width={w - 36} height={86} rx={18} fill={j ? "#ecfdf5" : "#eff6ff"} />
+          <text x={cols[j].x + w / 2} y={y + 56} textAnchor="middle" fontFamily={FONT} fontWeight={800} fontSize={32} fill={B.ink}>{s}</text></g>)}
+      </g>; })}
+    <Src />
+  </Svg>;
+};
+
+// ------------------------------------------------------------------ 15. balance (see-saw tips to one side, then levels with "?")
+// data: { left:{text, color}, right:{text, color}, tipCue, levelCue, center? }
+const balance: React.FC<DP> = ({ t, cue, data: d }) => {
+  const Tt = cueAt(cue, d.tipCue, 0.8), Tl = cueAt(cue, d.levelCue, 2.5);
+  const ang = 12 * ease((t - Tt) / 0.6) * (1 - ease((t - Tl) / 0.8)) + Math.sin(t * 2) * 1.2;
+  const kq = sp(t, Tl + 0.4, 9, 220);
+  const pans: [any, number][] = [[d.left, 260], [d.right, 820]];
+  return <Svg>
+    <polygon points="540,330 470,470 610,470" fill="#0B1220" />
+    <g transform={`rotate(${ang} 540 330)`}>
+      <rect x={140} y={318} width={800} height={24} rx={12} fill="#334155" />
+      {pans.map(([s, x], i) => <g key={i} transform={`rotate(${-ang} ${x} 318)`}>
+        <rect x={x - 170} y={170} width={340} height={140} rx={30} fill={col(s.color)} filter="url(#shadow)" />
+        <text x={x} y={258} textAnchor="middle" fontFamily={FONT} fontWeight={900} fontSize={Math.min(54, 560 / Math.max(1, [...s.text].length))} fill="#fff">{s.text}</text></g>)}
+    </g>
+    {t > Tl + 0.4 ? <g transform={`translate(540,110) scale(${kq})`}><circle r={70} fill="#F59E0B" filter="url(#shadow)" /><text y={30} textAnchor="middle" fontFamily={FONT} fontWeight={900} fontSize={96} fill="#fff">?</text></g> : null}
+    {d.center ? <text x={540} y={545} textAnchor="middle" fontFamily={FONT} fontWeight={800} fontSize={32} fill={B.grey}>{d.center}</text> : null}
+  </Svg>;
+};
+
+export const DATA_SCENES: Record<string, React.FC<DP>> = { posterFaceoff, leaderboard, gapRuler, vbars, trendBars, lineChart, scenarios, gauge, poll, bigNumber, versus, overtake, catchFreeze, splitCompare, balance };

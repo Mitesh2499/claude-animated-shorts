@@ -40,8 +40,8 @@ const SIZE: Record<string, React.CSSProperties> = {
 export const SAFE = (SCRIPT as any).layout === "safe";
 export const ZONE = { top: 270, bottom: 1248, side: 65, head: [285, 465], canvas: [470, 1070], subs: [1082, 1240] } as const;
 const SUB_SIZE: Record<string, React.CSSProperties> = {
-  small: { fontSize: 44, fontWeight: 600 }, reg: { fontSize: 46, fontWeight: 600 }, big: { fontSize: 58, fontWeight: 800 },
-  huge: { fontSize: 66, fontWeight: 900 }, italic: { fontSize: 50, fontWeight: 700, fontStyle: "italic" }, bar: { fontSize: 50, fontWeight: 800, color: "#fff" },
+  small: { fontSize: 52, fontWeight: 600 }, reg: { fontSize: 54, fontWeight: 600 }, big: { fontSize: 68, fontWeight: 800 },
+  huge: { fontSize: 78, fontWeight: 900 }, italic: { fontSize: 58, fontWeight: 700, fontStyle: "italic" }, bar: { fontSize: 58, fontWeight: 800, color: "#fff" },
 };
 
 // ------------------------------------------------------------------ token bookkeeping: must match build.py `tokens()` order
@@ -279,14 +279,14 @@ const SceneSection: React.FC<{ s: Section; times: number[]; t0: number; t1: numb
     return (
       <AbsoluteFill style={{ fontFamily: FONT }}>
         {s.title ? <div style={{ position: "absolute", top: ZONE.head[0], height: ZONE.head[1] - ZONE.head[0], left: ZONE.side, right: ZONE.side, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
-          <div style={{ opacity: kh, transform: `translateY(${(1 - kh) * 30}px) scale(${0.92 + 0.08 * kh})`, fontSize: 78, fontWeight: 900, lineHeight: 1.12, letterSpacing: -1, color: C.ink }}>
-            {s.title.map((sp, i) => <span key={i} style={{ color: sp.c ? COL[sp.c] ?? sp.c : C.ink, fontSize: sp.s === "small" || sp.s === "reg" ? 44 : sp.s === "huge" ? 96 : undefined, fontWeight: sp.s === "small" || sp.s === "reg" ? 700 : undefined, marginRight: "0.25em", display: sp.s === "small" || sp.s === "reg" ? "block" : "inline" }}>{sp.t}</span>)}
+          <div style={{ opacity: kh, transform: `translateY(${(1 - kh) * 30}px) scale(${0.92 + 0.08 * kh})`, fontSize: 90, fontWeight: 900, lineHeight: 1.1, letterSpacing: -1, color: C.ink }}>
+            {s.title.map((sp, i) => <span key={i} style={{ color: sp.c ? COL[sp.c] ?? sp.c : C.ink, fontSize: sp.s === "small" || sp.s === "reg" ? 48 : sp.s === "huge" ? 108 : undefined, fontWeight: sp.s === "small" || sp.s === "reg" ? 700 : undefined, marginRight: "0.25em", display: sp.s === "small" || sp.s === "reg" ? "block" : "inline" }}>{sp.t}</span>)}
           </div></div> : null}
         <div style={{ position: "absolute", top: ZONE.canvas[0], left: 0, width: CW, height: CH,
-          transform: `scale(${1 + 0.07 * Math.min(1, (now - t0) / Math.max(1, t1 - t0))}) translate(${Math.sin((now - t0) * 1.1) * 9}px, ${Math.cos((now - t0) * 0.9) * 6}px)`, transformOrigin: "50% 50%" }}>
+          transform: `scale(${1 + 0.07 * Math.min(1, (now - t0) / Math.max(1, t1 - t0))}) translate(${Math.sin((now - t0) * 1.1) * 9}px, ${Math.cos((now - t0) * 0.9) * 6}px)`, transformOrigin: "50% 92%" /* grow upward: keeps the canvas bottom off the subtitles */ }}>
           {DS ? <DS t={now - t0} d={t1 - t0} cue={cue} data={s.data} /> : SS ? <SS t={now - t0} d={t1 - t0} cue={cue} /> : Scene ? <div style={{ transform: `scale(${CH / SH})`, transformOrigin: "50% 0", width: SW, height: SH }}><Scene t={now - t0} d={t1 - t0} cue={cue} /></div> : null}
         </div>
-        <div style={{ position: "absolute", top: ZONE.subs[0], height: ZONE.subs[1] - ZONE.subs[0], left: 70, right: 130, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+        <div style={{ position: "absolute", top: ZONE.subs[0] - 6, height: ZONE.subs[1] - ZONE.subs[0] + 6, left: 70, right: 120, display: "flex", flexDirection: "column", justifyContent: "center" }}>
           {L.slice(from, cur + 1).map((x, j) => <TextLine key={from + j} line={x.line} times={times} start={st[from + j]} sizes={SUB_SIZE} />)}
         </div>
       </AbsoluteFill>
