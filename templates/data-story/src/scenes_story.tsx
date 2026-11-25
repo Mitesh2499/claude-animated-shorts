@@ -12,6 +12,7 @@ import { sp, ease, cl } from "./scenes";
 import type { SceneProps } from "./scenes";
 import { Box, BoxShadow, proj, fit, col, mixc } from "./scenes_depth";
 import type { Cam } from "./scenes_depth";
+import { E, prog, arrive, snapTail, f2s, logLerp } from "./motion";
 
 const CW = 1080, CH = 600;
 type DP = SceneProps & { data?: any };
@@ -57,7 +58,10 @@ const photo: React.FC<DP> = ({ t, d, cue, data: D }) => {
   const shots = D.shots as any[]; const Ts = shots.map((s, i) => (i === 0 ? 0 : cueAt(cue, s.cue, (i * d) / shots.length) - 0.12));
   let cur = 0; Ts.forEach((x, i) => { if (t >= x) cur = i; });
   const s = shots[cur], ts = t - Ts[cur], span = (cur < shots.length - 1 ? Ts[cur + 1] : d) - Ts[cur];
-  const kin = cur === 0 ? sp(t, 0, 14, 160) : ease(ts / 0.3);
+  // first shot: the print card arrives DOWN from 1.12x with a focus pull (snapSettle 13 f) - never grows from small
+  const ain = arrive(t, 0, { from: 1.12, blur: 10, dur: f2s(13), ease: E.snapSettle });
+  // later shots: camera reveal snap (one frame to ~0.7 of 1.32x, then a 0.45 s decelerating tail) + 5 f blur-to-focus
+  const snap = cur > 0 ? snapTail(t, Ts[cur], 1.32, 0.72, 0.45) : 1, focus = cur > 0 ? 6 * (1 - prog(ts, 0, f2s(5), E.glide)) : 0;
   const Tfz = s.freeze ? cueAt(cue, s.freeze, 1e9) - 0.05 : 1e9, frozen = t > Tfz;
   const kb = Math.min(1, (frozen ? Tfz - Ts[cur] : ts) / Math.max(2, span));
   const KB: Record<string, number[]> = { in: [1.05, 1.2, 0, 0], out: [1.22, 1.06, 0, 0], left: [1.15, 1.15, 34, -34], right: [1.15, 1.15, -34, 34] };
@@ -66,16 +70,16 @@ const photo: React.FC<DP> = ({ t, d, cue, data: D }) => {
   const Td = s.dust ? cueAt(cue, s.dust, 1e9) : 1e9, kd = cl((t - Td) / 1.9);
   const file = imgFile(s.img), fb = s.fallback ?? {}, fc = col(fb.color ?? "accent");
   const shake = frozen ? Math.sin((t - Tfz) * 70) * 7 * Math.exp(-(t - Tfz) * 9) : 0;
-  const flash = Math.max(cur > 0 ? 1 - ts / 0.16 : 0, frozen ? 1 - (t - Tfz) / 0.22 : 0);
+  const flash = frozen ? 1 - (t - Tfz) / 0.22 : 0;   // white flash only means something: the FREEZE shutter
   const edge = 100 - kd * 135; // dust sweep boundary (% of width), right -> left
   return <div style={{ position: "absolute", left: 0, top: 0, width: CW, height: CH, perspective: 1600 }}>
     <div style={{ position: "absolute", left: 65 + shake, top: 34, width: 950, height: 550, borderRadius: 26, overflow: "hidden", background: "#0B1220",
       boxShadow: "0 30px 60px rgba(20,27,77,0.28), 0 8px 18px rgba(20,27,77,0.18)",
-      transform: `rotateY(${Math.sin(t * 0.45) * 5}deg) rotateX(${3 + Math.cos(t * 0.38) * 1.5}deg) scale(${0.9 + 0.1 * kin})`,
-      filter: kin < 0.98 ? `blur(${(1 - kin) * 9}px)` : undefined,
+      transform: `rotateY(${Math.sin(t * 0.45) * 5}deg) rotateX(${3 + Math.cos(t * 0.38) * 1.5}deg) scale(${ain.scale})`, opacity: ain.opacity,
+      filter: ain.blur > 0.25 ? `blur(${ain.blur}px)` : undefined,
       WebkitMaskImage: kd > 0 ? `linear-gradient(100deg, #000 ${edge}%, transparent ${edge + 22}%)` : undefined, maskImage: kd > 0 ? `linear-gradient(100deg, #000 ${edge}%, transparent ${edge + 22}%)` : undefined }}>
       {file ? <Img src={staticFile(`brand/cards/${file}`)} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: s.pos ?? "50% 35%",
-        transform: `scale(${lerp(s0, s1, kb)}) translateX(${lerp(x0, x1, kb)}px)`, filter: `grayscale(${desat}) contrast(${1 + 0.18 * desat}) brightness(${1 - 0.12 * desat})` }} />
+        transform: `scale(${lerp(s0, s1, kb) * snap}) translateX(${lerp(x0, x1, kb)}px)`, filter: `grayscale(${desat}) contrast(${1 + 0.18 * desat}) brightness(${1 - 0.12 * desat})${focus > 0.25 ? ` blur(${focus}px)` : ""}` }} />
         : <div style={{ width: "100%", height: "100%", position: "relative", background: `radial-gradient(ellipse 80% 70% at 30% 30%, ${mixc(fc, "#ffffff", 0.18)}, ${mixc(fc, "#000000", 0.55)} 70%, #07070A)`,
           filter: `grayscale(${desat})`, transform: `scale(${lerp(s0, s1, kb) * 0.95 + 0.05})` }}>
           <div style={{ position: "absolute", left: 60, right: 60, top: 150, paddingLeft: 30, fontFamily: FONT, fontWeight: 900, fontSize: 70, lineHeight: 1.02, color: "#fff", letterSpacing: -1.5 }}>{fb.title ?? s.img}</div>
@@ -84,7 +88,7 @@ const photo: React.FC<DP> = ({ t, d, cue, data: D }) => {
         </div>}
       {D.rec ? <Rec t={t} w={950} h={550} label={typeof D.rec === "string" ? D.rec : "REC"} img={file ? s.img : undefined} /> : null}
       {frozen && !kd ? <div style={{ position: "absolute", left: "50%", top: 44, transform: "translateX(-50%)", fontFamily: MONO, fontWeight: 700, fontSize: 24, letterSpacing: 5, color: "#fff", background: "rgba(11,18,32,0.65)", padding: "6px 16px", borderRadius: 8 }}>❚❚ FREEZE</div> : null}
-      {s.caption ? <div style={{ position: "absolute", left: 34, bottom: 30, fontFamily: MONO, fontWeight: 600, fontSize: 21, letterSpacing: 3, color: "#fff", background: "rgba(11,18,32,0.72)", padding: "8px 16px", borderRadius: 10, opacity: cl((ts - 0.3) * 3) }}>{s.caption.toUpperCase()}</div> : null}
+      {s.caption ? <div style={{ position: "absolute", left: 34, bottom: 30, fontFamily: MONO, fontWeight: 600, fontSize: 21, letterSpacing: 3, color: "#fff", background: "rgba(11,18,32,0.72)", padding: "8px 16px", borderRadius: 10, opacity: cl((ts - 0.3) * 5), transform: `translateX(${-28 * (1 - prog(ts, 0.3, f2s(12), E.softLand))}px)` }}>{s.caption.toUpperCase()}</div> : null}
       {flash > 0 ? <div style={{ position: "absolute", inset: 0, background: "#fff", opacity: flash }} /> : null}
     </div>
     {kd > 0 ? Array.from({ length: 90 }, (_, j) => { const r1 = random(`dust${j}`), r2 = random(`dusty${j}`), r3 = random(`dusts${j}`);
@@ -110,7 +114,7 @@ const chain: React.FC<DP> = ({ t, cue, data: D }) => {
     {it.map((x, i) => { if (t < Ti[i]) return null; const w = wd(x.t), pts = corners(w);
       const xs = pts.map((p) => p.x), ys = pts.map((p) => p.y); const cx = (Math.min(...xs) + Math.max(...xs)) / 2, cy = (Math.min(...ys) + Math.max(...ys)) / 2;
       const F = { K, ox: 540 - cx * K, oy: i * rowH + (rowH - gapH) / 2 - cy * K };
-      const k = sp(t, Ti[i], 9, 200), last = i === n - 1 && D.result !== false; const c = x.color ?? (last ? "accent" : "chalk");
+      const k = prog(t, Ti[i], f2s(8), E.gentleIn), last = i === n - 1 && D.result !== false; const c = x.color ?? (last ? "accent" : "chalk");
       const struck = D.strike?.i === i && t > Tst;
       return <g key={i}>
         {i > 0 ? <text x={540} y={i * rowH - gapH / 2 + 14} textAnchor="middle" fontFamily={FONT} fontWeight={900} fontSize={gapH * 0.95} fill={MUTE} opacity={cl((t - Ti[i]) * 5)}>{ops[i - 1]}</text> : null}
@@ -127,11 +131,12 @@ const chain: React.FC<DP> = ({ t, cue, data: D }) => {
 // A recording viewfinder with the brand avatar punches in; the term pops in accent; the definition builds line by line.
 // If the user records a presenter clip later, swap the avatar for it.
 const explainer: React.FC<DP> = ({ t, cue, data: D }) => {
-  const k = sp(t, 0, 12, 170), Tt = cueAt(cue, D.termCue, 0.15) - 0.1, kt = sp(t, Tt, 9, 220);
+  const vf = arrive(t, 0, { from: 1.25, blur: 8, dur: f2s(14), ease: E.snapSettle }), k = vf.k, Tt = cueAt(cue, D.termCue, 0.15) - 0.1;
+  const tm = arrive(t, Tt, { from: 1.6, blur: 10, dur: f2s(12), ease: E.snapSettle, fade: f2s(4) });
   const av = D.avatar ?? SC.brandLogo;
   return <div style={{ position: "absolute", left: 0, top: 0, width: CW, height: CH, fontFamily: FONT }}>
     <div style={{ position: "absolute", left: 65, top: 40, width: 330, height: 420, borderRadius: 26, overflow: "hidden", background: "#0B1220",
-      transform: `scale(${0.8 + 0.2 * k}) rotate(${(1 - k) * -4}deg)`, boxShadow: "0 26px 50px rgba(20,27,77,0.3)" }}>
+      transform: `scale(${vf.scale}) rotate(${(1 - k) * -4}deg)`, opacity: vf.opacity, filter: vf.blur > 0.25 ? `blur(${vf.blur}px)` : undefined, boxShadow: "0 26px 50px rgba(20,27,77,0.3)" }}>
       <div style={{ position: "absolute", left: 55, top: 95, width: 220, height: 220, borderRadius: 110, overflow: "hidden", background: col("accent"), transform: `scale(${1 + 0.04 * Math.sin(t * 3)})` }}>
         {av ? <Img src={staticFile(av)} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : null}</div>
       <div style={{ position: "absolute", left: 0, right: 0, bottom: 34, textAlign: "center", fontFamily: MONO, fontWeight: 700, fontSize: 22, letterSpacing: 3, color: "#fff" }}>{SC.brand ?? ""}</div>
@@ -140,9 +145,9 @@ const explainer: React.FC<DP> = ({ t, cue, data: D }) => {
     <div style={{ position: "absolute", left: 65, top: 486, width: 330, textAlign: "center" }}>
       <span style={{ background: col("accent"), color: "#fff", fontFamily: MONO, fontWeight: 700, fontSize: 26, letterSpacing: 4, padding: "8px 20px", borderRadius: 10 }}>{D.label ?? "MCU 101"}</span></div>
     <div style={{ position: "absolute", left: 440, right: 65, top: 30 }}>
-      {t > Tt ? <div style={{ fontWeight: 900, fontSize: D.term.length > 10 ? 70 : 92, lineHeight: 1, letterSpacing: -2, color: col("accent"), transform: `scale(${0.6 + 0.4 * kt})`, transformOrigin: "0 50%", opacity: cl(kt * 2) }}>{D.term}</div> : null}
-      {(D.lines ?? []).map((l: any, i: number) => { const T = cueAt(cue, l.cue, 0.8 + i * 0.8) - 0.1; if (t < T) return null; const kl = sp(t, T, 13, 190);
-        return <div key={i} style={{ marginTop: 22, fontWeight: 800, fontSize: 40, lineHeight: 1.15, color: l.c ? col(l.c) : INK, opacity: cl(kl * 1.6), transform: `translateY(${(1 - kl) * 24}px)` }}>{l.t}</div>; })}
+      {t > Tt ? <div style={{ fontWeight: 900, fontSize: D.term.length > 10 ? 70 : 92, lineHeight: 1, letterSpacing: -2, color: col("accent"), transform: `scale(${tm.scale})`, transformOrigin: "0 50%", opacity: tm.opacity, filter: tm.blur > 0.25 ? `blur(${tm.blur}px)` : undefined }}>{D.term}</div> : null}
+      {(D.lines ?? []).map((l: any, i: number) => { const T = cueAt(cue, l.cue, 0.8 + i * 0.8) - 0.1; if (t < T) return null; const kl = prog(t, T, f2s(12), E.softLand), ko = prog(t, T, f2s(5), E.cruise);
+        return <div key={i} style={{ marginTop: 22, fontWeight: 800, fontSize: 40, lineHeight: 1.15, color: l.c ? col(l.c) : INK, opacity: 0.2 + 0.8 * ko, transform: `translateY(${(1 - kl) * 28}px)`, filter: kl < 0.9 ? `blur(${(1 - kl) * 4}px)` : undefined }}>{l.t}</div>; })}
     </div>
   </div>;
 };

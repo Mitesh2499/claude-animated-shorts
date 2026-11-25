@@ -9,6 +9,7 @@ import { SAFE_SCENES, CW, CH } from "./scenes_safe";
 import { DATA_SCENES } from "./scenes_data";
 import { DEPTH_SCENES } from "./scenes_depth";
 import { STORY_SCENES } from "./scenes_story";
+import { E, DUR, prog, arrive, lookCss, drift, logLerp, f2s, Grain, Vignette, LightLeak, ShutterBlur } from "./motion";
 
 export const W = 1080, H = 1920, FPS = 30;
 export const TOTAL = Math.ceil(TL.total * FPS);
@@ -43,6 +44,11 @@ const SIZE: Record<string, React.CSSProperties> = {
 // headline 285-465 (15-24 %) -> visual canvas 470-1070 (24-56 %) -> rolling 2-line subtitles 1082-1240 (56-65 %).
 export const SAFE = (SCRIPT as any).layout === "safe";
 export const ZONE = { top: 270, bottom: 1248, side: 65, head: [285, 465], canvas: [470, 1070], subs: [1082, 1240] } as const;
+/** film finish (script.json "finish", one level for the whole film): shutter motion blur inside fast transition windows,
+ *  deterministic grain, vignette, light leaks on flash cuts. "finish": false switches everything off. */
+const FIN_RAW = (SCRIPT as any).finish;
+export const FINISH = FIN_RAW === false ? { motionBlur: false, samples: 0, grain: 0, vignette: 0, leaks: false }
+  : { motionBlur: true, samples: 6, grain: 0.03, vignette: 0.05, leaks: true, ...(FIN_RAW ?? {}) } as { motionBlur: boolean; samples: number; grain: number; vignette: number; leaks: boolean };
 const SUB_SIZE: Record<string, React.CSSProperties> = {
   small: { fontSize: 52, fontWeight: 600 }, reg: { fontSize: 54, fontWeight: 600 }, big: { fontSize: 68, fontWeight: 800 },
   huge: { fontSize: 78, fontWeight: 900 }, italic: { fontSize: 58, fontWeight: 700, fontStyle: "italic" }, bar: { fontSize: 58, fontWeight: 800, color: "#fff" },
@@ -71,10 +77,13 @@ const lineStarts = (s: Section) => { let k = 0; return sectionLines(s).map(({ li
 
 // ------------------------------------------------------------------ primitives
 const useNow = () => useCurrentFrame() / FPS;
+// word motion (motionmaxxing type/sound-sync): the word starts 4 f before it is spoken and lands (softLand, 7 f) 0-2 f
+// before it is heard - text that trails the voice feels late, text far ahead spoils the line.
+const WORD_LEAD = f2s(4);
 const Word: React.FC<{ w: string; at: number; style?: React.CSSProperties }> = ({ w, at, style }) => {
   const now = useNow();
-  const k = Math.max(0, Math.min(1, (now - at) / 0.24));
-  const shown = now >= at - 0.02;
+  const k = prog(now, at - WORD_LEAD, DUR.word, E.softLand);
+  const shown = now >= at - WORD_LEAD;
   return (
     <span style={{
       display: "inline-block", marginRight: "0.26em", opacity: shown ? 0.35 + 0.65 * k : 0,
@@ -283,23 +292,31 @@ const SceneSection: React.FC<{ s: Section; times: number[]; t0: number; t1: numb
     // headline (static, pops in) -> visual canvas -> rolling 2-line karaoke subtitles
     const lineT = st.map((i) => times[i] ?? 1e9); let cur = 0; lineT.forEach((x, i) => { if (now >= x - 0.05) cur = i; });
     const from = Math.max(0, cur - 1);
-    const DS = s.data ? DATA_SCENES[s.scene ?? ""] ?? DEPTH_SCENES[s.scene ?? ""] ?? STORY_SCENES[s.scene ?? ""] : undefined; const SS = SAFE_SCENES[s.scene ?? ""]; const kh = spring({ frame: Math.max(0, (now - t0) * FPS), fps: FPS, config: { damping: 13, stiffness: 150 } });
-    // section transitions learned from the RR reel: colour flash cut, zoom-through, drop-in, whip; exits: dive / whip / zoom
-    const lt = now - t0, rt = t1 - now; const ke = s.enter ? ease01(lt / (s.enter === "flash" ? 0.28 : 0.4)) : 1; const kx = s.exit ? ease01(1 - rt / (s.exit === "dive" ? 0.45 : 0.3)) : 0;
-    const enterT = s.enter === "zoom" ? `scale(${1 + (1 - ke) * 0.9})` : s.enter === "drop" ? `translateY(${-(1 - ke) * 420}px)` : s.enter === "whip" ? `translateX(${(1 - ke) * 1100}px)` : "";
-    const exitT = s.exit === "whip" ? `translateX(${-kx * kx * 1100}px)` : s.exit === "zoom" ? `scale(${1 + kx * kx * 2.5})` : "";
-    const blur = (s.enter === "zoom" || s.enter === "whip" ? (1 - ke) * 14 : 0) + (s.exit === "whip" || s.exit === "zoom" ? kx * kx * 14 : 0);
+    const DS = s.data ? DATA_SCENES[s.scene ?? ""] ?? DEPTH_SCENES[s.scene ?? ""] ?? STORY_SCENES[s.scene ?? ""] : undefined; const SS = SAFE_SCENES[s.scene ?? ""];
+    // headline: arrives DOWN from oversize with a focus pull (no spring - no overshoot on type), 1 f after the cut
+    const hl = arrive(now, t0 + f2s(1), { from: 1.14, blur: 9, dy: 26, dur: f2s(14), ease: E.snapSettle });
+    // section transitions learned from the RR reel (colour flash cut, zoom-through, drop-in, whip; exits dive / whip / zoom),
+    // timed with the measured eases: entries snapSettle/whip (most travel in the first 4 f), exits accelExit (leave at peak speed).
+    const lt = now - t0, rt = t1 - now;
+    const ke = s.enter ? prog(lt, 0, s.enter === "flash" ? f2s(8) : s.enter === "whip" ? f2s(9) : f2s(13), s.enter === "whip" ? E.whip : E.snapSettle) : 1;
+    const kx = s.exit ? prog(-rt, -(s.exit === "dive" ? 0.45 : f2s(10)), s.exit === "dive" ? 0.45 : f2s(10), E.accelExit) : 0;
+    const enterT = s.enter === "zoom" ? `scale(${logLerp(1.9, 1, ke)})` : s.enter === "drop" ? `translateY(${-(1 - ke) * 420}px)` : s.enter === "whip" ? `translateX(${(1 - ke) * 1100}px)` : "";
+    const exitT = s.exit === "whip" ? `translateX(${-kx * 1100}px)` : s.exit === "zoom" ? `scale(${logLerp(1, 3.5, kx)})` : "";
+    // blur is a focus pull on zooms; on whips the shutter blur (FINISH.motionBlur) does it, so no per-element smear then
+    const blur = (s.enter === "zoom" ? (1 - ke) * 14 : 0) + (s.exit === "zoom" ? kx * 14 : 0) + (!FINISH.motionBlur ? (s.enter === "whip" ? (1 - ke) * 14 : 0) + (s.exit === "whip" ? kx * 14 : 0) : 0);
     const fl = s.enter === "flash" ? 1 - ke : s.exit === "dive" ? Math.max(0, (kx - 0.75) * 4) : 0;
+    const cv = drift(lt, `canvas${t0.toFixed(2)}`, { pxPerSec: 7, scalePerSec: 0 }), creep = 1 + 0.06 * Math.min(1, lt / Math.max(1, t1 - t0));
     return (
       <AbsoluteFill style={{ fontFamily: FONT }}>
        <AbsoluteFill style={{ transform: `${enterT} ${exitT}`, filter: blur > 0.3 ? `blur(${blur}px)` : undefined, opacity: s.enter === "zoom" ? Math.min(1, ke * 2) : 1 }}>
         {s.kicker ? <div style={{ position: "absolute", top: ZONE.top - 2, left: ZONE.side, fontFamily: "'JetBrains Mono','Cascadia Code',Consolas,monospace", fontWeight: 600, fontSize: 30, letterSpacing: 3, color: COL.blue, opacity: Math.min(1, lt * 4) }}>{"// " + s.kicker.toUpperCase()}</div> : null}
         {s.title ? <div style={{ position: "absolute", top: ZONE.head[0] + (s.kicker ? 22 : 0), height: ZONE.head[1] - ZONE.head[0] - (s.kicker ? 22 : 0), left: ZONE.side, right: ZONE.side, display: "flex", alignItems: "center", justifyContent: s.kicker ? "flex-start" : "center", textAlign: s.kicker ? "left" : "center" }}>
-          <div style={{ opacity: kh, transform: `translateY(${(1 - kh) * 30}px) scale(${0.92 + 0.08 * kh})`, fontSize: s.kicker ? 68 : 90, fontWeight: 900, lineHeight: s.kicker ? 1.04 : 1.1, letterSpacing: -1, color: C.ink }}>
+          <div style={{ ...lookCss(hl), transformOrigin: s.kicker ? "0% 50%" : "50% 50%", fontSize: s.kicker ? 68 : 90, fontWeight: 900, lineHeight: s.kicker ? 1.04 : 1.1, letterSpacing: -1, color: C.ink }}>
             {s.title.map((sp, i) => <span key={i} style={{ color: sp.c ? COL[sp.c] ?? sp.c : C.ink, fontSize: sp.s === "small" || sp.s === "reg" ? 48 : sp.s === "huge" ? 108 : undefined, fontWeight: sp.s === "small" || sp.s === "reg" ? 700 : undefined, marginRight: "0.25em", display: sp.s === "small" || sp.s === "reg" ? "block" : "inline" }}>{sp.t}</span>)}
           </div></div> : null}
         <div style={{ position: "absolute", top: ZONE.canvas[0], left: 0, width: CW, height: CH,
-          transform: `scale(${1 + 0.07 * Math.min(1, (now - t0) / Math.max(1, t1 - t0))}) translate(${Math.sin((now - t0) * 1.1) * 9}px, ${Math.cos((now - t0) * 0.9) * 6}px)`, transformOrigin: "50% 92%" /* grow upward: keeps the canvas bottom off the subtitles */ }}>
+          /* no dead frame: linear camera creep (seeded direction) + slow push, never a bob; grows upward so the canvas bottom stays off the subtitles */
+          transform: `scale(${creep}) translate(${cv.x.toFixed(2)}px, ${cv.y.toFixed(2)}px)`, transformOrigin: "50% 92%" }}>
           {DS ? <DS t={now - t0} d={t1 - t0} cue={cue} data={s.exit === "dive" ? { dive: true, ...s.data } : s.data} /> : SS ? <SS t={now - t0} d={t1 - t0} cue={cue} /> : Scene ? <div style={{ transform: `scale(${CH / SH})`, transformOrigin: "50% 0", width: SW, height: SH }}><Scene t={now - t0} d={t1 - t0} cue={cue} /></div> : null}
         </div>
         <div style={{ position: "absolute", top: ZONE.subs[0] - 6, height: ZONE.subs[1] - ZONE.subs[0] + 6, left: 70, right: 120, display: "flex", flexDirection: "column", justifyContent: "center" }}>
@@ -307,6 +324,7 @@ const SceneSection: React.FC<{ s: Section; times: number[]; t0: number; t1: numb
         </div>
        </AbsoluteFill>
         {fl > 0.01 ? <AbsoluteFill style={{ background: s.flash ? COL[s.flash] ?? s.flash : COL.accent, opacity: fl }} /> : null}
+        {FINISH.leaks && s.enter === "flash" ? <LightLeak progress={lt / 0.75} seed={Math.round(t0 * 10)} strength={0.55} /> : null}
       </AbsoluteFill>
     );
   }
@@ -335,14 +353,15 @@ const Cta: React.FC<{ s: Section; times: number[]; t0: number }> = ({ s, times, 
 };
 const Follow: React.FC<{ s: Section; times: number[]; t0: number }> = ({ s, times, t0 }) => {
   const f = useCurrentFrame(); const L = sectionLines(s), st = lineStarts(s);
-  const k = spring({ frame: Math.max(0, f - (t0 + 0.2) * FPS), fps: FPS, config: { damping: 11, stiffness: 150 } });
+  // the avatar arrives DOWN from 1.5x (snapSettle, the film's sign-off), never grows from zero; then a slow creep
+  const av = arrive(f / FPS, t0 + 0.2, { from: 1.5, blur: 10, dur: f2s(18), ease: E.snapSettle }); const k = av.scale * (1 + 0.012 * Math.max(0, f / FPS - t0 - 0.8));
   const half = Math.ceil(L.length / 2);
   return (
     <AbsoluteFill style={{ fontFamily: FONT }}>
       <Grid op={0.45} />
       <div style={{ position: "absolute", top: SAFE ? ZONE.head[0] : H * 0.06, left: 40, right: 40 }}>{L.slice(0, half).map((x, i) => <TextLine key={i} line={x.line} times={times} start={st[i]} />)}</div>
       <div style={{ position: "absolute", top: SAFE ? 500 : H * 0.3, left: 0, right: 0, display: "flex", justifyContent: "center" }}>
-        <div style={{ width: SAFE ? 320 : 380, height: SAFE ? 320 : 380, borderRadius: 190, background: "#111", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 200, transform: `scale(${k})`, boxShadow: "0 40px 80px rgba(0,0,0,0.25)", overflow: "hidden" }}>
+        <div style={{ width: SAFE ? 320 : 380, height: SAFE ? 320 : 380, borderRadius: 190, background: "#111", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 200, transform: `scale(${k})`, opacity: av.opacity, filter: av.blur > 0.25 ? `blur(${av.blur}px)` : undefined, boxShadow: "0 40px 80px rgba(0,0,0,0.25)", overflow: "hidden" }}>
           {S.brandLogo ? <Img src={staticFile(S.brandLogo)} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : S.brand.replace(/^@/, "")[0]?.toUpperCase()}
         </div>
       </div>
@@ -363,6 +382,13 @@ const useInter = () => {
     l.onerror = done; setTimeout(done, 8000);
   }, [h]);
 };
+/** is `now` inside a fast transition window of section i? (shutter blur costs x samples, so only there) */
+const fastWindow = (i: number, now: number) => {
+  const s = S.sections[i], tl = TL.sections[i]; if (!s || !tl) return false;
+  const inE = s.enter && s.enter !== "flash" && now - tl.t0 < f2s(s.enter === "whip" ? 9 : 13);
+  const inX = s.exit && tl.t1 - now < (s.exit === "dive" ? 0.45 : f2s(10));
+  return Boolean(inE || inX);
+};
 export const Listicle: React.FC = () => {
   useInter();
   const now = useNow();
@@ -370,10 +396,16 @@ export const Listicle: React.FC = () => {
   const s = S.sections[i]; const tl = TL.sections[i];
   return (
     <AbsoluteFill style={{ background: C.bg }}>
-      {TH.paper ? <AbsoluteFill style={{ backgroundImage: "radial-gradient(ellipse 70% 45% at 50% 40%, rgba(255,255,255,0.85), rgba(255,255,255,0) 70%), linear-gradient(rgba(20,27,77,0.035) 2px, transparent 2px), linear-gradient(90deg, rgba(20,27,77,0.035) 2px, transparent 2px)", backgroundSize: "100% 100%, 60px 60px, 60px 60px" }} /> : null}
-      {s && tl ? (s.kind === "item" ? <Item s={s} times={tl.words} t0={tl.t0} /> : s.kind === "hook" ? <Hook s={s} times={tl.words} t0={tl.t0} />
-        : s.kind === "scene" ? <SceneSection s={s} times={tl.words} t0={tl.t0} t1={tl.t1} />
-        : s.kind === "cta" ? <Cta s={s} times={tl.words} t0={tl.t0} /> : s.kind === "follow" ? <Follow s={s} times={tl.words} t0={tl.t0} /> : <Center s={s} times={tl.words} t0={tl.t0} />) : null}
+      <ShutterBlur active={FINISH.motionBlur && fastWindow(i, now)} samples={FINISH.samples}>
+        <AbsoluteFill style={{ background: C.bg }}>
+          {TH.paper ? <AbsoluteFill style={{ backgroundImage: "radial-gradient(ellipse 70% 45% at 50% 40%, rgba(255,255,255,0.85), rgba(255,255,255,0) 70%), linear-gradient(rgba(20,27,77,0.035) 2px, transparent 2px), linear-gradient(90deg, rgba(20,27,77,0.035) 2px, transparent 2px)", backgroundSize: "100% 100%, 60px 60px, 60px 60px" }} /> : null}
+          {s && tl ? (s.kind === "item" ? <Item s={s} times={tl.words} t0={tl.t0} /> : s.kind === "hook" ? <Hook s={s} times={tl.words} t0={tl.t0} />
+            : s.kind === "scene" ? <SceneSection s={s} times={tl.words} t0={tl.t0} t1={tl.t1} />
+            : s.kind === "cta" ? <Cta s={s} times={tl.words} t0={tl.t0} /> : s.kind === "follow" ? <Follow s={s} times={tl.words} t0={tl.t0} /> : <Center s={s} times={tl.words} t0={tl.t0} />) : null}
+        </AbsoluteFill>
+      </ShutterBlur>
+      <Vignette strength={FINISH.vignette} />
+      <Grain amount={FINISH.grain} />
       <Watermark />
       <Audio src={staticFile("audio/mix.wav")} />
     </AbsoluteFill>
