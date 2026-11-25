@@ -177,6 +177,9 @@ def mix(voice, secs, total):
                 if kind == 'error': tt = np.arange(int(0.3 * SR)) / SR; x = lambda: np.sign(np.sin(2 * np.pi * 140 * tt)) * np.exp(-tt * 9) * 0.12
                 if kind == 'glitch': tt = np.arange(int(0.35 * SR)) / SR; x = lambda: bp(rng.standard_normal(len(tt)), 800, 7000) * (np.sin(2 * np.pi * 23 * tt) > 0) * np.exp(-tt * 6) * 0.35
                 if kind == 'boom': tt = np.arange(int(0.9 * SR)) / SR; x = lambda: np.sin(2 * np.pi * np.cumsum(70 - 35 * tt / 0.9) / SR) * np.exp(-tt * 3.5) * 0.7
+                if kind == "clack": tt = np.arange(int(0.07 * SR)) / SR; x = lambda: (bp(rng.standard_normal(len(tt)), 1800, 6500) * 0.5 + np.sin(2 * np.pi * 900 * tt)) * np.exp(-tt * 90) * 0.35
+                if kind == "rewind": tt = np.arange(int(1.0 * SR)) / SR; x = lambda: np.sin(2 * np.pi * np.cumsum(1400 - 1100 * tt) / SR * 3) * (np.sin(2 * np.pi * 18 * tt) > -0.3) * np.exp(-tt * 1.5) * 0.12
+                if kind == "slam": tt = np.arange(int(0.45 * SR)) / SR; x = lambda: (np.sin(2 * np.pi * 60 * tt) * 0.8 + bp(rng.standard_normal(len(tt)), 200, 3000) * 0.6) * np.exp(-tt * 12) * 0.6
                 if kind == 'riser': tt = np.arange(int(1.2 * SR)) / SR; x = lambda: bp(rng.standard_normal(len(tt)), 600, 6000) * (tt / 1.2) ** 2 * 0.3
                 if x: put(sfx, x(), at + r * ev.get('every', 0.08), ev.get('gain', 0.8))
     # light pluck bed, 96 bpm, i - VI - III - VII in A minor

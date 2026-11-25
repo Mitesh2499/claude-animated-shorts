@@ -7,6 +7,7 @@ import TL from "./timeline.json";
 import { SCENES, SW, SH } from "./scenes";
 import { SAFE_SCENES, CW, CH } from "./scenes_safe";
 import { DATA_SCENES } from "./scenes_data";
+import { DEPTH_SCENES } from "./scenes_depth";
 
 export const W = 1080, H = 1920, FPS = 30;
 export const TOTAL = Math.ceil(TL.total * FPS);
@@ -25,6 +26,8 @@ type Section = {
   kind: "hook" | "item" | "recap" | "cta" | "follow" | "scene"; blocks?: Line[]; ordinal?: string; scene?: string; minDur?: number;
   badge?: { name: string; say?: string; color?: string; glyph?: string; logo?: string }; head?: Line[]; card?: Card; sub?: Line[]; bullets?: (string | Span)[];
   ordinalSay?: string; tag?: string; chips?: string[]; keyword?: string; cover?: string; title?: Span[]; data?: any;
+  /** mono "// LABEL" above the headline; enter: flash|zoom|drop|whip; exit: dive|whip|zoom; flash: colour of the enter flash */
+  kicker?: string; enter?: "flash" | "zoom" | "drop" | "whip"; exit?: "dive" | "whip" | "zoom"; flash?: string;
 };
 // brandLogo / watermarkLogo: paths under public/ (build.py copies brand/ -> public/brand/), e.g. "brand/logos/logo.png"
 const S = SCRIPT as unknown as { brand: string; brandLogo?: string; watermarkLogo?: string; sections: Section[] };
@@ -45,6 +48,7 @@ const SUB_SIZE: Record<string, React.CSSProperties> = {
 };
 
 // ------------------------------------------------------------------ token bookkeeping: must match build.py `tokens()` order
+const ease01 = (x: number) => { const c = Math.max(0, Math.min(1, x)); return 1 - Math.pow(1 - c, 3); };
 const words = (t: string) => t.split(/\s+/).filter(Boolean);
 export const sectionLines = (s: Section): { group: string; line: Line }[] => {
   const out: { group: string; line: Line }[] = [];
@@ -275,20 +279,30 @@ const SceneSection: React.FC<{ s: Section; times: number[]; t0: number; t1: numb
     // headline (static, pops in) -> visual canvas -> rolling 2-line karaoke subtitles
     const lineT = st.map((i) => times[i] ?? 1e9); let cur = 0; lineT.forEach((x, i) => { if (now >= x - 0.05) cur = i; });
     const from = Math.max(0, cur - 1);
-    const DS = s.data ? DATA_SCENES[s.scene ?? ""] : undefined; const SS = SAFE_SCENES[s.scene ?? ""]; const kh = spring({ frame: Math.max(0, (now - t0) * FPS), fps: FPS, config: { damping: 13, stiffness: 150 } });
+    const DS = s.data ? DATA_SCENES[s.scene ?? ""] ?? DEPTH_SCENES[s.scene ?? ""] : undefined; const SS = SAFE_SCENES[s.scene ?? ""]; const kh = spring({ frame: Math.max(0, (now - t0) * FPS), fps: FPS, config: { damping: 13, stiffness: 150 } });
+    // section transitions learned from the RR reel: colour flash cut, zoom-through, drop-in, whip; exits: dive / whip / zoom
+    const lt = now - t0, rt = t1 - now; const ke = s.enter ? ease01(lt / (s.enter === "flash" ? 0.28 : 0.4)) : 1; const kx = s.exit ? ease01(1 - rt / (s.exit === "dive" ? 0.45 : 0.3)) : 0;
+    const enterT = s.enter === "zoom" ? `scale(${1 + (1 - ke) * 0.9})` : s.enter === "drop" ? `translateY(${-(1 - ke) * 420}px)` : s.enter === "whip" ? `translateX(${(1 - ke) * 1100}px)` : "";
+    const exitT = s.exit === "whip" ? `translateX(${-kx * kx * 1100}px)` : s.exit === "zoom" ? `scale(${1 + kx * kx * 2.5})` : "";
+    const blur = (s.enter === "zoom" || s.enter === "whip" ? (1 - ke) * 14 : 0) + (s.exit === "whip" || s.exit === "zoom" ? kx * kx * 14 : 0);
+    const fl = s.enter === "flash" ? 1 - ke : s.exit === "dive" ? Math.max(0, (kx - 0.75) * 4) : 0;
     return (
       <AbsoluteFill style={{ fontFamily: FONT }}>
-        {s.title ? <div style={{ position: "absolute", top: ZONE.head[0], height: ZONE.head[1] - ZONE.head[0], left: ZONE.side, right: ZONE.side, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
-          <div style={{ opacity: kh, transform: `translateY(${(1 - kh) * 30}px) scale(${0.92 + 0.08 * kh})`, fontSize: 90, fontWeight: 900, lineHeight: 1.1, letterSpacing: -1, color: C.ink }}>
+       <AbsoluteFill style={{ transform: `${enterT} ${exitT}`, filter: blur > 0.3 ? `blur(${blur}px)` : undefined, opacity: s.enter === "zoom" ? Math.min(1, ke * 2) : 1 }}>
+        {s.kicker ? <div style={{ position: "absolute", top: ZONE.top - 2, left: ZONE.side, fontFamily: "'JetBrains Mono','Cascadia Code',Consolas,monospace", fontWeight: 600, fontSize: 30, letterSpacing: 3, color: COL.blue, opacity: Math.min(1, lt * 4) }}>{"// " + s.kicker.toUpperCase()}</div> : null}
+        {s.title ? <div style={{ position: "absolute", top: ZONE.head[0] + (s.kicker ? 22 : 0), height: ZONE.head[1] - ZONE.head[0] - (s.kicker ? 22 : 0), left: ZONE.side, right: ZONE.side, display: "flex", alignItems: "center", justifyContent: s.kicker ? "flex-start" : "center", textAlign: s.kicker ? "left" : "center" }}>
+          <div style={{ opacity: kh, transform: `translateY(${(1 - kh) * 30}px) scale(${0.92 + 0.08 * kh})`, fontSize: s.kicker ? 68 : 90, fontWeight: 900, lineHeight: s.kicker ? 1.04 : 1.1, letterSpacing: -1, color: C.ink }}>
             {s.title.map((sp, i) => <span key={i} style={{ color: sp.c ? COL[sp.c] ?? sp.c : C.ink, fontSize: sp.s === "small" || sp.s === "reg" ? 48 : sp.s === "huge" ? 108 : undefined, fontWeight: sp.s === "small" || sp.s === "reg" ? 700 : undefined, marginRight: "0.25em", display: sp.s === "small" || sp.s === "reg" ? "block" : "inline" }}>{sp.t}</span>)}
           </div></div> : null}
         <div style={{ position: "absolute", top: ZONE.canvas[0], left: 0, width: CW, height: CH,
           transform: `scale(${1 + 0.07 * Math.min(1, (now - t0) / Math.max(1, t1 - t0))}) translate(${Math.sin((now - t0) * 1.1) * 9}px, ${Math.cos((now - t0) * 0.9) * 6}px)`, transformOrigin: "50% 92%" /* grow upward: keeps the canvas bottom off the subtitles */ }}>
-          {DS ? <DS t={now - t0} d={t1 - t0} cue={cue} data={s.data} /> : SS ? <SS t={now - t0} d={t1 - t0} cue={cue} /> : Scene ? <div style={{ transform: `scale(${CH / SH})`, transformOrigin: "50% 0", width: SW, height: SH }}><Scene t={now - t0} d={t1 - t0} cue={cue} /></div> : null}
+          {DS ? <DS t={now - t0} d={t1 - t0} cue={cue} data={s.exit === "dive" ? { dive: true, ...s.data } : s.data} /> : SS ? <SS t={now - t0} d={t1 - t0} cue={cue} /> : Scene ? <div style={{ transform: `scale(${CH / SH})`, transformOrigin: "50% 0", width: SW, height: SH }}><Scene t={now - t0} d={t1 - t0} cue={cue} /></div> : null}
         </div>
         <div style={{ position: "absolute", top: ZONE.subs[0] - 6, height: ZONE.subs[1] - ZONE.subs[0] + 6, left: 70, right: 120, display: "flex", flexDirection: "column", justifyContent: "center" }}>
           {L.slice(from, cur + 1).map((x, j) => <TextLine key={from + j} line={x.line} times={times} start={st[from + j]} sizes={SUB_SIZE} />)}
         </div>
+       </AbsoluteFill>
+        {fl > 0.01 ? <AbsoluteFill style={{ background: s.flash ? COL[s.flash] ?? s.flash : COL.accent, opacity: fl }} /> : null}
       </AbsoluteFill>
     );
   }
@@ -352,6 +366,7 @@ export const Listicle: React.FC = () => {
   const s = S.sections[i]; const tl = TL.sections[i];
   return (
     <AbsoluteFill style={{ background: C.bg }}>
+      {TH.paper ? <AbsoluteFill style={{ backgroundImage: "radial-gradient(ellipse 70% 45% at 50% 40%, rgba(255,255,255,0.85), rgba(255,255,255,0) 70%), linear-gradient(rgba(20,27,77,0.035) 2px, transparent 2px), linear-gradient(90deg, rgba(20,27,77,0.035) 2px, transparent 2px)", backgroundSize: "100% 100%, 60px 60px, 60px 60px" }} /> : null}
       {s && tl ? (s.kind === "item" ? <Item s={s} times={tl.words} t0={tl.t0} /> : s.kind === "hook" ? <Hook s={s} times={tl.words} t0={tl.t0} />
         : s.kind === "scene" ? <SceneSection s={s} times={tl.words} t0={tl.t0} t1={tl.t1} />
         : s.kind === "cta" ? <Cta s={s} times={tl.words} t0={tl.t0} /> : s.kind === "follow" ? <Follow s={s} times={tl.words} t0={tl.t0} /> : <Center s={s} times={tl.words} t0={tl.t0} />) : null}

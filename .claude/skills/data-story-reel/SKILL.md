@@ -1,6 +1,6 @@
 ---
 name: data-story-reel
-description: Make a 45-70 s vertical DATA-STORY / STATS ANALYSIS reel (box-office race, sales/market share, sports or creator stats, "X is ahead here but behind there - why?") in Hindi or English, laid out for Instagram's safe zones - short headline at 15-24 %, poster/chart visual at 24-56 %, rolling 2-line karaoke subtitles at 56-65 %, nothing important in the top 14 % or bottom 35 %. Scenes are data-driven (poster face-off, leaderboard, zoomed gap ruler, vertical bars, period trend with drop arrow, line chart with ghost reference, scenario bars, target gauge, prediction poll, big number) so a new reel needs only numbers + script in script.json. Proven on the Ramayana vs Baahubali 2 vs Dhurandhar 2 box-office reel (2026-11-23). Use when the user gives numbers/tables and asks for an analysis reel, a box-office / collection / comparison video, "make it a data reel", "like the Ramayana reel", or charts + posters with voice-over. For tool/tips listicles use kinetic-listicle-short; for stories use illustrated-parallax-short / cartoon-3d-short.
+description: Make a 45-70 s vertical DATA-STORY / STATS ANALYSIS reel (box-office race, sales/market share, sports or creator stats, "X is ahead here but behind there - why?") in Hindi or English, laid out for Instagram's safe zones - short headline at 15-24 %, poster/chart visual at 24-56 %, rolling 2-line karaoke subtitles at 56-65 %, nothing important in the top 14 % or bottom 35 %. Scenes are data-driven (poster face-off, leaderboard, zoomed gap ruler, vertical bars, period trend with drop arrow, line chart with ghost reference, scenario bars, target gauge, prediction poll, big number) plus "2.5D" scenes learned from the Rajasthan Royals innings reel (3D cricket-ball unit grids with camera dive, extruded 3D bars with a top-down-to-side camera swing, keycap word tiles, rewind counter, scorecard progress, phase rows, record stack, deadpan stamps, strike-through, fake-UI punchline), section kickers and flash/zoom/dive/whip transitions, so a new reel needs only numbers + script in script.json. Proven on the Ramayana vs Baahubali 2 vs Dhurandhar 2 box-office reel (2026-11-23); 2.5D scenes proven in c:/Projects/reel10-depth-lab (2026-11-25). Use when the user gives numbers/tables and asks for an analysis reel, a sports-innings / player-record breakdown ("like the RR / Vaibhav reel"), a box-office / collection / comparison video, "make it a data reel", "like the Ramayana reel", or charts + posters with voice-over. For tool/tips listicles use kinetic-listicle-short; for stories use illustrated-parallax-short / cartoon-3d-short.
 ---
 
 # Data-story reel (safe-zone layout, data-driven charts, Remotion)
@@ -8,6 +8,7 @@ description: Make a 45-70 s vertical DATA-STORY / STATS ANALYSIS reel (box-offic
 Template: `templates/data-story/` (`script.example.json` = the full Ramayana reel, `src/scenes_data.tsx` = the 10 data scenes, `src/Listicle.tsx` = safe-zone layout + karaoke, `build.py` = voice/timeline/mix/posters).
 Proven: `stories/reel08-gta6-vs-endgame/` (Kokoro voice, versus/overtake/catch/split/balance, 56 s) and `stories/reel06-ramayana-boxoffice/` (v3 built only from script.json with this template; project `c:\Projects\reel07-ramayana-datastory`).
 Shares the brand kit, voice pipeline, icons (theSVG) and QA with `kinetic-listicle-short` - read its Gotchas too.
+**Before writing a script, read `references/rr-anatomy-lessons.md`** (scripting devices + editing grammar + the 3D-in-2D trick, learned from the best-edited reel in Raw/). 2.5D scenes: `src/scenes_depth.tsx`; full demo of every new scene: `script.depth.example.json`.
 
 ## 0. Voice: Kokoro hm_omega (DEFAULT, user's pick 2026-11-25)
 - The user judged edge-tts robotic; after an A/B of free voices (c:\Projectsoice-lab, COMPARE_*.wav) they picked **Kokoro-82M `hm_omega`** (Apache-2.0, local). Measured closest to natural reels: rhythm nPVI 46 vs refs 46-56 (edge Madhur at +25 % = 30), best Whisper intelligibility.
@@ -26,6 +27,18 @@ A data reel is an argument, not a news bulletin. Shape every reel as:
 5. **The projection** - 2-3 labelled scenarios from a stated model, crossing the rivals' benchmark lines; a target gauge for the round number everyone talks about.
 6. **The question** - prediction poll ("1,800 / 1,900 / 2,000+? Comment"), then follow. Viewers answering = comments.
 One fact on screen per beat. Never five numbers at once.
+
+**Script devices that make it watchable** (details + examples in `references/rr-anatomy-lessons.md`):
+- **Borrowed-anxiety cold open:** a feed-wide topic, then pivot ("Worried AI will take your job? Imagine being a bowler.").
+- **Name / word assembly gag** → `tiles3d`.
+- **Deadpan rhetorical Q&A** ("No." / "Also no.") → `stampQA`.
+- **Outcome first, then "Let's rewind"** → `progress` → `rewind`.
+- **Translate every number into everyday meaning** ("more likely to go for six than not", "96 % without running", "almost half the time").
+- **One dry understatement per big number** ("on paper: not ideal", "the rope was decorative"). No hype words.
+- **A repetition run with a broken last beat** ("…Also Vaibhav.") → `recordStack`.
+- **One meta joke near the end.**
+- **A callback ending** that answers the first line.
+- **Lines of 4-9 words**, with a short pause before each punchline and a visual hit on it.
 
 ## 2. Screen layout: Instagram safe zones (mandatory)
 | Zone (1080x1920) | y px | % | Content |
@@ -67,7 +80,34 @@ Scenes (`src/scenes_data.tsx`, all read `data`):
 | `splitCompare` | two columns of like-vs-unlike facts on cue | `left{id,head}, right{id,head}, rows[{l,r,cue}]` |
 | `balance` | see-saw tips then levels with ? (verdict) | `left{text,color}, right{text,color}, tipCue, levelCue` |
 | `poll` | prediction question, options pop on cue, cursor hover, comment button | `poster{id,img}?, question, sub?, options[{t,cue,color?}], commentCue, button` |
-Colours accept names (red, green, amber, blue, cyan, violet, slate, saffron) or hex. New chart type -> add a data-driven component to `scenes_data.tsx` and register it in `DATA_SCENES`.
+**2.5D scenes** (`src/scenes_depth.tsx`: plain-SVG perspective camera, shaded spheres/boxes, no WebGL). Cues accept `"word#2"` for the 2nd occurrence.
+| scene | use | data |
+|---|---|---|
+| `ballGrid` | unit visualisation: one 3D ball per item drops in (counter ticks), subset recolours, share bar, rope lasso, dive | `groups[{n,cols?,color?,label?,unit?,count?,cue,span?}], flip{n,color,cue,group?}, split{cue,a,b}, rope{cue,label}, pitch?, yaw?` (≤ ~110 balls per group; 2 groups = record vs new) |
+| `bars3d` | composition of a total as extruded 3D bars; flat tiles seen from above swing to a side view on cue; counters left | `items[{label,v,color,cue}], max?, unit?, big{v,suffix,text,cue}` |
+| `tiles3d` | keycap word tiles drop in, merge into one word; optional dictionary card with strike + "in this case" | `tiles[{t,color?,ink?,cue,note?}], merge{t,color,cue,note}, card{cue,head,tag,def,strike,strikeCue,altLabel,alt,altCue}` |
+| `rewind` | outcome counts back to 0 with ◀◀ REWIND (time-travel bridge) | `from, to?, cue, dur?` + sfx `rewind` |
+| `progress` | "12.5 overs of 50" pip strip + layered target track (needed vs scored) | `pips{v,total,label,cue}, track{total,label,cue}, segs[{v,color,cue,text}]` |
+| `phaseRows` | thin rate bars per phase + dashed threshold + stat boxes | `rows[{label,sub,v,display,color,cue}], max, ref{v,label,cue}, boxes[{label,v,unit,cue}]` |
+| `recordStack` | "?" placeholders flip into the same name (repetition gag) | `rows[{label,qCue,name,v,unit,cue,img?}], footer{t,cue}` (`img` = stem in brand/cards) |
+| `stampQA` | rhetorical questions answered by slammed stamps | `rows[{q,cue,a,aCue,color?}]` + sfx `slam` |
+| `strikeList` | old benchmarks struck through + big stamp ("IRRELEVANT.") | `rows[{label,v}], strikeCue, stamp{text,cue}` |
+| `verifyCard` | fake-UI punchline (captcha that fails) | `title?, check?, status, cue, fail, failCue` + sfx `error` |
+
+**Section extras:**
+- `"kicker": "balls faced"` shows a mono `// BALLS FACED` label above a left-aligned 68 px headline. Keep a kicker headline to 2 lines of ≤ 24 characters.
+- `"enter"`: `flash` (accent flood for 0.28 s on a topic change), `zoom` (zoom-through from blur), `drop` or `whip`.
+- `"exit"`: `dive` (the camera flies into the 3D objects and ends on an accent flash; `ballGrid` is built for it), `zoom` or `whip`.
+- Use at most one transition per act boundary, and leave the rest as plain cuts.
+
+**Paper theme** (the RR look in our brand): `"accent": "<one hero colour>", "theme": {"bg": "#F2EEE9", "paper": "1", "ink": "#141B4D", "blue": "#2546C9"}`. Use one hero colour for "their" numbers, blue for benchmarks and context, and grey for "everything else".
+**SFX** (per section `sfx`): `clack` (ball/tile drops: `{"word":"103","type":"clack","n":18,"every":0.1,"gain":0.4}`), `slam` (stamps), `rewind`, `error`, plus the older pop/tick/whoosh/chime/glitch/boom/riser.
+**3D rules:**
+- Only physical things get depth (balls, bars, tiles). Text and cards stay flat.
+- Every number shown as units must be the real count.
+- Share bars are computed from `flip.n / group.n`, never typed.
+
+Colours accept names (red, green, amber, blue, cyan, violet, slate, saffron, navy, accent, chalk, grey) or hex. New chart type -> add a data-driven component to `scenes_data.tsx` (or `scenes_depth.tsx` for 3D objects, reusing `proj`/`fit`/`Ball`/`Box`) and register it.
 
 ## 5. Honesty rules for data
 - Same metric compared with same metric (net vs net, gross vs gross); say which ("इंडिया नेट", "ग्रॉस").
@@ -81,6 +121,7 @@ Colours accept names (red, green, amber, blue, cyan, violet, slate, saffron) or 
 1. Intake (above) -> write `script.json` from `script.example.json` (show the user the voice-over first unless they said "just build").
 2. `mkdir c:\Projects\<name>`, copy `templates/data-story/*`, junction `node_modules` -> `C:\Projects\bitter-fruit\node_modules`.
 3. `python -I build.py` (voice per section with WordBoundary timings, `src/timeline.json`, `public/audio/mix.wav`, posters). Loop it up to 3x - edge-tts can drop a request. Check total length: target 55-70 s; Hindi runs long - shorten lines before raising the rate past +25 %.
+   **Layout preview before any voice:** `node scripts/dry_timeline.mjs 2.4` writes fake word timings + a silent mix, so you can check stills and rough-cut the 2.5D scenes in minutes, then run build.py for the real voice.
 4. `npx tsc --noEmit -p .`, then stills at each section end with red guide lines at 14 % and 65 % (all headline/number/subtitle pixels between them).
 5. Render silent -> mux (`-map 0:v:0 -map 1:a:0`) -> QA on the final MP4: 0 black frames, motion metric (0.4 s windows, start-vs-end mean diff > 1.0) >= 90 % (safe-mode canvas push-in 7 %, origin 50 % 92 % so the canvas grows upward and never covers the subtitles, gives ~94 %), audio about -13 to -15 dB, peak <= 0.95.
 6. Deliver mp4 + cover still (hook end frame) + script.json + SCRIPT.md to `stories/<name>/`; keep older versions as `v1_`, `v2_`.
