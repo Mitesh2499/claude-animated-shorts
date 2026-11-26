@@ -58,3 +58,14 @@ Then LOOK at `overview.png` and every card at full size. Fix dead space, orphan 
 - Ball tokens: `.`/`0` dot, digits runs, `4`/`6` boundaries, `W…` wicket, `wd`/`nb`/`lb1`/`b1` extras.
 - Team colours: pick from the kit/flag, don't use club logos. Credit any user photo in `source`.
 - Long names: use `short` for the card header ("H Klaasen") and the full name in the panel title.
+
+## Icons and graphics (2026-11-25)
+- **Icons: theSVG first** ([thesvg.org](https://thesvg.org), MIT, 7,900+ brand logos and 1,100+ UI icons): `python -I brand/fetch_icon.py search <words>`, then `ui <slug> [look]` or `brand <slug>`.
+- **Animated assets:** `python -I brand/fetch_anim.py search <words>`, then one of:
+  - `motive <slug>` (CC0);
+  - `assetpolish <pack>/<name>` (CC0);
+  - `sketchvalley <slug>`;
+  - `lottie <url>` (LottieFiles / Lottieflow);
+  - `url <file> --license ...` (IconKing, Sveegees, Pulsar, SVG Repo, Openverse).
+- `fetch_anim.py sources` lists every library with its licence. Every file is logged in `brand/animated/CREDITS.json`, and `fetch_anim.py credits` prints the caption credit lines (Pulsar and some SVG Repo / Openverse items need them).
+- X cards are static PNGs: use theSVG brand marks for teams and tools and UI icons for stat rows. Animated assets aren't useful here.

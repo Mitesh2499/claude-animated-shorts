@@ -85,3 +85,15 @@ Then LOOK: Read `out/overview.png`, then every slide that matters at full size (
 - `image.fit: bleed` reserves the bottom 46 % for the photo (footer turns white). `right` keeps text in the left 56 %. Use photos the user owns.
 - Hindi: set `"lang": "hi"`. Line-height is raised automatically; keep titles shorter (Devanagari is wider).
 - **White is the user's feed default** (2026-11-25): all posts use light backgrounds. For sports use `"theme": "arena light"`; use dark `arena`/`midnight` only when asked. On white, kit colours such as CSK yellow are fills under dark text, never text (check contrast: text ≥ 4.5:1, bars/graphics ≥ 3:1). Proof: `stories/carousel03-stokes-ipl2027-auction-white/`.
+
+## Icons and graphics (2026-11-25)
+- **Icons: theSVG first** ([thesvg.org](https://thesvg.org), MIT, 7,900+ brand logos and 1,100+ UI icons): `python -I brand/fetch_icon.py search <words>`, then `ui <slug> [look]` or `brand <slug>`.
+- **Animated assets:** `python -I brand/fetch_anim.py search <words>`, then one of:
+  - `motive <slug>` (CC0);
+  - `assetpolish <pack>/<name>` (CC0);
+  - `sketchvalley <slug>`;
+  - `lottie <url>` (LottieFiles / Lottieflow);
+  - `url <file> --license ...` (IconKing, Sveegees, Pulsar, SVG Repo, Openverse).
+- `fetch_anim.py sources` lists every library with its licence. Every file is logged in `brand/animated/CREDITS.json`, and `fetch_anim.py credits` prints the caption credit lines (Pulsar and some SVG Repo / Openverse items need them).
+- Carousels are static PNGs: animated SVGs render only their first frame, so prefer theSVG static icons and the code-drawn visuals. AssetPolish **stickers** (CC0) work as static decorations.
+- Text over any icon or image still follows the contrast rule (4.5:1).

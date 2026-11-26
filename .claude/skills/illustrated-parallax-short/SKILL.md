@@ -70,3 +70,18 @@ Proven on "जब भगवान ने जवाब दिया..." (`c:\Proj
 - Pipeline used: `gen_voice.py` (edge-tts hi-IN-MadhurNeural, per-line rate and pitch; the service randomly returns NoAudioReceived: retry, then drop pitch / leading "...") -> ffmpeg to wav -> `prep_voice.py` trims silence -> `timeline_build.py` writes `src/timeline.json` (shot starts + voice starts) -> `mix.py` synthesises ambience, tanpura, bansuri, choir pad, bells, SFX and ducks music under the voice -> Remotion render (`scripts/render.mjs`, silent) -> mux with `-map 0:v:0 -map 1:a:0`.
 - Voice speed: Hindi edge-tts speaks ~2.3 words/s even at +12 %, so a 84-word script runs ~37 s of speech: budget 45-50 s, not 38.
 - Weak spots to upgrade when an artist/model is available: stiff cut-out bodies, simple faces, sausage hands. The camera, cuts, light states, sound arc and timing already match the style bible.
+
+## Craft upgrade (2026-11-25)
+Read `templates/_shared/MOTION.md`.
+- **Shared code** (next to `Short.tsx`): `motion.tsx` (measured eases, oversize arrival, linear drift, grain/vignette/light leak, shutter blur for whips) and `assets.tsx` (frame-exact animated SVG / Lottie / GIF props: sparkles, dust, glows from Motive / AssetPolish / SketchValley / LottieFiles).
+- The stepped 10 fps drawn motion stays (its clock is "on twos"). Never put shutter blur on stepped layers; use it only on smooth camera moves.
+- **Loudness:** `procedural/mix.py` masters to −14 LUFS with true peak ≤ −1.5 dBTP.
+- **QA:** `py -I templates/_shared/reel_qa.py out/<final>.mp4 --expect <s>`.
+- **Icons: theSVG first** ([thesvg.org](https://thesvg.org), MIT, 7,900+ brand logos and 1,100+ UI icons): `python -I brand/fetch_icon.py search <words>`, then `ui <slug> [look]` or `brand <slug>`.
+- **Animated assets:** `python -I brand/fetch_anim.py search <words>`, then one of:
+  - `motive <slug>` (CC0);
+  - `assetpolish <pack>/<name>` (CC0);
+  - `sketchvalley <slug>`;
+  - `lottie <url>` (LottieFiles / Lottieflow);
+  - `url <file> --license ...` (IconKing, Sveegees, Pulsar, SVG Repo, Openverse).
+- `fetch_anim.py sources` lists every library with its licence. Every file is logged in `brand/animated/CREDITS.json`, and `fetch_anim.py credits` prints the caption credit lines (Pulsar and some SVG Repo / Openverse items need them).

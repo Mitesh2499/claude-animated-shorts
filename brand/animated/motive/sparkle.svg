@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="svg-sparkle-17pb1lk" width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" role="img" aria-labelledby="svg-sparkle-17pb1lk-title">
+  <title id="svg-sparkle-17pb1lk-title">Sparkle</title>
+  <!-- Source: Motive Originals
+Author: Motive project
+Source page: /sources/original/
+License: CC0-1.0 (https://creativecommons.org/publicdomain/zero/1.0/)
+Original project artwork, CC0-1.0. No attribution required. -->
+  <style>@keyframes svg-sparkle-17pb1lk-motion-0{0%{transform:scale(1)}50%{transform:scale(1.15)}100%{transform:scale(1)}}
+#svg-sparkle-17pb1lk [data-motion]{transform-box:view-box;transform-origin:12px 12px;animation-name:svg-sparkle-17pb1lk-motion-0;animation-duration:1300ms;animation-delay:0ms;animation-timing-function:ease-in-out;animation-iteration-count:infinite;animation-direction:normal;animation-fill-mode:both}
+@media(prefers-reduced-motion:reduce){#svg-sparkle-17pb1lk [data-motion]{animation:none}}</style>
+  <g data-motion="motion">
+    <path d="M12 3 14.5 9.5 21 12 14.5 14.5 12 21 9.5 14.5 3 12 9.5 9.5z"/>
+  </g>
+</svg>

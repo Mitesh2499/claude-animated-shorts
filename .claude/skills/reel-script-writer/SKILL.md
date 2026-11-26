@@ -85,3 +85,7 @@ Cut a beat before cutting the hook. Every shot: one idea, one change in the pict
 
 ## Hand-off to production
 Convert the shot list into `templates/illustrated/story.ts` plan rows (`[id, seconds, note]`), the layer list into `ASSETS.md`, the cue sheet into the `templates/audio/` event table. Voice: `edge-tts` Hindi voices (e.g. hi-IN-MadhurNeural for men, hi-IN-SwaraNeural for women/child) or the user's own recording; the divine voice slower by 10-15 % with reverb tail.
+
+## Planning assets and motion (2026-11-25)
+- When a scene needs an icon or animated prop, name it in the script ("ICON: theSVG `rocket` draws on", "ANIM: Motive `check-circle-draw` at 'done'"), so the build skills can fetch it with `brand/fetch_icon.py` or `brand/fetch_anim.py` (licences in `brand/animated/CREDITS.json`).
+- When analysing a sample reel, measure it first: `py -I templates/_shared/probe_reference.py Raw/<video>.mp4` gives cuts, shot lengths, transition kinds, camera moves and sound-hit sync. Write the pattern with those numbers. Motion and sound rules: `templates/_shared/MOTION.md`.

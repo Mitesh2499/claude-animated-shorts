@@ -174,7 +174,12 @@ def mix(voice, secs, total):
     mus *= (1 - 0.45 * env); fade = np.ones(N); fade[-int(1.2 * SR):] = np.linspace(1, 0, int(1.2 * SR)); mus *= fade
     m = voice * 0.95 + mus * 1.4 + sfx * 0.7          # standard mix: music under voice, SFX light
     m = np.tanh(m * 1.6) / np.tanh(1.6); m *= 0.95 / (np.abs(m).max() + 1e-9)
-    st = np.stack([m, m], 1).astype('float32')
+    # loudness master (templates/_shared/audio_master.py): -14 LUFS, true peak <= -1.5 dBTP; "loudness": false in script.json = off
+    LN = S.get('loudness', {})
+    if LN is not False:
+        sys.path.insert(0, os.path.join(ROOT, 'scripts')); from audio_master import master
+        st, rep = master(np.stack([m, m], 1), SR, LN.get('lufs', -14.0), LN.get('tp', -1.5)); print('master', rep)
+    else: st = np.stack([m, m], 1).astype('float32')
     sf.write(os.path.join(ROOT, 'public', 'audio', 'mix.wav'), st, SR)
     print('mix', round(total, 2), 's  rms dB', round(20 * np.log10(np.sqrt((m ** 2).mean())), 1))
 

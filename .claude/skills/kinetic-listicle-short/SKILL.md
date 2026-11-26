@@ -141,3 +141,21 @@ edge-tts sounds robotic to the user. Use the Kokoro engine for new videos (`"eng
 - Text width: a `huge` span longer than ~12 characters wraps; split it ("3" huge + "commands" big) or use big.
 - Remotion bundles copy `public/` to TEMP: render with TEMP/TMP set to `C:/Users/mithi/AppData/Local/Temp/remotion-tmp` (the scripts do it).
 - Windows paths inside Python source: use forward slashes (`C:/Projects/...`). A patch once turned `\b` in `...shorts\brand` into a backspace and the brand copy silently failed.
+
+## Craft upgrade (2026-11-25)
+Read `templates/_shared/MOTION.md`.
+- **Shared code:** `src/motion.tsx` (12 measured eases, `arrive`/`leave`, `drift`, finish layers) and `src/assets.tsx` (`<Asset>`, frame-exact animated SVG / Lottie / GIF, and draw-on/arrive/stagger for static theSVG icons).
+- **Use them for new moves:**
+  - words land 0-2 f before they are heard;
+  - entries `snapSettle`/`softLand` 12 f; exits `accelExit`;
+  - nothing grows from zero; no springs on type.
+- **Loudness:** `build.py` masters to −14 LUFS with true peak ≤ −1.5 dBTP.
+- **QA:** `py -I scripts/reel_qa.py out/<final>.mp4 --expect <s>`, then look at `sheet.jpg`.
+- **Icons: theSVG first** ([thesvg.org](https://thesvg.org), MIT, 7,900+ brand logos and 1,100+ UI icons): `python -I brand/fetch_icon.py search <words>`, then `ui <slug> [look]` or `brand <slug>`.
+- **Animated assets:** `python -I brand/fetch_anim.py search <words>`, then one of:
+  - `motive <slug>` (CC0);
+  - `assetpolish <pack>/<name>` (CC0);
+  - `sketchvalley <slug>`;
+  - `lottie <url>` (LottieFiles / Lottieflow);
+  - `url <file> --license ...` (IconKing, Sveegees, Pulsar, SVG Repo, Openverse).
+- `fetch_anim.py sources` lists every library with its licence. Every file is logged in `brand/animated/CREDITS.json`, and `fetch_anim.py credits` prints the caption credit lines (Pulsar and some SVG Repo / Openverse items need them).

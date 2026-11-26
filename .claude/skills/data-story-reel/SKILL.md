@@ -160,3 +160,28 @@ Colours accept names (red, green, amber, blue, cyan, violet, slate, saffron, nav
 4. `npx tsc --noEmit -p .`, then stills at each section end with red guide lines at 14 % and 65 % (all headline/number/subtitle pixels between them).
 5. Render silent -> mux (`-map 0:v:0 -map 1:a:0`) -> QA on the final MP4: 0 black frames, motion metric (0.4 s windows, start-vs-end mean diff > 1.0) >= 90 % (safe-mode canvas push-in 7 %, origin 50 % 92 % so the canvas grows upward and never covers the subtitles, gives ~94 %), audio about -13 to -15 dB, peak <= 0.95.
 6. Deliver mp4 + cover still (hook end frame) + script.json + SCRIPT.md to `stories/<name>/`; keep older versions as `v1_`, `v2_`.
+
+## Craft upgrade (2026-11-25): measured motion, finish, loudness, QA, assets
+Read `templates/_shared/MOTION.md` before building. It condenses motionmaxxing, LottieFiles motion-design, cinetic, remotion-dev/skills and reanimate.
+- **Motion** (`src/motion.tsx`):
+  - Headlines, photo cards, explainer terms and the follow avatar arrive DOWN from oversize with a focus pull (`snapSettle`), with no springs on type.
+  - Exits accelerate (`accelExit`).
+  - A shot change is a camera snap plus a 0.45 s tail; the white flash is kept for FREEZE only.
+  - Keycap tiles fall with gravity (`gentleIn`) and slam.
+  - Subtitle words land 0-2 f before they are heard.
+  - The canvas creeps linearly (no sine bob).
+- **Finish:** `"finish": {"motionBlur": true, "samples": 6, "grain": 0.03, "vignette": 0.05, "leaks": true}` (these are the defaults; `false` turns all of it off).
+  - Shutter blur is active only inside zoom, whip and dive windows.
+  - The vignette stays at 0.05 on the white/paper grounds the user's feed uses.
+- **Loudness:** `build.py` masters to −14 LUFS with true peak ≤ −1.5 dBTP (`"loudness": false` turns it off).
+- **QA:** `rebuild.cmd` ends with `py -I scripts/reel_qa.py out/<final>.mp4 --out out/qa`. Quote its gates. Look at `out/qa/sheet.jpg` and describe every tile before delivering.
+- **Icons and animated assets on any section:** `"stickers": [{"src": "brand/animated/motive/check-circle-draw.svg", "at": "spoken word", "x": 820, "y": 40, "w": 180, "mode": "draw|arrive|stagger"}]` (canvas coordinates 1080 × 600). Animated SVG, Lottie (`.json`), GIF and MP4 are seeked to the frame (`src/assets.tsx`).
+- **Icons: theSVG first** ([thesvg.org](https://thesvg.org), MIT, 7,900+ brand logos and 1,100+ UI icons): `python -I brand/fetch_icon.py search <words>`, then `ui <slug> [look]` or `brand <slug>`.
+- **Animated assets:** `python -I brand/fetch_anim.py search <words>`, then one of:
+  - `motive <slug>` (CC0);
+  - `assetpolish <pack>/<name>` (CC0);
+  - `sketchvalley <slug>`;
+  - `lottie <url>` (LottieFiles / Lottieflow);
+  - `url <file> --license ...` (IconKing, Sveegees, Pulsar, SVG Repo, Openverse).
+- `fetch_anim.py sources` lists every library with its licence. Every file is logged in `brand/animated/CREDITS.json`, and `fetch_anim.py credits` prints the caption credit lines (Pulsar and some SVG Repo / Openverse items need them).
+- **Learning from a new reference reel:** `py -I templates/_shared/probe_reference.py Raw/<video>.mp4`. It gives cut kinds (for example the RR pink/blue colour floods, 2-8 f per step), shot lengths, nearest ease and sound-hit sync. Put the numbers in `references/`.

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="svg-check-circle-draw-1hge3cu" width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" role="img" aria-labelledby="svg-check-circle-draw-1hge3cu-title">
+  <title id="svg-check-circle-draw-1hge3cu-title">Check circle draw</title>
+  <!-- Source: Motive Originals
+Author: Motive project
+Source page: /sources/original/
+License: CC0-1.0 (https://creativecommons.org/publicdomain/zero/1.0/)
+Original project artwork, CC0-1.0. No attribution required. -->
+  <style>@keyframes svg-check-circle-draw-1hge3cu-motion-0{0%{stroke-dashoffset:60}50%{stroke-dashoffset:0}100%{stroke-dashoffset:0}}
+#svg-check-circle-draw-1hge3cu [data-motion]{transform-box:view-box;transform-origin:12px 12px;animation-name:svg-check-circle-draw-1hge3cu-motion-0;animation-duration:1400ms;animation-delay:0ms;animation-timing-function:ease-in-out;animation-iteration-count:infinite;animation-direction:normal;animation-fill-mode:both}
+@media(prefers-reduced-motion:reduce){#svg-check-circle-draw-1hge3cu [data-motion]{animation:none}}</style>
+  <g data-motion="motion" stroke-dasharray="60" stroke-dashoffset="0">
+    <circle cx="12" cy="12" r="9" pathLength="60"/>
+    <path d="M7 12l3 3 7-7" pathLength="60"/>
+  </g>
+</svg>

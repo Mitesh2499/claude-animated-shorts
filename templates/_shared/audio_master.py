@@ -8,7 +8,7 @@
 import sys
 import numpy as np
 from scipy.signal import lfilter, resample_poly, bilinear
-from scipy.ndimage import minimum_filter1d
+from scipy.ndimage import minimum_filter1d, uniform_filter1d
 
 
 def _kweight(sr):
@@ -62,20 +62,25 @@ def _limit(x, sr, ceiling_db):
     for i, v in enumerate(need):
         cur = v if v < cur else v + (cur - v) * rel
         g[i] = cur
+    # centred smoothing over the look-ahead window: the gain ramps down over ~5 ms instead of stepping. A stepped gain
+    # is a click that the AAC encoder overshoots by up to 3 dB (measured: -1.8 dBTP wav -> +1.3 dBTP after encode).
+    g = uniform_filter1d(g, size=look, mode='nearest')
+    g = np.minimum(g, minimum_filter1d(need, size=look // 2 * 2 + 1, mode='nearest'))   # never above what the peak itself needs
+    g = uniform_filter1d(g, size=max(3, look // 4), mode='nearest')
     return x * (g[:, None] if x.ndim == 2 else g)
 
 
-def master(x, sr, target_lufs=-14.0, ceiling_dbtp=-1.5, max_gain_db=20.0):
+def master(x, sr, target_lufs=-14.0, ceiling_dbtp=-1.5, max_gain_db=20.0, codec_margin_db=0.5):
     """gain to the target loudness, then limit true peaks; returns (audio, report dict)"""
     x = np.asarray(x, dtype=np.float64)
     before, tp0 = lufs(x, sr), true_peak(x, sr)
     gain = min(max_gain_db, target_lufs - before)
     y = x * 10 ** (gain / 20)
     for _ in range(3):                                  # limiter + tiny make-up until both targets hold
-        y = _limit(y, sr, ceiling_dbtp - 0.3)
+        y = _limit(y, sr, ceiling_dbtp - codec_margin_db)        # margin: lossy encoders add ~0.3-1 dB of inter-sample overs
         tp = true_peak(y, sr)
-        if tp <= ceiling_dbtp: break
-        y *= 10 ** ((ceiling_dbtp - tp - 0.05) / 20)
+        if tp <= ceiling_dbtp - codec_margin_db + 0.1: break
+        y *= 10 ** ((ceiling_dbtp - codec_margin_db - tp) / 20)
     after, tp1 = lufs(y, sr), true_peak(y, sr)
     return y.astype(np.float32), {'lufs_in': round(before, 1), 'tp_in': round(tp0, 1), 'gain_db': round(gain, 1), 'lufs': round(after, 1), 'true_peak': round(tp1, 1)}
 

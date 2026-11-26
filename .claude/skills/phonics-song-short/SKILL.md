@@ -80,3 +80,16 @@ The reference in `Raw/` is someone else's channel content: study only. Never reu
 ## Software
 Remotion 4.0.250 (no three.js needed), Python 3.10 with numpy, scipy, edge-tts (present). Fredoka font (OFL) ships in
 `templates/phonics/public/fonts/`. Whisper QA: `py -3.10 -m venv` + `pip install faster-whisper` (model "small", CPU int8).
+
+## Craft upgrade (2026-11-25)
+Read `templates/_shared/MOTION.md`. The song pipeline already masters to −14 LUFS / −1 dBTP.
+- **QA:** `py -I templates/_shared/reel_qa.py out/<final>.mp4 --expect <s>`.
+- Kid-safe animated props (stars, hearts, balloons) can come from CC0 libraries (Motive, AssetPolish) and render with `templates/_shared/assets.tsx`, seeked to the beat grid.
+- **Icons: theSVG first** ([thesvg.org](https://thesvg.org), MIT, 7,900+ brand logos and 1,100+ UI icons): `python -I brand/fetch_icon.py search <words>`, then `ui <slug> [look]` or `brand <slug>`.
+- **Animated assets:** `python -I brand/fetch_anim.py search <words>`, then one of:
+  - `motive <slug>` (CC0);
+  - `assetpolish <pack>/<name>` (CC0);
+  - `sketchvalley <slug>`;
+  - `lottie <url>` (LottieFiles / Lottieflow);
+  - `url <file> --license ...` (IconKing, Sveegees, Pulsar, SVG Repo, Openverse).
+- `fetch_anim.py sources` lists every library with its licence. Every file is logged in `brand/animated/CREDITS.json`, and `fetch_anim.py credits` prints the caption credit lines (Pulsar and some SVG Repo / Openverse items need them).

@@ -102,6 +102,9 @@ mix = voice + .9 * music + sfx
 mix = lp(mix, 15000, 1); mix *= .9 / np.abs(mix).max()
 mix = np.tanh(mix * 2.2) / np.tanh(2.2) * .95          # gentle soft limiter: about +5 dB average loudness for phones
 mix = mix[: int(TOTAL * SR)]
+# loudness master (templates/_shared/audio_master.py): -14 LUFS integrated, true peak <= -1.5 dBTP
+import os as _os, sys as _sys; _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__))); from audio_master import master as _master
+mix, _rep = _master(mix if mix.ndim == 2 else mix[:, None].repeat(2, axis=1), SR); print('master', _rep)
 sf.write('../public/audio/mix.wav', mix.astype('float32'), SR)
 rms = lambda x: 20 * np.log10(np.sqrt((x ** 2).mean()) + 1e-9)
 print('dur', len(mix) / SR, 'peak', np.abs(mix).max().round(2), 'rms dB', round(rms(mix), 1))

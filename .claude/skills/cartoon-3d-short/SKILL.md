@@ -164,3 +164,18 @@ lighting 5-6, ink 6, textures 5-6, characters 7, depth 6-7, composition 6-7 (fro
 - Golden rim light done as an offset outer copy turns every hat into a picture frame: inner rim only, head/torso only.
 - Balcony/railing rails at chest height through characters: put the lens ~2.5 m up so rails cross legs, not torsos.
 - Flat holds read as freezes in QA (frozen span ≥12 f): every hold needs a creeping push-in.
+
+## Craft upgrade (2026-11-25)
+Read `templates/_shared/MOTION.md`: measured eases and camera grammar (snap plus tail, log-space zoom, pushes 1.25-1.5×), and one blur grammar per film. The 3D lens blur and grade already exist (`lensblur.ts`, `grade.ts`, `postprocessing`).
+- **Sound:** `templates/audio/mix.py` already masters to LUFS / true peak.
+- **QA:** `py -I templates/_shared/reel_qa.py out/<final>.mp4 --expect <s>` for the gates, cut list, motion band and sheet.
+- **Particles:** three.quarks ([github.com/Alchemist0823/three.quarks](https://github.com/Alchemist0823/three.quarks), MIT) is the upgrade path for sparks, dust and smoke when a story needs them. Install it into the shared node_modules at an exact version and drive it with the frame time (seeded, deterministic).
+- **Icons: theSVG first** ([thesvg.org](https://thesvg.org), MIT, 7,900+ brand logos and 1,100+ UI icons): `python -I brand/fetch_icon.py search <words>`, then `ui <slug> [look]` or `brand <slug>`.
+- **Animated assets:** `python -I brand/fetch_anim.py search <words>`, then one of:
+  - `motive <slug>` (CC0);
+  - `assetpolish <pack>/<name>` (CC0);
+  - `sketchvalley <slug>`;
+  - `lottie <url>` (LottieFiles / Lottieflow);
+  - `url <file> --license ...` (IconKing, Sveegees, Pulsar, SVG Repo, Openverse).
+- `fetch_anim.py sources` lists every library with its licence. Every file is logged in `brand/animated/CREDITS.json`, and `fetch_anim.py credits` prints the caption credit lines (Pulsar and some SVG Repo / Openverse items need them).
+- 2D overlays such as sign icons or magic sparkles can use `templates/_shared/assets.tsx` inside the Remotion composition.

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="svg-eye-blink-6hy9h1" width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" role="img" aria-labelledby="svg-eye-blink-6hy9h1-title">
+  <title id="svg-eye-blink-6hy9h1-title">Eye blink</title>
+  <!-- Source: Motive Originals
+Author: Motive project
+Source page: /sources/original/
+License: CC0-1.0 (https://creativecommons.org/publicdomain/zero/1.0/)
+Original project artwork, CC0-1.0. No attribution required. -->
+  <style>@keyframes svg-eye-blink-6hy9h1-motion-0{0%{opacity:1}50%{opacity:0.625}100%{opacity:1}}
+#svg-eye-blink-6hy9h1 [data-motion]{transform-box:view-box;transform-origin:12px 12px;animation-name:svg-eye-blink-6hy9h1-motion-0;animation-duration:2000ms;animation-delay:0ms;animation-timing-function:ease-in-out;animation-iteration-count:infinite;animation-direction:normal;animation-fill-mode:both}
+@media(prefers-reduced-motion:reduce){#svg-eye-blink-6hy9h1 [data-motion]{animation:none}}</style>
+  <g data-motion="motion">
+    <path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/>
+    <circle cx="12" cy="12" r="3"/>
+  </g>
+</svg>

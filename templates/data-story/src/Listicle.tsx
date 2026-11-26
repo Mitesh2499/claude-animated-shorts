@@ -10,6 +10,8 @@ import { DATA_SCENES } from "./scenes_data";
 import { DEPTH_SCENES } from "./scenes_depth";
 import { STORY_SCENES } from "./scenes_story";
 import { E, DUR, prog, arrive, lookCss, drift, logLerp, f2s, Grain, Vignette, LightLeak, ShutterBlur } from "./motion";
+import { Asset } from "./assets";
+import { Sequence } from "remotion";
 
 export const W = 1080, H = 1920, FPS = 30;
 export const TOTAL = Math.ceil(TL.total * FPS);
@@ -30,6 +32,10 @@ type Section = {
   ordinalSay?: string; tag?: string; chips?: string[]; keyword?: string; cover?: string; title?: Span[]; data?: any;
   /** mono "// LABEL" above the headline; enter: flash|zoom|drop|whip; exit: dive|whip|zoom; flash: colour of the enter flash */
   kicker?: string; enter?: "flash" | "zoom" | "drop" | "whip"; exit?: "dive" | "whip" | "zoom"; flash?: string;
+  /** icons / animated assets on the canvas (1080 x 600 px, canvas coordinates): src under public/ ("brand/animated/motive/x.svg",
+   *  "brand/icons/rocket.duotone.svg", "brand/animated/lottie/x.json", ".gif", ".mp4"); at = spoken word (cue) or seconds;
+   *  mode for static SVG: draw | arrive | stagger; dur = hide after N s; speed = playback rate */
+  stickers?: { src: string; at?: string | number; x: number; y: number; w: number; h?: number; mode?: "draw" | "arrive" | "stagger"; dur?: number; speed?: number; loop?: boolean; color?: string }[];
 };
 // brandLogo / watermarkLogo: paths under public/ (build.py copies brand/ -> public/brand/), e.g. "brand/logos/logo.png"
 const S = SCRIPT as unknown as { brand: string; brandLogo?: string; watermarkLogo?: string; sections: Section[] };
@@ -318,6 +324,8 @@ const SceneSection: React.FC<{ s: Section; times: number[]; t0: number; t1: numb
           /* no dead frame: linear camera creep (seeded direction) + slow push, never a bob; grows upward so the canvas bottom stays off the subtitles */
           transform: `scale(${creep}) translate(${cv.x.toFixed(2)}px, ${cv.y.toFixed(2)}px)`, transformOrigin: "50% 92%" }}>
           {DS ? <DS t={now - t0} d={t1 - t0} cue={cue} data={s.exit === "dive" ? { dive: true, ...s.data } : s.data} /> : SS ? <SS t={now - t0} d={t1 - t0} cue={cue} /> : Scene ? <div style={{ transform: `scale(${CH / SH})`, transformOrigin: "50% 0", width: SW, height: SH }}><Scene t={now - t0} d={t1 - t0} cue={cue} /></div> : null}
+          {(s.stickers ?? []).length ? <Sequence from={Math.round(t0 * FPS)} layout="none">{(s.stickers ?? []).map((k, j) => (
+            <Asset key={j} src={k.src} from={typeof k.at === "string" ? cue(k.at) - f2s(3) : k.at ?? 0.2} dur={k.dur} speed={k.speed} loop={k.loop} mode={k.mode ?? "auto"} w={k.w} h={k.h} x={k.x} y={k.y} color={k.color ? COL[k.color] ?? k.color : undefined} />))}</Sequence> : null}
         </div>
         <div style={{ position: "absolute", top: ZONE.subs[0] - 6, height: ZONE.subs[1] - ZONE.subs[0] + 6, left: 70, right: 120, display: "flex", flexDirection: "column", justifyContent: "center" }}>
           {L.slice(from, cur + 1).map((x, j) => <TextLine key={from + j} line={x.line} times={times} start={st[from + j]} sizes={fitSizes(x.line)} />)}
